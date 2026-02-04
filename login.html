@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="./img/logo.webp">
+    <link rel="stylesheet" href="./css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>L&M PC Computadoras</title>
+</head>
+
+<body>
+    <div class="login-background">
+        <div class="login-container">
+            <div class="login-header">
+                <h2>L&M PC Computadoras</h2>
+                <p style="font-size: 0.9rem; color: var(--text-muted);">Inicia sesion en L&M PC Computadoras</p>
+            </div>
+
+            <form id="loginForm" class="login-form">
+                <div class="input-group">
+                    <label for="username">Ingresa tu Correo Electronico: </label>
+                    <div class="input-container">
+                        <i class="fas fa-user input-icon"></i>
+                        <input type="text" id="username" name="username" placeholder="ejemplo@correo.com" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="password">Ingresa tu Contraseña: </label>
+                    <div class="input-container">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" id="password" name="password" placeholder="*****" required>
+                    </div>
+                </div>
+
+                <div class="form-options">
+                    <a href="./contraseña.html" class="forgot-password">Olvido su Contraseña?</a>
+                </div>
+
+                <button type="submit" class="login-btn">
+                    <span class="btn-text">Ingresar</span>
+                    <i class="fas fa-arrow-right btn-icon"></i>
+                </button>
+
+                <div style="margin-top:12px; text-align:center;">
+                    <a href="./registro.html" id="showRegister" style="font-size:14px; color:#2b6cb0; text-decoration:none; display:inline-flex; gap:8px; align-items:center;">
+                        <span>¿No tienes cuenta? Haz click aqui</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </form>
+
+            
+            <div id="loginMessage" class="message hidden"></div>
+
+            <div class="login-footer">
+                <p>2026 - L&M PC COMPUTADORAS ©</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+
+</body>
+
+</html>

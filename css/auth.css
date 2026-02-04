@@ -1,0 +1,335 @@
+/* Estilos específicos para páginas de autenticación (login, registro, recuperar contraseña)
+   Basados en el diseño anterior proporcionado por el usuario. */
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.login-background {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)), url('../img/fondopc.webp') center/cover no-repeat;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 560px;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 30px 28px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+.login-header i {
+    color: var(--primary-color, #ff9100);
+}
+
+.login-header h2 {
+    font-size: 22px;
+    margin: 8px 0;
+    color: #1D1D1B;
+}
+
+.login-header p {
+    font-size: 14px;
+    color: var(--text-muted, #5E5E5E);
+}
+
+.login-form {
+    display: block;
+}
+
+.input-group {
+    margin-bottom: 14px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #1D1D1B;
+}
+
+.input-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f6f9fc;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #e9eef6;
+}
+
+.input-container input,
+.input-container select {
+    border: 0;
+    background: transparent;
+    outline: none;
+    width: 100%;
+    font-size: 14px;
+    padding: 6px 0;
+}
+
+.input-icon {
+    color: #64748b;
+    font-size: 18px;
+}
+
+.login-btn {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    padding: 12px;
+    background: var(--primary-color, #ff9100);
+    color: #fff;
+    border-radius: 10px;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+}
+
+.login-btn .btn-icon {
+    margin-left: 8px;
+}
+
+.login-footer {
+    text-align: center;
+    margin-top: 18px;
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+.register-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+    gap: 12px;
+}
+
+.login-link-container a {
+    color: var(--primary-color, #ff9100);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/* Alerts */
+.alert {
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.alert-error {
+    background: #fff0f0;
+    color: #9b1c1c;
+    border: 1px solid #fbcaca;
+}
+
+.alert-success {
+    background: #f0fff4;
+    color: #0f5132;
+    border: 1px solid #bbf7d0;
+}
+
+/* Mobile tweaks */
+@media (max-width:480px) {
+    .login-container {
+        padding: 20px;
+        border-radius: 10px;
+    }
+
+    .login-header h2 {
+        font-size: 20px;
+    }
+}
+/* ===== BASE ===== */
+.admin-page {
+    min-height: 100vh;
+    background: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)),
+                url('../img/fondopc.webp') center/cover no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    font-family: Arial, sans-serif;
+}
+
+.admin-container {
+    width: 100%;
+    max-width: 520px;
+}
+
+/* ===== CARD ===== */
+.admin-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 30px 28px;
+    box-shadow: 0 12px 30px rgba(0,0,0,.18);
+}
+
+/* ===== HEADER ===== */
+.admin-header {
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+.admin-header h1 {
+    font-size: 22px;
+    margin: 8px 0;
+    color: #1D1D1B;
+}
+
+.admin-header i {
+    color: #ff9100;
+}
+
+.admin-header p {
+    font-size: 14px;
+    color: #5e5e5e;
+}
+
+/* ===== MENSAJES ===== */
+.mensaje {
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin-bottom: 14px;
+    font-size: 14px;
+}
+
+.mensaje.error {
+    background: #fff0f0;
+    color: #9b1c1c;
+    border: 1px solid #fbcaca;
+}
+
+.mensaje.success {
+    background: #f0fff4;
+    color: #0f5132;
+    border: 1px solid #bbf7d0;
+}
+
+/* ===== INFO ===== */
+.info-section {
+    background: #f6f9fc;
+    border: 1px solid #e9eef6;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 16px;
+    color: #334155;
+}
+
+/* ===== FORM ===== */
+.form-group {
+    margin-bottom: 14px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #1D1D1B;
+}
+
+/* INPUT ESTILO LOGIN */
+.form-group input,
+.codigo-admin-section input {
+    width: 100%;
+    padding: 12px;
+    background: #f6f9fc;
+    border-radius: 8px;
+    border: 1px solid #e9eef6;
+    outline: none;
+    font-size: 14px;
+}
+
+.form-group input:focus,
+.codigo-admin-section input:focus {
+    border-color: #ff9100;
+    background: #fff;
+}
+
+/* ===== CODIGO ADMIN ===== */
+.codigo-admin-section {
+    margin-bottom: 16px;
+}
+
+.codigo-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 6px;
+}
+
+/* ===== BOTON ===== */
+.btn-submit {
+    width: 100%;
+    padding: 12px;
+    background: #ff9100;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 10px;
+    box-shadow: 0 8px 18px rgba(0,0,0,.12);
+}
+
+.btn-submit:hover {
+    background: #e67f00;
+}
+
+/* ===== FOOTER ===== */
+.toggle-modo {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.toggle-modo a {
+    color: #ff9100;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/* ===== BACK LINK ===== */
+.back-link {
+    display: inline-block;
+    margin-bottom: 12px;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+
+/* ===== MOBILE ===== */
+@media (max-width: 480px) {
+    .admin-card {
+        padding: 22px;
+    }
+
+    .admin-header h1 {
+        font-size: 20px;
+    }
+}
+.form-options{
+    text-align: right;
+    margin-top: -10px;
+    margin-bottom: 10px;
+}
