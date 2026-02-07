@@ -1,0 +1,22 @@
+// Selectores para el calendario admin
+export const calendarHeadingAdmin = document.querySelector('#calendar-date-admin');
+export const calendarDaysAdmin = document.querySelector('.calendar__days');
+export const previousMonthBtnAdmin = document.querySelector('.calendar__button--previous-admin');
+export const nextMonthBtnAdmin = document.querySelector('.calendar__button--next-admin');
+
+// Modal y campos
+export const adminModal = document.getElementById('admin-appointment-modal');
+export const adminModalHeading = document.querySelector('.modal__heading');
+export const adminFieldId = document.getElementById('appointment-id');
+export const adminFieldNombre = document.getElementById('appointment-nombre');
+export const adminFieldApellido = document.getElementById('appointment-apellido');
+export const adminFieldCorreo = document.getElementById('appointment-correo');
+export const adminFieldFecha = document.getElementById('appointment-fecha');
+export const adminFieldTelefono = document.getElementById('appointment-telefono');
+export const adminFieldMotivo = document.getElementById('appointment-motivo');
+export const btnNewAppointment = document.getElementById('btn-new-appointment');
+export const btnSaveAppointment = document.getElementById('btn-save-appointment');
+export const btnDeleteAppointment = document.getElementById('btn-delete-appointment');
+export const btnModalClose = document.querySelector('.modal__close');
+export const btnModalCancel = document.querySelector('.modal__button--close');
+export const adminAppointmentsTable = document.getElementById('admin-appointments-table');

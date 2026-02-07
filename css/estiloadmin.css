@@ -1,0 +1,162 @@
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
+
+.login-background {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: linear-gradient(
+        rgba(0, 0, 0, 0.35),
+        rgba(0, 0, 0, 0.35)
+    ), url('../img/fondopc.webp') center/cover no-repeat;
+}
+
+
+.login-container {
+    width: 100%;
+    max-width: 480px;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 30px 28px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+.login-header i {
+    color: var(--primary-color, #ff9100);
+}
+
+.login-header h2 {
+    font-size: 22px;
+    margin: 8px 0;
+    color: #1D1D1B;
+}
+
+.login-header p {
+    font-size: 14px;
+    color: var(--text-muted, #5E5E5E);
+}
+
+.login-form {
+    display: block;
+}
+
+.input-group {
+    margin-bottom: 14px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #1D1D1B;
+}
+
+.input-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f6f9fc;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #e9eef6;
+}
+
+.input-container input,
+.input-container select {
+    border: 0;
+    background: transparent;
+    outline: none;
+    width: 100%;
+    font-size: 14px;
+    padding: 6px 0;
+}
+
+.input-icon {
+    color: #64748b;
+    font-size: 18px;
+}
+
+.login-btn {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    padding: 12px;
+    background: var(--primary-color, #ff9100);
+    color: #fff;
+    border-radius: 10px;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+}
+
+.login-btn .btn-icon {
+    margin-left: 8px;
+}
+
+.login-footer {
+    text-align: center;
+    margin-top: 18px;
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+.register-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+    gap: 12px;
+}
+
+.login-link-container a {
+    color: var(--primary-color, #ff9100);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/* Alerts */
+.alert {
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.alert-error {
+    background: #fff0f0;
+    color: #9b1c1c;
+    border: 1px solid #fbcaca;
+}
+
+.alert-success {
+    background: #f0fff4;
+    color: #0f5132;
+    border: 1px solid #bbf7d0;
+}
+
+/* Mobile tweaks */
+@media (max-width:480px) {
+    .login-container {
+        padding: 20px;
+        border-radius: 10px;
+    }
+
+    .login-header h2 {
+        font-size: 20px;
+    }
+}
+

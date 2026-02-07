@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="./img/logo.webp">
+    <link rel="stylesheet" href="./css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Registro - L&M PC Computadoras</title>
+</head>
+
+<body>
+    <div class="login-background">
+        <div class="login-container">
+            
+            <div class="login-header">
+                <h2>Crear Cuenta</h2>
+                <p style="font-size: 0.9rem; color: var(--text-muted);">Registrate en L&M PC Computadoras</p>
+            </div>
+
+            <form id="registerForm" class="login-form">
+                
+                <div class="input-group">
+                    <label for="regUsername">Correo Electrónico: </label>
+                    <div class="input-container">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input type="email" id="regUsername" name="username" placeholder="ejemplo@correo.com" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="regPassword">Contraseña: </label>
+                    <div class="input-container">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" id="regPassword" name="password" placeholder="Crear contraseña" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="regConfirm">Confirmar Contraseña: </label>
+                    <div class="input-container">
+                        <i class="fas fa-check-circle input-icon"></i>
+                        <input type="password" id="regConfirm" name="confirmPassword" placeholder="Repetir contraseña" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="regRole">Tipo de Usuario</label>
+                    <div class="input-container">
+                        <i class="fas fa-users-cog input-icon"></i>
+                        <select id="regRole" name="role" class="tech-select" required>
+                            <option value="" disabled selected>Seleccione un rol...</option>
+                            <option value="usuario">Usuario Común</option>
+                            <option value="tecnico">Técnico</option>
+                            <option value="encargado">Encargado</option>
+                            <option value="asistente">Asistente</option>
+                            <option value="pasante">Pasante</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="register-footer">
+                    <button type="submit" class="login-btn">
+                        <span class="btn-text">Registrarse</span>
+                        <i class="fas fa-user-plus btn-icon"></i>
+                    </button>
+
+                    <div class="login-link-container">
+                        <span style="font-size: 13px; color: #64748b;">¿Ya tienes cuenta?</span>
+                        <a href="./login.html" id="backToLogin" class="highlight-link">Inicia sesión aquí</a>
+                    </div>
+                </div>
+            </form>
+
+            <div class="login-footer">
+                <p>2026 - L&M PC COMPUTADORAS ©</p>
+            </div>
+        </div>
+    </div>
+
+    </body>
+</html>
