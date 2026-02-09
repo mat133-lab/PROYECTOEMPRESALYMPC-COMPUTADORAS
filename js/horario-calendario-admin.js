@@ -62,6 +62,7 @@ async function renderCalendar() {
             li.className = 'calendar__appointment';
             li.dataset.id = a.id;
             li.textContent = `${a.nombre} ${a.apellido}`;
+            li.title = `${a.nombre} ${a.apellido} - ${a.motivo}`;
             ul.appendChild(li);
         });
     } catch (err) {

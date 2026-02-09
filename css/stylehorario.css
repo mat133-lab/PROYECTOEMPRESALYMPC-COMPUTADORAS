@@ -140,30 +140,33 @@ body {
 .calendar__appointments {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 5px;
     list-style: none;
-    margin: 0;
+    margin: 4px 0 0 0;
     padding: 0;
 }
 
 .calendar__appointment {
-    padding: 4px 6px;
-    font-size: 0.75em;
-    background-color: #fff3e0;
-    color: #e65100;
-    border-radius: 4px;
-    border-left: 3px solid #ff9100;
+    padding: 6px 8px;
+    font-size: 0.8em;
+    background-color: #4caf50;
+    color: #fff;
+    border-radius: 6px;
+    border-left: 4px solid #388e3c;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     cursor: pointer;
-    transition: 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
 }
 
 .calendar__appointment:hover {
-    background-color: #ff9100;
+    background-color: #45a049;
     color: #fff;
-    box-shadow: 0 2px 8px rgba(255, 145, 0, 0.3);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.5);
+    transform: translateY(-2px);
 }
 
 .calendar__day--content {

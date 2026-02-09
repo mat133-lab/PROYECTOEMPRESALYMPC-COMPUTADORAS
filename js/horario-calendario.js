@@ -26,30 +26,41 @@ class UI {
     }
 
     static cleanCalendarDayContent(dayElement) {
-        const appointmentsContainer = dayElement.querySelector('.calendar__appointments');
-        if (appointmentsContainer) {
-            appointmentsContainer.remove();
-        }
+        const badge = dayElement.querySelector('.calendar__badge');
+        if (badge) badge.remove();
+
         dayElement.classList.remove('calendar__day--content');
     }
 
+
     static updateCalendarDayContent(dayElement, appointment) {
-        // Si no existe el contenedor de citas, crearlo
-        let appointmentsContainer = dayElement.querySelector('.calendar__appointments');
-        if (!appointmentsContainer) {
-            appointmentsContainer = document.createElement('ul');
-            appointmentsContainer.className = 'calendar__appointments';
+        let badge = dayElement.querySelector('.calendar__badge');
+
+        // almacenamiento por cada día
+        if (!dayElement.dataset.appointments) {
+            dayElement.dataset.appointments = JSON.stringify([]);
+        }
+        const stored = JSON.parse(dayElement.dataset.appointments);
+        stored.push(appointment);
+        dayElement.dataset.appointments = JSON.stringify(stored);
+
+        // crear badge si no existe
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'calendar__badge';
+            dayElement.appendChild(badge);
             dayElement.classList.add('calendar__day--content');
-            dayElement.appendChild(appointmentsContainer);
         }
 
-        // Crear elemento de cita
-        const appointmentItem = document.createElement('li');
-        appointmentItem.dataset.id = appointment.id;
-        appointmentItem.className = 'calendar__appointment';
-        appointmentItem.textContent = appointment.nombre + ' ' + appointment.apellido;
-        appointmentsContainer.appendChild(appointmentItem);
+        // texto del badge
+        badge.textContent =
+            stored.length === 1
+                ? appointment.motivo
+                : `${stored.length} citas`;
     }
+
+
+
 
     static createCalendarModalItem(appointment) {
         const li = document.createElement('li');
@@ -109,9 +120,9 @@ async function getMonthlyAppointments(dateRange) {
         const response = await fetch(
             `/lymPCComputadoras/php/api_horarios.php?desde=${desde}&hasta=${hasta}`
         );
-        
+
         if (!response.ok) throw new Error('Error al obtener las citas');
-        
+
         const appointments = await response.json();
         displayAppointmentsInCalendar(appointments);
     } catch (error) {
@@ -131,7 +142,7 @@ function displayAppointmentsInCalendar(appointments) {
         const date = new Date(record.fecha);
         const day = date.getDate();
         const calendarDayContainer = document.querySelector(`.calendar__day[data-day="${day}"]`);
-        
+
         if (calendarDayContainer) {
             UI.updateCalendarDayContent(calendarDayContainer, record);
         }
@@ -172,17 +183,17 @@ function displayAppointmentsInModal(appointments, calendarDay) {
     const month = currentDate.getMonth() + 1;
     const year = currentDate.getFullYear();
     const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    
+
     modalHeading.textContent = `Citas - ${formatDateString(dateString)}`;
     UI.cleanHTML(modalCalendarList);
-    
+
     appointments.forEach(appointment => {
         const li = document.createElement('li');
         li.className = 'modal__item';
         li.textContent = appointment.text;
         modalCalendarList.appendChild(li);
     });
-    
+
     openModal();
 }
 
@@ -204,3 +215,72 @@ nextMonthBtn?.addEventListener('click', () => setMonth(1));
 
 calendarDays?.addEventListener('click', loadAppointmentsModal);
 modalCancelBtn?.addEventListener('click', closeModal);
+
+document.addEventListener("DOMContentLoaded", () => {
+    const days = document.querySelectorAll(".calendar__day");
+    const modal = document.getElementById("appointments-modal");
+    const modalTitle = modal.querySelector(".modal__heading");
+    const currentDate = new Date();
+    const month = currentDate.getMonth() + 1; //1-12
+    const year = currentDate.getFullYear();
+    days.forEach(day => {
+        day.addEventListener("click", () => {
+            const dayNumber = day.dataset.day;
+            if (!dayNumber) return;
+            const selectedDate = `${year}-${String(month).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+            abrirFormulario(selectedDate);
+        });
+    });
+    function abrirFormulario(fecha, usuario = null) {
+        modalTitle.textContent = `Agendar Cita Fisica - ${fecha} para ${usuario ? usuario : 'Nuevo Usuario'}`;
+        modal.showModal();
+
+        cargarFormulario(fecha, usuario);
+    }
+    function cargarFormulario(fecha, usuario = null) {
+        const list = document.querySelector(".modal__list");
+        list.innerHTML = `
+    <form method="POST" action="guardar_cita.php">
+            <input type="hidden" name="fecha" value="${fecha}">
+
+        <div class="mb-3">
+            <label>Nombre</label>
+            <input type="text" name="nombre" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Apellido</label>
+            <input type="text" name="apellido" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Correo</label>
+            <input type="email" name="correo" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Teléfono</label>
+            <input type="text" name="telefono" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Motivo</label>
+            <textarea name="motivo" class="form-control" required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-warning w-100">
+            Agendar cita física
+        </button>
+    </form>
+
+        `;
+    }
+    document.querySelectorAll(".modal__close, .modal__button--close")
+        .forEach(btn => {
+            btn.addEventListener("click", () => {
+                document.getElementById("appointments-modal").close();
+            });
+        });
+        
+});
+

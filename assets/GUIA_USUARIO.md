@@ -103,14 +103,22 @@ El calendario muestra:
 
 - Navegación por meses (botones Anterior/Siguiente)
 - Todos los días del mes en un formato de grilla
-- Etiquetas con citas registradas
-- Colores diferenciados: Naranja para citas propias
+- Badges verdes de cita en los días que tienen citas agendadas
+- El nombre del cliente y motivo de la cita al pasar el mouse
+
+Características Visuales:
+
+Los badges de cita son cuadrados verdes que contienen:
+- Nombre completo del cliente
+- Al pasar el mouse, se muestra el motivo completo de la cita
+- Color verde para fácil identificación de días con citas
+- Animación al pasar el mouse (elevación y cambio de tono)
 
 Funcionalidades:
 
 - Navegar entre meses del año
-- Ver todas tus citas del mes
-- Haz clic en una cita para ver detalles
+- Ver todas tus citas del mes en badges verdes
+- Haz clic en un badge de cita para ver detalles en el modal
 - El calendario se actualiza automáticamente con nuevas citas
 
 ## 6. Dashboard Administrativo
@@ -207,18 +215,23 @@ Metodo 2: Via Modal
 Características especiales del calendario:
 
 - Vista de mes completo
-- Muestra todas las citas del mes (no solo las del usuario)
+- Muestra todas las citas del mes con badges verdes
 - Navega entre meses con botones Anterior/Siguiente
-- Haz clic en días con citas para ver detalles
-- Haz clic en una cita para editarla
-- Citas mostradas como etiquetas con nombre del cliente
-- Diseño responsivo para móvil y escritorio
+- Haz clic en un badge de cita para editar
+- Citas mostradas con nombre del cliente y motivo
 
 Elementos Visuales:
 
-- Color naranja: Indica presencia de citas
+- Color verde: Badges con citas (nombre cliente + motivo)
 - Fondos grises: Días con citas para fácil identificación
-- Etiquetas compactas: Nombre y apellido del cliente
+- Badges interactivos: Cambian de color al pasar el mouse
+- Información al pasar el mouse: Muestra nombre completo y motivo
+
+Interacción:
+
+- Un clic en el badge abre el modal de edición
+- Desde el modal puedes editar o eliminar la cita
+- La tabla de la derecha muestra todas las citas ordenadas por fecha
 
 ## Cierre de Sesión
 
