@@ -707,29 +707,42 @@ th {
 }
 .calendar__day {
     position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 5px;
+    min-height: 80px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    padding: 8px;
 }
-
+.calendar__day:hover {
+    background-color: #fff9f0;
+}
+.day__info {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+}
 .calendar__badge {
-    display: inline-block;
-    margin-top: 6px;
-    padding: 2px 6px;
+    position: relative;
+    display: block;
+    width: 100%;
+    margin-top: 5px;
+    padding: 3px 6px;
     font-size: 11px;
     background-color: #28a745;
     color: white;
-    border-radius: 8px;
-    max-width: 90%;
+    border-radius: 4px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-.calendar__badge{
-    position: absolute;
-    top: 6px;
-    left: 6px;
-    background: #28a745;
-    color: #fff;
-    padding: 2px 6px;
-    font-size: 12px;
-    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     pointer-events: none;
+}
+.calendar__badge.multiple {
+    background-color: #ff9100;
 }

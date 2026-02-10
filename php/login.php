@@ -1,8 +1,15 @@
 <?php 
 session_start();
 require_once '../includes/db.php';
+
+// Si el usuario ya tiene sesión iniciada, redirigir al dashboard
+if(isset($_SESSION['usuario'])){
+    header("Location: ../php/dashboard.php");
+    exit;
+}
+
 if($_SERVER['REQUEST_METHOD']=== 'POST'){
-    $user = $_POST['correo'];
+    $user = trim($_POST['correo']); // Limpiar espacios en blanco
     $pass = $_POST['contrasena'];
 
 //consulta segura de las sentencias
@@ -15,9 +22,8 @@ if($row && password_verify($pass, $row['contraseña'])){
     $_SESSION['correo'] = $row['correo'];
     $_SESSION['id'] = $row['id'];
     // Guardar nombre de usuario si existe en la tabla
-    if(isset($row['usuario'])){
-        $_SESSION['usuario'] = $row['usuario'];
-    }
+    // Asegurar que la variable de sesión se cree incluso si el campo usuario está vacío
+    $_SESSION['usuario'] = !empty($row['usuario']) ? $row['usuario'] : 'Usuario';
     $_SESSION['rol'] = $row['rol'];
     header("Location: ../php/dashboard.php");
     exit;
@@ -47,6 +53,13 @@ if($row && password_verify($pass, $row['contraseña'])){
                 <h2>Iniciar Sesion</h2>
                 <p style="font-size: 0.9rem; color: var(--text-muted);">Inicia sesion en tu perfil</p>
             </div>
+
+            <?php if(isset($error)): ?>
+                <div style="background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 15px; border-radius: 5px; text-align: center; border: 1px solid #f5c6cb;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <?php echo htmlspecialchars($error); ?>
+                </div>
+            <?php endif; ?>
 
             <form id="loginForm" class="login-form" method="POST">
                 <div class="input-group">

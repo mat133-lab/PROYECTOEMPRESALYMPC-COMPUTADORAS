@@ -11,7 +11,7 @@ if (!isset($_SESSION['usuario'])) {
 
 // Obtener parámetros de fecha
 $desde = isset($_GET['desde']) ? $_GET['desde'] : date('Y-m-01');
-$hasta = isset($_GET['hasta']) ? $_GET['hasta'] : date('Y-m-t');
+$hasta = isset($_GET['hasta']) ? $_GET['hasta'] . ' 23:59:59' : date('Y-m-t 23:59:59');
 
 try {
     // Consultar citas del usuario en el rango de fechas

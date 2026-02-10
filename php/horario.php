@@ -301,6 +301,10 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
     </script>
 
+    <script>
+        // Pasar correo de sesión a JS para el formulario
+        window.currentUserEmail = "<?php echo isset($_SESSION['correo']) ? $_SESSION['correo'] : ''; ?>";
+    </script>
     <!-- Calendar Module -->
     <script src="../js/horario-calendario.js" type="module"></script>
 </body>
