@@ -1,0 +1,326 @@
+/* ================== CONFIGURACIÓN GLOBAL ================== */
+body {
+    background-color: #f5f7fa; /* Fondo gris muy suave para toda la página */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Ajuste para el navbar fijo */
+.main {
+    /* El HTML ya tiene margin-top, pero esto asegura el padding interno */
+    padding-bottom: 40px;
+}
+
+/* ================== CALENDARIO (COLUMNA IZQUIERDA) ================== */
+.calendar {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    height: 100%; /* Para que ocupe toda la altura de la columna */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header del Calendario */
+.calendar__header {
+    background: linear-gradient(135deg, #ff9100 0%, #ff7b00 100%);
+    padding: 15px 20px;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 70px; /* Altura fija para alinear con el sidebar */
+}
+
+.calendar__header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    text-transform: capitalize;
+}
+
+/* Botones Redondos (Flechas) */
+.calendar__header button {
+    background-color: #fff;
+    color: #ff7b00;
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    font-weight: 800;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.calendar__header button:hover {
+    transform: scale(1.1);
+    background-color: #fff8e1;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Días de la semana estilos */
+.calendar__weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+    padding: 10px 0;
+}
+
+.calendar__weekday {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #666;
+    text-transform: uppercase;
+}
+
+/* Cuadrícula de días */
+.calendar__days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: #eee; /* Color de las líneas de separación */
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1; /* Ocupa el espacio restante */
+}
+
+.calendar__day {
+    background: #fff;
+    min-height: 100px; /* Altura mínima de cada celda */
+    padding: 8px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.calendar__day:hover {
+    background-color: #fff8e1; /* Naranja muy suave al pasar el mouse */
+}
+
+/* Estilo de la "Etiqueta" de Cita en el calendario */
+.cita-estilo {
+    display: block;
+    background-color: #4CAF50; /* Verde éxito */
+    color: white;
+    padding: 3px 8px;
+    margin-top: 4px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: 0.2s;
+}
+
+.cita-estilo:hover {
+    background-color: #388E3C;
+    transform: translateY(-1px);
+}
+
+
+/* ================== SIDEBAR DE CITAS (COLUMNA DERECHA) ================== */
+.citas-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border: none;
+}
+
+.citas-header {
+    background: linear-gradient(135deg, #ff9100 0%, #ff7b00 100%);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+    height: 70px; /* Misma altura que el header del calendario */
+}
+
+.citas-header h5 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.1em;
+}
+
+/* Botón "+ Nueva" */
+.btn-nueva-cita {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    padding: 5px 15px;
+    font-size: 0.85em;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-nueva-cita:hover {
+    background: #fff;
+    color: #ff9100;
+}
+
+/* Cuerpo con Scroll */
+.citas-body {
+    padding: 0;
+    flex-grow: 1;
+    overflow-y: auto; /* Scroll solo aquí */
+    background: #fff;
+}
+
+/* Tabla del Sidebar */
+.table-custom {
+    width: 100%;
+    margin-bottom: 0;
+    border-collapse: collapse;
+}
+
+.table-custom thead th {
+    background-color: #f8f9fa;
+    color: #666;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 12px 15px;
+    border-bottom: 2px solid #eee;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.table-custom tbody td {
+    padding: 12px 15px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.table-custom tbody tr:hover {
+    background-color: #fffdf5;
+}
+
+/* Textos dentro de la tabla */
+.cita-item-nombre {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.9rem;
+    display: block;
+}
+
+.cita-item-fecha {
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* Botones de acción (Editar/Borrar) */
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    margin-left: 4px;
+    border: none;
+    transition: 0.2s;
+    font-size: 1rem;
+}
+
+.btn-edit-custom {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+.btn-edit-custom:hover {
+    background-color: #1976d2;
+    color: #fff;
+}
+
+.btn-delete-custom {
+    background-color: #ffebee;
+    color: #d32f2f;
+}
+.btn-delete-custom:hover {
+    background-color: #d32f2f;
+    color: #fff;
+}
+
+/* Scrollbar Bonito */
+.citas-body::-webkit-scrollbar {
+    width: 6px;
+}
+.citas-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+.citas-body::-webkit-scrollbar-thumb {
+    background: #ddd;
+    border-radius: 10px;
+}
+.citas-body::-webkit-scrollbar-thumb:hover {
+    background: #ff9100;
+}
+
+
+/* ================== ESTILOS DEL MODAL (Nuevo) ================== */
+/* Esto hace que el <dialog> se vea como un modal moderno */
+dialog.modal {
+    border: none;
+    background: transparent;
+    padding: 0;
+    width: 100%;
+    max-width: 500px;
+    margin: auto;
+    border-radius: 12px;
+}
+
+dialog.modal::backdrop {
+    background: rgba(0, 0, 0, 0.5); /* Fondo oscuro transparente */
+    backdrop-filter: blur(2px);
+}
+
+.modal__card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal__header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #eee;
+    padding: 15px 20px;
+}
+
+.modal__list__container {
+    padding: 20px;
+}
+
+.modal__footer {
+    background-color: #f8f9fa;
+    padding: 15px 20px;
+    border-top: 1px solid #eee;
+}

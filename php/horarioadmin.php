@@ -1,29 +1,29 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Horario Administrador - L&M PC Computadoras</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../css/stylehorario.css">
-    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/horariostyleadmin.css">
 </head>
+
 <body>
-<?php
-session_start();
-require_once '../includes/db.php';
+    <?php
+    session_start();
+    require_once '../includes/db.php';
 
-// Verificar rol
-$rolesConAcceso = ['admin', 'tecnico', 'encargado', 'pasante'];
-if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $rolesConAcceso)) {
-    header('Location: ../php/login.php');
-    exit();
-}
+    // Verificar rol
+    $rolesConAcceso = ['admin', 'tecnico', 'encargado', 'pasante'];
+    if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $rolesConAcceso)) {
+        header('Location: ../php/login.php');
+        exit();
+    }
+    ?>
 
-?>
-<nav class="navbar navbar-dark bg-warning fixed-top">
+    <nav class="navbar navbar-dark bg-warning fixed-top shadow-sm">
         <div class="container-fluid">
-
             <a class="navbar-brand" href="../php/dashboardadmin.php">L&M PC Computadoras</a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
@@ -32,36 +32,21 @@ if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $rolesConAcceso)) {
             </button>
 
             <div class="offcanvas offcanvas-end text-bg-warning" tabindex="-1" id="offcanvasDarkNavbar">
-
                 <div class="offcanvas-header">
-                    <h5 class="offcanvas-title">Menu</h5>
+                    <h5 class="offcanvas-title">Menú</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
                 </div>
 
                 <div class="offcanvas-body">
                     <ul class="navbar-nav flex-grow-1 pe-3">
-
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                                 Cuenta y Configuración
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li>
-                                    <a class="dropdown-item categoria-link" href="../php/perfiladmin.php"
-                                        data-categoria="estructura">
-                                        Perfil
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item categoria-link" href="#" data-categoria="techos">
-                                        Configuracion
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item categoria-link" href="#" data-categoria="techos">
-                                        Termino y Condiciones
-                                    </a>
-                                </li>
+                                <li><a class="dropdown-item" href="../php/perfiladmin.php">Perfil</a></li>
+                                <li><a class="dropdown-item" href="#">Configuración</a></li>
+                                <li><a class="dropdown-item" href="#">Términos y Condiciones</a></li>
                             </ul>
                         </li>
 
@@ -77,105 +62,155 @@ if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $rolesConAcceso)) {
                             <?php endif; ?>
 
                         </div>
-
                     </ul>
                 </div>
             </div>
         </div>
     </nav>
 
-<div class="container main">
-    <div class="row mt-5">
-        <div class="col-lg-8">
-            <section class="calendar">
-                <header class="calendar__header">
-                    <div class="header__container">
-                        <button class="calendar__button calendar__button--previous-admin" aria-label="Anterior"><i class="ri-arrow-left-s-line"></i></button>
-                        <h3 class="container__heading" id="calendar-date-admin"></h3>
-                        <button class="calendar__button calendar__button--next-admin" aria-label="Siguiente"><i class="ri-arrow-right-s-line"></i></button>
+    <div class="container-fluid main px-4" style="margin-top: 80px;">
+        <div class="row g-4 h-100">
+            <div class="col-lg-9 mb-4">
+                <div class="calendar">
+                    <div class="calendar__header">
+                        <button class="calendar__button--previous-admin" aria-label="Anterior"> &lt; </button>
+                        <h2 id="calendar-date-admin">Cargando...</h2>
+                        <button class="calendar__button--next-admin" aria-label="Siguiente"> &gt; </button>
                     </div>
-                </header>
 
-                <section class="calendar__weekdays">
-                    <div class="calendar__weekday"><h4>Lunes</h4><abbr>Lun</abbr></div>
-                    <div class="calendar__weekday"><h4>Martes</h4><abbr>Mar</abbr></div>
-                    <div class="calendar__weekday"><h4>Miércoles</h4><abbr>Mie</abbr></div>
-                    <div class="calendar__weekday"><h4>Jueves</h4><abbr>Jue</abbr></div>
-                    <div class="calendar__weekday"><h4>Viernes</h4><abbr>Vie</abbr></div>
-                    <div class="calendar__weekday"><h4>Sábado</h4><abbr>Sab</abbr></div>
-                    <div class="calendar__weekday"><h4>Domingo</h4><abbr>Dom</abbr></div>
-                </section>
+                    <div class="calendar__weekdays">
+                        <div class="calendar__weekday">Lun</div>
+                        <div class="calendar__weekday">Mar</div>
+                        <div class="calendar__weekday">Mié</div>
+                        <div class="calendar__weekday">Jue</div>
+                        <div class="calendar__weekday">Vie</div>
+                        <div class="calendar__weekday">Sáb</div>
+                        <div class="calendar__weekday">Dom</div>
+                    </div>
 
-                <ol class="calendar__days">
-                    <?php for ($d = 1; $d <= 31; $d++): ?>
-                        <li class="calendar__day" data-day="<?php echo $d; ?>">
-                            <div class="day__info"><h5><?php echo $d; ?></h5></div>
-                        </li>
-                    <?php endfor; ?>
-                </ol>
-            </section>
-        </div>
-
-        <div class="col-lg-4">
-            <div class="card compact-card p-3">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h5 class="mb-0">Citas Registradas</h5>
-                    <button id="btn-new-appointment" class="btn btn-sm btn-success">Nueva</button>
-                </div>
-                <div class="table-wrapper">
-                    <table class="compact-table table table-striped">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nombre</th>
-                                <th>Fecha</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-appointments-table">
-                        <?php
-                        $stmt = $conn->query("SELECT id_cita, nombre, apellido, correo, fecha, telefono, motivo FROM citas ORDER BY fecha DESC");
-                        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-                            $id = htmlspecialchars($row['id_cita']);
-                            $nombre = htmlspecialchars($row['nombre'] . ' ' . $row['apellido']);
-                            $fecha = htmlspecialchars($row['fecha']);
-                            echo "<tr data-id=\"$id\"><td>#{$id}</td><td>{$nombre}</td><td>{$fecha}</td><td><button class=\"btn btn-sm btn-primary btn-edit\">Editar</button> <button class=\"btn btn-sm btn-danger btn-delete\">Borrar</button></td></tr>";
-                        }
+                    <ol class="calendar__days">
+                        <?php 
+                        // Generamos 35 espacios para asegurar una cuadrícula rectangular (5 filas x 7 cols)
+                        for ($d = 1; $d <= 35; $d++): 
                         ?>
-                        </tbody>
-                    </table>
+                        <li class="calendar__day" data-day="<?php echo $d; ?>">
+                            <span class="day-number text-muted fw-bold"
+                                style="font-size: 0.9rem; margin-bottom:5px; display:block;">
+                                <?php echo ($d <= 31) ? $d : ''; ?>
+                            </span>
+
+                        </li>
+                        <?php endfor; ?>
+                    </ol>
                 </div>
             </div>
+
+            <div class="col-lg-3 mb-4">
+                <div class="citas-card">
+                    <div class="citas-header">
+                        <h5>Próximas Citas</h5>
+                        <button id="btn-new-appointment" class="btn-nueva-cita">
+                            + Nueva
+                        </button>
+                    </div>
+
+                    <div class="citas-body">
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Cliente / Fecha</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-appointments-table">
+                                <?php
+                                // Consulta segura a la base de datos
+                                $stmt = $conn->query("SELECT id_cita, nombre, apellido, fecha FROM citas ORDER BY fecha DESC LIMIT 15");
+                                
+                                foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                                    $id = htmlspecialchars($row['id_cita']);
+                                    $nombre = htmlspecialchars($row['nombre'] . ' ' . $row['apellido']);
+                                    
+                                    // Formato de fecha limpio
+                                    $fechaObj = new DateTime($row['fecha']);
+                                    $fechaDia = $fechaObj->format('d M'); // dia y mes
+                                    $fechaHora = $fechaObj->format('H:i'); // hora y minutos
+                                    
+                                    echo "<tr data-id=\"$id\">
+                                            <td>
+                                                <div class='cita-item-nombre'>$nombre</div>
+                                                <div class='cita-item-fecha'>
+                                                   $fechaDia <span class='ms-2'> $fechaHora</span>
+                                                </div>
+                                            </td>
+                                            <td class='text-end'>
+                                                <button class='btn-icon btn-edit-custom btn-edit' data-id='$id' title='Editar'>✏️</button>
+                                                <button class='btn-icon btn-delete-custom btn-delete' data-id='$id' title='Borrar'>🗑️</button>
+                                            </td>
+                                          </tr>";
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
-</div>
+    <dialog class="modal" id="admin-appointment-modal">
+        <form method="dialog" class="modal__card p-4 rounded-3 shadow">
+            <header class="modal__header d-flex justify-content-between align-items-center mb-3">
+                <h3 class="modal__heading m-0 fw-bold text-dark">Gestionar Cita</h3>
+                <button type="button" class="btn-close modal__close"></button>
+            </header>
 
-<!-- Modal editar/crear -->
-<dialog class="modal" id="admin-appointment-modal">
-    <form method="dialog" class="modal__card p-3">
-        <header class="modal__header">
-            <h3 class="modal__heading">Editar Cita</h3>
-            <button type="button" class="modal__close">✕</button>
-        </header>
-        <div class="modal__list__container p-2">
-            <input type="hidden" id="appointment-id">
-            <div class="mb-2"><label>Nombre</label><input id="appointment-nombre" class="form-control"></div>
-            <div class="mb-2"><label>Apellido</label><input id="appointment-apellido" class="form-control"></div>
-            <div class="mb-2"><label>Correo</label><input id="appointment-correo" class="form-control" type="email"></div>
-            <div class="mb-2"><label>Fecha</label><input id="appointment-fecha" class="form-control" type="datetime-local"></div>
-            <div class="mb-2"><label>Telefono</label><input id="appointment-telefono" class="form-control"></div>
-            <div class="mb-2"><label>Motivo</label><textarea id="appointment-motivo" class="form-control" rows="3"></textarea></div>
-        </div>
-        <footer class="modal__footer d-flex gap-2">
-            <button id="btn-save-appointment" class="btn btn-primary">Guardar</button>
-            <button id="btn-delete-appointment" class="btn btn-danger">Eliminar</button>
-            <button type="button" class="modal__button--close btn btn-secondary">Cancelar</button>
-        </footer>
-    </form>
-</dialog>
+            <div class="modal__list__container">
+                <input type="hidden" id="appointment-id">
 
-<!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-<script type="module" src="../js/horario-calendario-admin.js"></script>
+                <div class="row g-2 mb-2">
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-muted">Nombre</label>
+                        <input id="appointment-nombre" class="form-control form-control-sm">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-muted">Apellido</label>
+                        <input id="appointment-apellido" class="form-control form-control-sm">
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label small fw-bold text-muted">Correo</label>
+                    <input id="appointment-correo" class="form-control form-control-sm" type="email">
+                </div>
+
+                <div class="row g-2 mb-2">
+                    <div class="col-7">
+                        <label class="form-label small fw-bold text-muted">Fecha y Hora</label>
+                        <input id="appointment-fecha" class="form-control form-control-sm" type="datetime-local">
+                    </div>
+                    <div class="col-5">
+                        <label class="form-label small fw-bold text-muted">Teléfono</label>
+                        <input id="appointment-telefono" class="form-control form-control-sm">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">Motivo / Descripción</label>
+                    <textarea id="appointment-motivo" class="form-control form-control-sm" rows="3"></textarea>
+                </div>
+            </div>
+
+            <footer class="modal__footer d-flex justify-content-end gap-2 mt-3 pt-3 border-top">
+                <button type="button" class="modal__button--close btn btn-light text-muted">Cancelar</button>
+                <button id="btn-delete-appointment" class="btn btn-outline-danger">Eliminar</button>
+                <button id="btn-save-appointment" class="btn btn-warning text-white fw-bold">Guardar Cambios</button>
+            </footer>
+        </form>
+    </dialog>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="../js/horario-calendario-admin.js"></script>
 </body>
+
 </html>
