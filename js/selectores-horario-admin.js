@@ -25,7 +25,7 @@ export const btnNewAppointment = document.getElementById('btn-new-appointment');
 export const btnSaveAppointment = document.getElementById('btn-save-appointment');
 export const btnDeleteAppointment = document.getElementById('btn-delete-appointment');
 
-export const btnModalClose = document.querySelector('.modal__close');
-export const btnModalCancel = document.querySelector('.modal__button--close');
+export const btnModalClose = document.getElementById('admin-modal-close-icon');
+export const btnModalCancel = document.getElementById('admin-modal-cancel-btn');
 
-export const adminAppointmentsTable = document.getElementById('admin-appointments-table');
+export const appointmentsTable = document.querySelector('#admin-appointments-table');

@@ -7,6 +7,15 @@
     <title>Horario Administrador - L&M PC Computadoras</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/horariostyleadmin.css">
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horario Administrador - L&M PC Computadoras</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/horariostyleadmin.css">
 </head>
 
 <body>
@@ -136,18 +145,7 @@
                                     $fechaDia = $fechaObj->format('d M'); // dia y mes
                                     $fechaHora = $fechaObj->format('H:i'); // hora y minutos
                                     
-                                    echo "<tr data-id=\"$id\">
-                                            <td>
-                                                <div class='cita-item-nombre'>$nombre</div>
-                                                <div class='cita-item-fecha'>
-                                                   $fechaDia <span class='ms-2'> $fechaHora</span>
-                                                </div>
-                                            </td>
-                                            <td class='text-end'>
-                                                <button class='btn-icon btn-edit-custom btn-edit' data-id='$id' title='Editar'>✏️</button>
-                                                <button class='btn-icon btn-delete-custom btn-delete' data-id='$id' title='Borrar'>🗑️</button>
-                                            </td>
-                                          </tr>";
+                                    echo "<tr data-id=\"$id\">\n                                            <td>\n                                                <div class='cita-item-nombre'>$nombre</div>\n                                                <div class='cita-item-fecha'>\n                                                   $fechaDia <span class='ms-2'> $fechaHora</span>\n                                                </div>\n                                            </td>\n                                            <td class='text-end'>\n                                                <button class='btn-icon btn-edit-custom btn-edit' data-id='$id' title='Editar'>✏️</button>\n                                                <button class='btn-icon btn-delete-custom btn-delete' data-id='$id' title='Borrar'>🗑️</button>\n                                            </td>\n                                          </tr>";
                                 }
                                 ?>
                             </tbody>
@@ -158,11 +156,12 @@
 
         </div>
     </div>
-    <dialog class="modal" id="admin-appointment-modal">
-        <form method="dialog" class="modal__card p-4 rounded-3 shadow">
+    
+    <dialog class="dialog-nativo" id="admin-appointment-modal">
+        <div class="modal__card p-4 rounded-3 shadow bg-white" style="max-width: 500px; width: 100%; margin: auto;">
             <header class="modal__header d-flex justify-content-between align-items-center mb-3">
                 <h3 class="modal__heading m-0 fw-bold text-dark">Gestionar Cita</h3>
-                <button type="button" class="btn-close modal__close"></button>
+                <button type="button" class="btn-close" id="admin-modal-close-icon"></button>
             </header>
 
             <div class="modal__list__container">
@@ -202,15 +201,34 @@
             </div>
 
             <footer class="modal__footer d-flex justify-content-end gap-2 mt-3 pt-3 border-top">
-                <button type="button" class="modal__button--close btn btn-light text-muted">Cancelar</button>
+                <button type="button" id="admin-modal-cancel-btn" class="btn btn-light text-muted">Cancelar</button>
                 <button id="btn-delete-appointment" class="btn btn-outline-danger">Eliminar</button>
                 <button id="btn-save-appointment" class="btn btn-warning text-white fw-bold">Guardar Cambios</button>
             </footer>
-        </form>
+        </div>
     </dialog>
 
+
+    <dialog class="dialog-nativo" id="modal-calendar">
+        <div class="modal__card rounded-3 shadow p-4"
+            style="max-width: 400px; width: 100%; margin: auto; background: white;">
+            <header class="modal__header d-flex justify-content-between align-items-center mb-3">
+                <h5 class="modal__heading m-0" id="modal-heading">Citas del día</h5>
+                <button type="button" class="btn-close" id="modal-close-btn"></button>
+            </header>
+
+            <ul class="modal__list list-unstyled mb-3" id="modal-calendar-list"></ul>
+
+            <div class="text-end border-top pt-2">
+                <button class="btn btn-secondary btn-sm"
+                    onclick="document.getElementById('modal-calendar').close()">Cerrar</button>
+            </div>
+        </div>
+    </dialog>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module" src="../js/horario-calendario-admin.js"></script>
 </body>
+
+</html>
 
 </html>

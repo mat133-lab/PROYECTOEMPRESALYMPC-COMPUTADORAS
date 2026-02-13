@@ -1,6 +1,7 @@
 /* ================== CONFIGURACIÓN GLOBAL ================== */
 body {
-    background-color: #f5f7fa; /* Fondo gris muy suave para toda la página */
+    background-color: #f5f7fa;
+    /* Fondo gris muy suave para toda la página */
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -16,7 +17,8 @@ body {
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     overflow: hidden;
-    height: 100%; /* Para que ocupe toda la altura de la columna */
+    height: 100%;
+    /* Para que ocupe toda la altura de la columna */
     display: flex;
     flex-direction: column;
 }
@@ -29,7 +31,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 70px; /* Altura fija para alinear con el sidebar */
+    height: 70px;
+    /* Altura fija para alinear con el sidebar */
 }
 
 .calendar__header h2 {
@@ -85,16 +88,19 @@ body {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 1px;
-    background: #eee; /* Color de las líneas de separación */
+    background: #eee;
+    /* Color de las líneas de separación */
     list-style: none;
     padding: 0;
     margin: 0;
-    flex-grow: 1; /* Ocupa el espacio restante */
+    flex-grow: 1;
+    /* Ocupa el espacio restante */
 }
 
 .calendar__day {
     background: #fff;
-    min-height: 100px; /* Altura mínima de cada celda */
+    min-height: 100px;
+    /* Altura mínima de cada celda */
     padding: 8px;
     position: relative;
     cursor: pointer;
@@ -102,13 +108,15 @@ body {
 }
 
 .calendar__day:hover {
-    background-color: #fff8e1; /* Naranja muy suave al pasar el mouse */
+    background-color: #fff8e1;
+    /* Naranja muy suave al pasar el mouse */
 }
 
 /* Estilo de la "Etiqueta" de Cita en el calendario */
 .cita-estilo {
     display: block;
-    background-color: #4CAF50; /* Verde éxito */
+    background-color: #4CAF50;
+    /* Verde éxito */
     color: white;
     padding: 3px 8px;
     margin-top: 4px;
@@ -119,7 +127,7 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: 0.2s;
 }
 
@@ -148,7 +156,8 @@ body {
     justify-content: space-between;
     align-items: center;
     color: #fff;
-    height: 70px; /* Misma altura que el header del calendario */
+    height: 70px;
+    /* Misma altura que el header del calendario */
 }
 
 .citas-header h5 {
@@ -178,7 +187,8 @@ body {
 .citas-body {
     padding: 0;
     flex-grow: 1;
-    overflow-y: auto; /* Scroll solo aquí */
+    overflow-y: auto;
+    /* Scroll solo aquí */
     background: #fff;
 }
 
@@ -247,6 +257,7 @@ body {
     background-color: #e3f2fd;
     color: #1976d2;
 }
+
 .btn-edit-custom:hover {
     background-color: #1976d2;
     color: #fff;
@@ -256,6 +267,7 @@ body {
     background-color: #ffebee;
     color: #d32f2f;
 }
+
 .btn-delete-custom:hover {
     background-color: #d32f2f;
     color: #fff;
@@ -265,13 +277,16 @@ body {
 .citas-body::-webkit-scrollbar {
     width: 6px;
 }
+
 .citas-body::-webkit-scrollbar-track {
     background: #f1f1f1;
 }
+
 .citas-body::-webkit-scrollbar-thumb {
     background: #ddd;
     border-radius: 10px;
 }
+
 .citas-body::-webkit-scrollbar-thumb:hover {
     background: #ff9100;
 }
@@ -290,14 +305,15 @@ dialog.modal {
 }
 
 dialog.modal::backdrop {
-    background: rgba(0, 0, 0, 0.5); /* Fondo oscuro transparente */
+    background: rgba(0, 0, 0, 0.5);
+    /* Fondo oscuro transparente */
     backdrop-filter: blur(2px);
 }
 
 .modal__card {
     background: #fff;
     border-radius: 12px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -305,8 +321,15 @@ dialog.modal::backdrop {
 }
 
 @keyframes slideDown {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .modal__header {
@@ -323,4 +346,18 @@ dialog.modal::backdrop {
     background-color: #f8f9fa;
     padding: 15px 20px;
     border-top: 1px solid #eee;
+}
+
+dialog.dialog-nativo {
+    border: none;
+    background: transparent;
+    padding: 0;
+    width: 100%;
+    margin: auto;
+    border-radius: 12px;
+}
+/* El fondo oscuro transparente detrás de la ventana */
+dialog.dialog-nativo::backdrop {
+    background: rgba(0, 0, 0, 0.6); 
+    backdrop-filter: blur(2px);
 }

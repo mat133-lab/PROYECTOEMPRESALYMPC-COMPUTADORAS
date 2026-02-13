@@ -20,7 +20,9 @@ import {
     btnSaveAppointment,
     btnDeleteAppointment,
     btnModalClose as btnFormClose,
-    btnModalCancel as btnFormCancel
+    btnModalCancel as btnFormCancel,
+    appointmentsTable,
+    btnNewAppointment
 
 } from './selectores-horario-admin.js';
 
@@ -30,6 +32,8 @@ import {
 } from './funciones-horario.js';
 
 const currentDate = new Date();
+
+
 
 // --- CLASE UI (Adaptada para Admin) ---
 class UI {
@@ -195,7 +199,6 @@ function displayAppointmentsInCalendar(appointments) {
         }
     });
 }
-
 // --- NAVEGACIÓN ---
 export function setMonth(step) {
     const currentMonth = currentDate.getMonth();
@@ -206,7 +209,16 @@ export function setMonth(step) {
 // --- MODALES Y FORMULARIOS ---
 
 // 1. Mostrar Lista de Citas (Solo lectura/selección)
+// 1. Mostrar Lista de Citas (Solo lectura/selección)
 function loadAppointmentsListModal(calendarDay) {
+    // --- PROTECCIÓN CONTRA EL CONGELAMIENTO ---
+    if (!listModal) {
+        console.error("ERROR CRÍTICO: No se encuentra el <dialog id='modal-calendar'> en el HTML.");
+        alert("Falta el componente modal-calendar en el HTML. Revisa la consola.");
+        return;
+    }
+    // ------------------------------------------
+
     const storedAppointments = calendarDay.dataset.appointments;
     const day = calendarDay.dataset.day;
     const month = currentDate.getMonth() + 1;
@@ -214,25 +226,35 @@ function loadAppointmentsListModal(calendarDay) {
     const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
     // Título del modal lista
-    modalHeading.textContent = `Gestión - ${formatDateString(dateString)}`;
+    if (modalHeading) modalHeading.textContent = `Gestión - ${formatDateString(dateString)}`;
+
+    // Limpiamos la lista anterior
+    UI.cleanHTML(modalCalendarList);
 
     // Botón para agregar nueva cita DESDE la lista
     const btnAddInList = document.createElement('button');
     btnAddInList.textContent = "+ Nueva Cita Aquí";
-    btnAddInList.className = "modal__button modal__button--primary";
-    btnAddInList.style.width = "100%";
-    btnAddInList.style.marginBottom = "10px";
+    btnAddInList.className = "btn btn-warning w-100 mb-2 fw-bold text-white"; // Clases Bootstrap
+
     btnAddInList.onclick = () => {
         listModal.close();
-        openAdminForm(null, dateString);
+        // Pequeño timeout para evitar conflicto de modales
+        setTimeout(() => {
+            openAdminForm(null, dateString);
+        }, 100);
     };
 
-    UI.cleanHTML(modalCalendarList);
     modalCalendarList.appendChild(btnAddInList);
 
     if (storedAppointments) {
         const appointments = JSON.parse(storedAppointments);
         appointments.forEach(app => UI.createAdminModalItem(app));
+    } else {
+        // Mensaje si no hay citas
+        const noCitas = document.createElement('li');
+        noCitas.textContent = "No hay citas programadas para hoy.";
+        noCitas.className = "text-muted text-center small my-3";
+        modalCalendarList.appendChild(noCitas);
     }
 
     listModal.showModal();
@@ -246,18 +268,18 @@ function openAdminForm(cita = null, fechaPreseleccionada = null) {
 
     if (cita) {
         // MODO EDICIÓN
-        modalTitle.textContent = 'Editar Cita';
-        adminFieldId.value = cita.id;
-        adminFieldNombre.value = cita.nombre;
-        adminFieldApellido.value = cita.apellido;
-        adminFieldCorreo.value = cita.correo;
-        adminFieldTelefono.value = cita.telefono;
-        adminFieldMotivo.value = cita.motivo;
+        adminFieldId.value = cita.id_cita || cita.id || '';
+        adminFieldNombre.value = cita.nombre || '';
+        adminFieldApellido.value = cita.apellido || '';
+        adminFieldCorreo.value = cita.correo || '';
+        adminFieldTelefono.value = cita.telefono || '';
+        adminFieldMotivo.value = cita.motivo || '';
 
-        // Manejo de fecha para input type="date"
-        // Si viene "YYYY-MM-DD HH:MM:SS", cortamos
-        const fechaSolo = cita.fecha.split(' ')[0];
-        adminFieldFecha.value = fechaSolo;
+        if (cita.fecha) {
+            // Convierte "2024-05-20 14:30:00" a "2024-05-20T14:30"
+            const fechaFormateada = cita.fecha.replace(' ', 'T').substring(0, 16);
+            adminFieldFecha.value = fechaFormateada;
+        }
 
         if (btnDeleteAppointment) btnDeleteAppointment.style.display = 'block'; // Mostrar botón borrar
     } else {
@@ -269,9 +291,10 @@ function openAdminForm(cita = null, fechaPreseleccionada = null) {
         adminFieldCorreo.value = '';
         adminFieldTelefono.value = '';
         adminFieldMotivo.value = '';
+        adminFieldFecha.value = '';
 
         if (fechaPreseleccionada) {
-            adminFieldFecha.value = fechaPreseleccionada;
+            adminFieldFecha.value = `${fechaPreseleccionada}T09:00`;
         }
 
         if (btnDeleteAppointment) btnDeleteAppointment.style.display = 'none'; // Ocultar botón borrar
@@ -356,6 +379,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Navegación
     previousMonthBtnAdmin?.addEventListener('click', () => setMonth(-1));
     nextMonthBtnAdmin?.addEventListener('click', () => setMonth(1));
+    // Botón '+ Nueva' — registrar una sola vez
+    btnNewAppointment?.addEventListener('click', () => openAdminForm());
 
     // Clic en el calendario
     if (calendarDaysAdmin) {
@@ -388,4 +413,39 @@ document.addEventListener('DOMContentLoaded', () => {
     btnDeleteAppointment?.addEventListener('click', deleteAppointment);
     btnFormClose?.addEventListener('click', () => adminModal.close());
     btnFormCancel?.addEventListener('click', () => adminModal.close());
+    if (appointmentsTable) {
+        appointmentsTable.addEventListener('click', async (e) => {
+            const btnEdit = e.target.closest('.btn-edit');
+
+            if (btnEdit) {
+                const id = btnEdit.dataset.id;
+
+                // ¡AQUÍ BORRAMOS EL botonEditar! Pasamos directo a buscar los datos
+
+                try {
+                    // Busca los datos de la cita en la base de datos
+                    const response = await fetch(`../php/api_horarios_admin.php?id=${id}`);
+
+                    if (response.ok) {
+                        const cita = await response.json();
+                        // ¡MAGIA! Esta línea es la que abre tu ventana emergente con los datos
+                        openAdminForm(cita);
+                    } else {
+                        alert("No se pudo cargar los datos");
+                    }
+                } catch (error) {
+                    console.error(error);
+                }
+                return;
+            }
+
+            const btnDelete = e.target.closest('.btn-delete');
+            if (btnDelete) {
+                const id = btnDelete.dataset.id;
+                adminFieldId.value = id;
+                deleteAppointment();
+                return;
+            }
+        });
+    }
 });
