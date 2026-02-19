@@ -7,94 +7,96 @@ $product_id = isset($_POST['product_id']) ? $_POST['product_id'] : null;
 $qty = isset($_POST['qty']) ? (int)$_POST['qty'] : 1;
 $action = isset($_POST['action']) ? $_POST['action'] : 'add';
 
-if(!$product_id){
-    echo json_encode(['ok'=>false,'msg'=>'product_id faltante']);
+if (!$product_id && $action === 'add') {
+    echo json_encode(['ok'=>false, 'msg'=>'Falta el ID del producto']);
     exit;
 }
 
-$tables = ['productos','inventario','items','productos_almacen','productos_tbl','productos_list'];
-$found = false;
-$table_found = '';
-$row = null;
-
-foreach($tables as $table){
-    try{
-        $stmt = $conn->prepare("SELECT * FROM $table WHERE id = ? LIMIT 1");
+// AGREGAR AL CARRITO
+if ($action === 'add') {
+    try {
+        // Buscamos el producto exactamente por id_producto
+        $stmt = $conn->prepare("SELECT * FROM productos WHERE id_producto = ? LIMIT 1");
         $stmt->execute([$product_id]);
-        $r = $stmt->fetch(PDO::FETCH_ASSOC);
-        if($r){
-            $found = true; $table_found = $table; $row = $r; break;
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$row) {
+            echo json_encode(['ok'=>false, 'msg'=>'El producto no existe en la base de datos.']);
+            exit;
         }
-    }catch(PDOException $e){
-        // tabla no existe o consulta inválida, intentar siguiente
-        continue;
-    }
-}
 
-if(!$found){
-    echo json_encode(['ok'=>false,'msg'=>'No se encontró la tabla/producto en la base de datos.']);
-    exit;
-}
+        // Verificamos si hay stock suficiente en la columna unidades en nuestra bd
+        $stock_actual = (int)$row['unidades'];
+        if ($stock_actual < $qty) {
+            echo json_encode(['ok'=>false, 'msg'=>'Stock insuficiente', 'stock'=>$stock_actual]);
+            exit;
+        }
 
-$stock_cols = ['unidades','stock','cantidad','existencia','cantidad_stock','qty'];
-$stock_col = null;
-foreach($stock_cols as $col){
-    if(array_key_exists($col, $row)){
-        $stock_col = $col; break;
-    }
-}
-
-if(!$stock_col){
-    echo json_encode(['ok'=>false,'msg'=>'No se encontró columna de stock en la tabla.']);
-    exit;
-}
-
-if($action === 'add'){
-    if((int)$row[$stock_col] < $qty){
-        echo json_encode(['ok'=>false,'msg'=>'Stock insuficiente','stock'=>(int)$row[$stock_col]]);
-        exit;
-    }
-
-    try{
-        $new_stock = (int)$row[$stock_col] - $qty;
-        $upd = $conn->prepare("UPDATE $table_found SET $stock_col = ? WHERE id = ?");
+        // Restamos las unidades y actualizamos la base de datos
+        $new_stock = $stock_actual - $qty;
+        $upd = $conn->prepare("UPDATE productos SET unidades = ? WHERE id_producto = ?");
         $upd->execute([$new_stock, $product_id]);
 
-        if(!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
-        if(isset($_SESSION['cart'][$product_id])) $_SESSION['cart'][$product_id] += $qty; else $_SESSION['cart'][$product_id] = $qty;
+        // Guardamos en la variable de sesión 
+        if (!isset($_SESSION['cart'])) {
+            $_SESSION['cart'] = [];
+        }
+        
+        if (isset($_SESSION['cart'][$product_id])) {
+            $_SESSION['cart'][$product_id] += $qty;
+        } else {
+            $_SESSION['cart'][$product_id] = $qty;
+        }
 
-        echo json_encode(['ok'=>true,'msg'=>'Agregado al carrito','stock'=>$new_stock,'cart'=>$_SESSION['cart']]);
+        echo json_encode([
+            'ok' => true, 
+            'msg' => 'Producto agregado al carrito', 
+            'stock' => $new_stock,
+            'producto' => [
+                'id' => $row['id_producto'],
+                'nombre' => $row['nombre'],
+                'serie' => $row['serie'],
+                'fecha' => $row['fecha'],
+                'precio' => $row['precio'],
+                'imagen' => $row['imagen'],
+                'categoria' => $row['categoria'],
+            ]
+        ]);
         exit;
-    }catch(PDOException $e){
-        echo json_encode(['ok'=>false,'msg'=>'Error BD: '.$e->getMessage()]);
+
+    } catch (PDOException $e) {
+        echo json_encode(['ok'=>false, 'msg'=>'Error SQL: ' . $e->getMessage()]);
+        exit;
+    } catch (Exception $e) {
+        echo json_encode(['ok'=>false, 'msg'=>'Error PHP: ' . $e->getMessage()]);
         exit;
     }
 }
 
-if($action === 'purchase'){
-    // En este flujo ya restamos stock al agregar al carrito. Aquí sólo confirmamos la compra y limpiamos la sesión.
-    if(!isset($_SESSION['cart']) || empty($_SESSION['cart'])){
-        echo json_encode(['ok'=>false,'msg'=>'El carrito está vacío']);
+
+// Accion para la Compra 
+if ($action === 'purchase') {
+    if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
+        echo json_encode(['ok'=>false, 'msg'=>'El carrito está vacío']);
         exit;
     }
 
-    // Opcional: podríamos insertar en tabla de pedidos si existe. Por ahora sólo limpiamos el carrito.
+    // Aquí simplemente vaciamos el carrito simulando la compra exitosa
     $_SESSION['cart'] = [];
-    echo json_encode(['ok'=>true,'msg'=>'Compra confirmada. Gracias por su compra.']);
+    echo json_encode(['ok'=>true, 'msg'=>'¡Compra confirmada! Gracias por su compra.']);
     exit;
 }
 
-if($action === 'clear'){
-    // Limpiar carrito sin confirmar compra (devolver stock)
-    if(isset($_SESSION['cart']) && !empty($_SESSION['cart'])){
-        // En este caso simple, solo limpiamos. Un flujo más completo devolvería el stock.
+// VACIAR CARRITO
+if ($action === 'clear') {
+    if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
         $_SESSION['cart'] = [];
     }
-    echo json_encode(['ok'=>true,'msg'=>'Carrito vaciado']);
+    echo json_encode(['ok'=>true, 'msg'=>'Carrito vaciado']);
     exit;
 }
 
-echo json_encode(['ok'=>false,'msg'=>'Acción no soportada']);
+// acciones no validas o no soportadas
+echo json_encode(['ok'=>false, 'msg'=>'Acción no soportada']);
 exit;
-
 ?>

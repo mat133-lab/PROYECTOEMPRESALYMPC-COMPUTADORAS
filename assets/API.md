@@ -312,6 +312,94 @@ const data = await response.json();
 console.log(data);
 ```
 
+## API de Carrito de Compras: cart_action.php
+
+URL Base: /lymPCComputadoras/php/cart_action.php
+
+Esta API permite gestionar el carrito de compras, agregar productos, verificar stock y procesar compras.
+
+### Autenticación
+
+- Requerida: Si (sesión de usuario activa)
+- Tipo: Sesión PHP ($_SESSION['usuario'] debe estar definido)
+
+### POST - Agregar Producto al Carrito
+
+Descripción: Agrega un producto al carrito verificando stock disponible.
+
+URL: POST /lymPCComputadoras/php/cart_action.php
+
+Headers: Content-Type: application/x-www-form-urlencoded
+
+Parámetros de Form:
+
+product_id (requerido): ID del producto
+qty (opcional): Cantidad a agregar (default: 1)
+action: 'add'
+
+Respuesta Exitosa: HTTP 200 OK
+
+Cuerpo de Respuesta:
+
+```json
+{
+  "ok": true,
+  "msg": "Producto agregado al carrito",
+  "stock": 4,
+  "producto": {
+    "id": 1,
+    "nombre": "ASUS ROG Strix G15",
+    "serie": "G513RC-HN002",
+    "fecha": "2024-01-15",
+    "precio": 4500000.00,
+    "imagen": "asus_rog.jpg",
+    "categoria": "ASUS"
+  }
+}
+```
+
+### POST - Procesar Compra
+
+Descripción: Finaliza la compra vaciando el carrito.
+
+URL: POST /lymPCComputadoras/php/cart_action.php
+
+Parámetros de Form:
+
+action: 'purchase'
+
+Respuesta Exitosa: HTTP 200 OK
+
+Cuerpo de Respuesta:
+
+```json
+{
+  "ok": true,
+  "msg": "¡Compra confirmada! Gracias por su compra."
+}
+```
+
+### POST - Vaciar Carrito
+
+Descripción: Elimina todos los productos del carrito.
+
+URL: POST /lymPCComputadoras/php/cart_action.php
+
+Parámetros de Form:
+
+action: 'clear'
+
+Respuesta Exitosa: HTTP 200 OK
+
+Cuerpo de Respuesta:
+
+```json
+{
+  "ok": true,
+  "msg": "Carrito vaciado"
+}
+```
+
 ## Códigos HTTP Estándar
 
 200 OK: Solicitud completada exitosamente

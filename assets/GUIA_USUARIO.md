@@ -7,9 +7,11 @@
 3. Solicitud de Citas
 4. Visualización de Citas
 5. Calendario de Usuario
-6. Dashboard Administrativo
-7. Gestión de Citas (Admin)
-8. Calendario Administrativo
+6. Catálogo de Productos
+7. Carrito de Compras
+8. Dashboard Administrativo
+9. Gestión de Citas (Admin)
+10. Calendario Administrativo
 
 ## 1. Registro e Inicio de Sesión
 
@@ -121,7 +123,82 @@ Funcionalidades:
 - Haz clic en un badge de cita para ver detalles en el modal
 - El calendario se actualiza automáticamente con nuevas citas
 
-## 6. Dashboard Administrativo
+## 6. Catálogo de Productos
+
+### Navegación del Catálogo
+
+Desde el dashboard principal, encontrarás un menú de navegación con diferentes categorías de productos:
+
+- **Pc de Escritorio**: Computadoras de escritorio de diversas marcas
+- **ASUS**: Productos de la marca ASUS
+- **HP/Dell**: Productos HP y Dell
+- **Lenovo**: Productos Lenovo
+- **MSI**: Productos MSI
+- **Omnilbook**: Productos Omnilbook
+
+### Visualización de Productos
+
+Cada página de categoría muestra:
+
+- Lista de productos disponibles
+- Información de cada producto: nombre, serie, fecha, precio, stock disponible
+- Imagen del producto
+- Botón "Agregar al Carrito" para productos con stock
+
+### Información de Productos
+
+Cada producto muestra:
+- **Nombre**: Nombre descriptivo del producto
+- **Serie**: Número de serie o modelo
+- **Fecha**: Fecha de lanzamiento o actualización
+- **Precio**: Precio en pesos colombianos
+- **Unidades**: Cantidad disponible en stock
+- **Imagen**: Foto del producto
+
+## 7. Carrito de Compras
+
+### Acceder al Carrito
+
+En la barra de navegación superior, encontrarás un ícono de canasta (carrito) que muestra:
+
+- Número de productos en el carrito
+- Vista previa de productos agregados
+- Total de la compra
+- Botones para vaciar carrito o proceder al pago
+
+### Agregar Productos al Carrito
+
+1. Ve a la categoría deseada desde el menú
+2. Encuentra el producto que deseas comprar
+3. Verifica que haya unidades disponibles
+4. Haz clic en "Agregar al Carrito"
+5. El sistema validará el stock y actualizará el inventario automáticamente
+
+### Gestionar el Carrito
+
+Desde el ícono del carrito puedes:
+
+- **Ver productos**: Lista completa con nombre, serie, fecha, unidades y precio
+- **Vaciar carrito**: Eliminar todos los productos
+- **Ver total**: Suma total de todos los productos
+- **Comprar ahora**: Finalizar la compra
+
+### Proceso de Compra
+
+1. Revisa los productos en tu carrito
+2. Verifica el total de la compra
+3. Haz clic en "Comprar ahora"
+4. El sistema procesará la compra y actualizará el stock
+5. Recibirás confirmación de compra exitosa
+
+### Validaciones del Carrito
+
+- No se pueden agregar productos sin stock
+- El stock se actualiza en tiempo real
+- Si intentas comprar más unidades de las disponibles, recibirás un mensaje de error
+- Los productos se reservan al agregarse al carrito
+
+## 8. Dashboard Administrativo
 
 Después de iniciar sesión como administrador, accederás a:
 
@@ -134,7 +211,7 @@ En el dashboard verás cuatro secciones de acceso rápido:
 3. Ver Contacto: Ver mensajes de soporte recibidos
 4. Ver Citas de Usuarios: Ver citas desde otra vista
 
-## 7. Gestión de Citas (Admin)
+## 9. Gestión de Citas (Admin)
 
 ### Acceder a la Gestión
 
@@ -210,7 +287,7 @@ Metodo 2: Via Modal
 3. Guarda como PDF o imprime directamente
 4. El PDF contendrá todas las citas de la tabla
 
-## 8. Calendario Administrativo
+## 10. Calendario Administrativo
 
 Características especiales del calendario:
 

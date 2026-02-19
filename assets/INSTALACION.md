@@ -87,7 +87,38 @@ CREATE TABLE citas (
 );
 ```
 
-#### Paso 2.5: Crea la Tabla contacto
+#### Paso 3.5: Crea la Tabla productos
+
+Ejecuta:
+
+```sql
+CREATE TABLE productos (
+  id_producto INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(255) NOT NULL,
+  serie VARCHAR(100),
+  fecha DATE,
+  precio DECIMAL(10,2) NOT NULL,
+  imagen VARCHAR(255),
+  categoria VARCHAR(50) NOT NULL,
+  unidades INT DEFAULT 0
+);
+```
+
+#### Paso 3.6: Inserta Datos de Ejemplo (Opcional)
+
+Para probar la funcionalidad, puedes insertar algunos productos de ejemplo:
+
+```sql
+INSERT INTO productos (nombre, serie, fecha, precio, imagen, categoria, unidades) VALUES
+('ASUS ROG Strix G15', 'G513RC-HN002', '2024-01-15', 4500000.00, 'asus_rog.jpg', 'ASUS', 5),
+('HP Pavilion Gaming', '15-dk0012la', '2024-02-01', 3200000.00, 'hp_pavilion.jpg', 'PCHP', 3),
+('Lenovo IdeaPad Gaming 3', '15ACH6', '2024-01-20', 3800000.00, 'lenovo_ideapad.jpg', 'lenovo', 7),
+('MSI GF65 Thin', '10UE-065XCO', '2024-02-10', 4100000.00, 'msi_gf65.jpg', 'msi', 2),
+('Omnilbook X14', 'X14-01', '2024-01-30', 2900000.00, 'omnilbook_x14.jpg', 'ominibook', 4),
+('PC Gamer Custom', 'PCG-001', '2024-02-05', 5500000.00, 'pc_custom.jpg', 'PC', 1);
+```
+
+#### Paso 3.7: Crea la Tabla contacto
 
 Ejecuta:
 

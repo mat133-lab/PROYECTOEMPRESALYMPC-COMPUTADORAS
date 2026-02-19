@@ -48,7 +48,13 @@ lymPCComputadoras/
   php/
     api_horarios.php           - API para usuarios
     api_horarios_admin.php     - API para administradores
-    cart_action.php            - Carrito (no implementado)
+    cart_action.php            - API para carrito de compras
+    asus.php                   - Catálogo productos ASUS
+    hpdell.php                 - Catálogo productos HP/Dell
+    lenovo.php                 - Catálogo productos Lenovo
+    msi.php                    - Catálogo productos MSI
+    omnibook.php               - Catálogo productos Omnilbook
+    pc.php                     - Catálogo productos PC
     contacto.php               - Procesar contacto
     contactoadmin.php          - Ver contactos (admin)
     contraseña.php             - Cambiar contraseña
@@ -188,6 +194,27 @@ CREATE TABLE contacto (
 - PRIMARY KEY en id_soporte
 - INDEX en Correo
 - INDEX en fecha_creacion
+
+### Tabla productos
+
+```sql
+CREATE TABLE productos (
+  id_producto INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(255) NOT NULL,
+  serie VARCHAR(100),
+  fecha DATE,
+  precio DECIMAL(10,2) NOT NULL,
+  imagen VARCHAR(255),
+  categoria VARCHAR(50) NOT NULL,
+  unidades INT DEFAULT 0
+);
+```
+
+Índices Recomendados:
+- PRIMARY KEY en id_producto
+- INDEX en categoria (para filtros de productos)
+- INDEX en precio (para ordenamiento)
+- INDEX en unidades (para productos con stock)
 
 ## Módulos JavaScript
 

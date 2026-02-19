@@ -10,13 +10,13 @@ Descripción general del proyecto, características principales, estructura, tec
 
 Contenido:
 - Descripción General del Proyecto
-- Características Principales
+- Características Principales (Gestión de Citas + Comercio Electrónico)
 - Estructura del Proyecto
 - Tecnologías Utilizadas
 - Roles de Usuario
 - Flujo de Autenticación
 - Variables de Sesión
-- Base de Datos
+- Base de Datos (usuarios, citas, productos, contacto)
 - Esquema de Colores
 - Seguridad
 - Mantenimiento
@@ -158,6 +158,16 @@ Horario de Soporte: Lunes a Viernes 9:00 AM a 5:00 PM
 
 ## Historial de Documentación
 
+Versión 1.1 - Febrero 2026
+
+Documentación actualizada con nuevas funcionalidades de comercio electrónico:
+- Sistema de catálogo de productos por categorías
+- Carrito de compras con gestión de stock
+- APIs para operaciones del carrito
+- Nueva tabla productos en base de datos
+- Guías de usuario actualizadas para funcionalidades de compra
+- Documentación técnica ampliada para desarrolladores
+
 Versión 1.0 - Febrero 2026
 
 Documentación inicial con:
@@ -173,7 +183,7 @@ Esta documentación fue elaborada para facilitar el uso, mantenimiento y expansi
 
 Documentación escrita por: Equipo de Desarrollo L&M PC
 Fecha: Febrero 2026
-Versión: 1.0
+Versión: 1.1
 
 ## Licencia
 

@@ -1,17 +1,22 @@
 <?php
 session_start();
-//comprobar si entro como usuario comun, tecnico, etc, pero especialmente para admin cuando 
-// vaya a citas podra ver todas las citas si es otro usuario no podra ver la tabla citas
 include_once '../includes/db.php';
+
 if (!isset($_SESSION['usuario'])) {
     header("Location: login.php");
     exit();
 }
-/*Si el administrador necesita volver al panel administrador le redirija al dashboard correspondiente dependiendo el usuario*/
+
+/* Redirigir si el admin está en la vista equivocada */
 if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
     header("Location: dashboardadmin.php");
     exit();
 }
+
+$es_admin = (isset($_SESSION['rol']) && $_SESSION['rol'] === 'admin') ? true : false;
+
+$query = "SELECT * FROM productos WHERE categoria = 'msi'";
+$result = $conn->query($query); 
 ?>
 <!doctype html>
 <html lang="en">
@@ -34,7 +39,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
                 <img src="../img/canasta.webp" id="img-libro" alt="Canasta">
 
                 <div id="libro">
-                    <table >
+                    <table>
                         <thead>
                             <tr>
                                 <th>Producto</th>
@@ -92,7 +97,8 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
                             </a>
                         </li>
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button"
+                                data-bs-toggle="dropdown">
                                 Pc de Escritorio
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
@@ -103,7 +109,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item categoria-link" href="#" data-categoria="techos">
+                                    <a class="dropdown-item categoria-link" href="../php/hpdell.php" data-categoria="techos">
                                         Hp Dell
                                     </a>
                                 </li>
@@ -115,13 +121,13 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
                                 Laptops
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="madera">ASUS</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/asus.php" data-categoria="madera">ASUS</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="pisos">LENOVO</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/lenovo.php" data-categoria="pisos">LENOVO</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="armarios">HP
+                                 <li><a class="dropdown-item categoria-link" href="../php/omnibook.php" data-categoria="armarios">HP
                                         OMNIBOOK </a></li>
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="armarios">MSI</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/msi.php" data-categoria="armarios">MSI</a>
                                 </li>
                                 <li><a class="dropdown-item categoria-link" href="#" data-categoria="armarios">DELL</a>
                                 </li>
@@ -163,9 +169,11 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
                                 Servicio Tecnico
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="../php/horario.php" data-categoria="bano">Horarios</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/horario.php"
+                                        data-categoria="bano">Horarios</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="../php/contacto.php" data-categoria="bano">Contacto</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/contacto.php"
+                                        data-categoria="bano">Contacto</a>
                                 </li>
                                 <li><a class="dropdown-item categoria-link" href="../php/gestion_citas.php"
                                         data-categoria="bano">Citas</a></li>
@@ -213,110 +221,66 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
             </div>
         </div>
     </nav>
+    <div class="container" style="margin-top: 100px;">
 
-    <header class="header">
-        <div class="header-content container">
-            <div class="header-txt">
-                <h1><span>Bienvenido a L&M PC Computadoras -
-                    </span>Explora todo nuestro catalogo </h1>
-                <p>
-                    Hola usuario aqui encontraras todo lo que necesitas
-                    relacionado a computacion, desde componentes hasta
-                    accesorios y mucho mas.
-                </p>
-                <a href="https://www.facebook.com/LyM010?locale=es_LA" class="btn-1">Mas Informacion</a>
-            </div>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Laptops MSI</h2>
+
+            <?php if ($es_admin): ?>
+            <a href="#" class="btn btn-success">
+                <i class="fas fa-plus"></i> Agregar Nuevo Producto
+            </a>
+            <?php endif; ?>
         </div>
 
-    </header>
-    <section class="info">
-        <div class="info-content container">
-            <div class="info-img">
-                <img src="../img/promocion.jpg" alt>
-            </div>
-            <div class="info-txt">
-                <h2>Los mejores en accesorios para el Usuario</h2>
-                <p>
-                    En L&M PC Computadoras, nos enorgullece ofrecerte una amplia
-                    gama de productos y accesorios de alta calidad para satisfacer todas tus
-                    necesidades tecnológicas.
-                </p>
-                <a href="https://www.facebook.com/LyM010?locale=es_LA" class="btn-1">Mas Informacion</a>
-            </div>
-        </div>
-    </section>
-    <main class="products container">
-        <h2>Productos Destacados</h2>
-        <p>
-            Las mejores ofertas y descuentos en productos seleccionados
-        </p>
-        <div class="box-container" id="lista-1">
-            <div class="box" data-id="1">
-                <img src="../uploads/asus.jpeg" alt>
-                <div class="product-txt">
-                    <h3>NOTEBOOK /ASUS RP058 CORE 7 240H/DISCO SOLIDO 1TB"1000gb" /MEMORIA RAM 16GB/RTX 5050 8G/
-                        PANTALLA16" 144HZ</h3>
-                    <p><span class="product-units" data-id="1">8</span> Unidades</p>
-                    <p>Serie Ultra Core</p>
-                    <p>precio inicial $1'666,00</p>
-                    <p>Descuento de $150.00</p>
-                    <p class="precio">$1'516.00</p>
-                    <a href="#" class="agregar-libro btn-3" data-id="1">Agregar al carrito</a>
-                </div>
-            </div>
-            <div class="box" data-id="2">
-                <img src="../uploads/pcdell.webp" alt>
-                <div class="product-txt">
-                    <h3>PC DELL</h3>
-                    <p><span class="product-units" data-id="2">8</span> Unidades</p>
-                    <p>SERIE 7000</p>
-                    <p>precio inicial $800.00</p>
-                    <p>Descuento de $1.50</p>
-                    <p class="precio">$798.50</p>
-                    <a href="#" class="agregar-libro btn-3" data-id="2">Agregar al carrito</a>
-                </div>
-            </div>
+        <div class="row">
+            <?php if ($result && $result->rowCount() > 0): ?>
+            <?php while($row = $result->fetch(PDO::FETCH_ASSOC)): ?>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <img src="../img/<?php echo $row['imagen']; ?>" class="card-img-top" alt="Producto"
+                        style="height: 200px; object-fit: cover;">
 
-            <div class="box" data-id="3">
-                <img src="../uploads/tablets.webp" alt>
-                <div class="product-txt">
-                    <h3>Tablet</h3>
-                    <p><span class="product-units" data-id="3">8</span> Unidades</p>
-                    <p>Ipad</p>
-                    <p>precio inicial $700</p>
-                    <p>Descuento de $1.50</p>
-                    <p class="precio">$698.50</p>
-                    <a href="#" class="agregar-libro btn-3" data-id="3">Agregar al carrito</a>
-                </div>
-            </div>
-            <div class="box" data-id="4">
-                <img src="../uploads/tinta.webp" alt>
-                <div class="product-txt">
-                    <h3>Tinta</h3>
-                    <p><span class="product-units" data-id="4">4</span> Unidades</p>
-                    <p>EPSON 1000 ML</p>
-                    <p>precio inicial $380</p>
-                    <p>Descuento de $80</p>
-                    <p class="precio">$300</p>
-                    <a href="#" class="agregar-libro btn-3" data-id="4">Agregar al carrito</a>
-                </div>
-            </div>
-            <div class="box" data-id="5">
-                <img src="../uploads/duplicadora.webp" alt>
-                <div class="product-txt">
-                    <h3>Duplicadora</h3>
-                    <p><span class="product-units" data-id="5">12</span> Unidades</p>
-                    <p>Fax 2001</p>
-                    <p>Precio Inicial $1200</p>
-                    <p>Descuento de $400</p>
-                    <p class="precio">$800</p>
-                    <a href="#" class="agregar-libro btn-3" data-id="5">Agregar al carrito</a>
-                </div>
-            </div>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title"><?php echo $row['nombre']; ?></h5>
+                        <p class="card-text text-muted"><?php echo $row['serie']; ?></p>
 
+                        <div class="mt-auto">
+                            <h4 class="text-primary">$<?php echo number_format($row['precio'], 2); ?></h4>
+                            <p class="text-secondary">Unidades disponibles: <span class="product-units"
+                                    data-id="<?php echo $row['id_producto']; ?>"><?php echo $row['unidades']; ?></span>
+                            </p>
+
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary agregar-libro"
+                                    data-id="<?php echo $row['id_producto']; ?>">Agregar al Carrito</button>
+
+                                <?php if ($es_admin): ?>
+                                <div class="d-flex gap-2 mt-2">
+                                    <a href="../php/editar.php?id=<?php echo $row['id_producto']; ?>"
+                                        class="btn btn-warning w-50">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </a>
+                                    <a href="../php/eliminar.php?id=<?php echo $row['id_producto']; ?>"
+                                        class="btn btn-danger w-50"
+                                        onclick="return confirm('¿Estás seguro de borrar esto?');">
+                                        <i class="fas fa-trash"></i> Borrar
+                                    </a>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endwhile; ?>
+            <?php else: ?>
+            <div class="col-12">
+                <div class="alert alert-info">No hay productos disponibles en este momento.</div>
+            </div>
+            <?php endif; ?>
         </div>
-        <div class="btn-2" id="load-more">Cargar mas Ofertas</div>
-    </main>
+    </div>
 
     <footer class="footer">
         <div class="footer-content container">

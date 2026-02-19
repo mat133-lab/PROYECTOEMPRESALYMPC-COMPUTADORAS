@@ -94,7 +94,7 @@ $adminName = isset($_SESSION['admin_name']) ? htmlspecialchars($_SESSION['admin_
 
         <section class="products">
             <div class="container">
-                <h2 style="text-align:center; margin-bottom:24px;">Accesos rápidos</h2>
+                <h2 style="text-align:center; margin-bottom:24px;">Accesos</h2>
                 <div class="box-container">
                     <a href="horarioadmin.php" class="box" style="text-decoration:none;">
                         <img src="../img/calendar.webp" alt="Citas" onerror="this.style.display='none'">

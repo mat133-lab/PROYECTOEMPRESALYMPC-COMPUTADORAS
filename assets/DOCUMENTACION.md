@@ -2,7 +2,25 @@
 
 ## Descripción General del Proyecto
 
-L&M PC Computadoras es una aplicación web de gestión de citas y horarios para una empresa de servicios técnicos de computadoras. La aplicación permite a usuarios registrarse, solicitar citas de servicio, y a personal administrativo gestionar, ver, editar y eliminar citas desde una interfaz de calendario interactivo.
+L&M PC Computadoras es una aplicación web integral de gestión de citas y comercio electrónico para una empresa de servicios técnicos de computadoras. La aplicación permite a usuarios registrarse, solicitar citas de servicio, gestionar un carrito de compras, y a personal administrativo gestionar citas y productos desde interfaces interactivas.
+
+## Características Principales
+
+### Para Usuarios Comunes
+- Registro e inicio de sesión con validación de contraseñas
+- Visualización de formulario para solicitar citas
+- Historial de citas personales en calendario interactivo
+- Catálogo de productos por categorías (ASUS, HP/Dell, Lenovo, MSI, Omnilbook, PC)
+- Carrito de compras con gestión de stock en tiempo real
+- Compra de productos con actualización automática de inventario
+
+### Para Personal Administrativo
+- Acceso a calendario administrativo con vista completa de citas
+- Tabla compacta de todas las citas registradas
+- Capacidad de crear, editar y eliminar citas
+- Gestión de productos y categorías
+- Control de inventario y stock
+- Exportación a PDF de citas registradas
 
 ## Características Principales
 
@@ -11,6 +29,9 @@ L&M PC Computadoras es una aplicación web de gestión de citas y horarios para 
 - Visualización de formulario para solicitar citas
 - Historial de citas personales en calendario interactivo
 - Visualización de detalles de citas por fecha
+- Catálogo de productos organizados por marcas (ASUS, HP/Dell, Lenovo, MSI, Omnilbook, PC)
+- Carrito de compras con validación de stock en tiempo real
+- Proceso de compra con actualización automática del inventario
 
 ### Para Personal Administrativo
 - Acceso a calendario administrativo con vista completa de citas
@@ -18,6 +39,8 @@ L&M PC Computadoras es una aplicación web de gestión de citas y horarios para 
 - Capacidad de crear nuevas citas
 - Edición de detalles de citas existentes
 - Eliminación de citas
+- Gestión completa del catálogo de productos
+- Control de stock e inventario
 - Exportación a PDF de citas registradas
 
 ## Estructura del Proyecto
@@ -31,6 +54,16 @@ lymPCComputadoras/
   includes/         - Archivos de inclusión PHP
   js/               - Scripts JavaScript
   php/              - Archivos PHP del servidor
+    ├── api_horarios.php         - API para citas de usuarios
+    ├── api_horarios_admin.php   - API para gestión de citas admin
+    ├── cart_action.php          - API para carrito de compras
+    ├── asus.php                 - Catálogo productos ASUS
+    ├── hpdell.php               - Catálogo productos HP/Dell
+    ├── lenovo.php               - Catálogo productos Lenovo
+    ├── msi.php                  - Catálogo productos MSI
+    ├── omnibook.php             - Catálogo productos Omnilbook
+    ├── pc.php                   - Catálogo productos PC
+    └── ...                      - Otros archivos PHP
   uploads/          - Directorio para archivos subidos
   assets/           - Documentación y complementos
 ```
@@ -41,6 +74,7 @@ Backend:
 - PHP 7.x con extensión PDO
 - Base de datos SQL (MySQL/MariaDB)
 - Sesiones de PHP para autenticación
+- APIs RESTful para citas y carrito de compras
 
 Frontend:
 - HTML5 semántico
@@ -48,6 +82,7 @@ Frontend:
 - JavaScript ES6 con módulos
 - Bootstrap 5.3.8 para componentes UI
 - Remixicon 4.6.0 para iconos
+- AJAX para interacciones dinámicas del carrito
 
 ## Roles de Usuario
 
@@ -86,7 +121,7 @@ Las variables de sesión que se utilizan son:
 
 ## Base de Datos
 
-La aplicación utiliza tres tablas principales:
+La aplicación utiliza cuatro tablas principales:
 
 ### Tabla usuarios
 Campos: id, usuario, correo, contraseña (hash), rol
@@ -96,8 +131,12 @@ Almacena los datos de autenticación de usuarios
 Campos: id_cita, nombre, apellido, correo, fecha, telefono, motivo
 Almacena todas las citas registradas
 
+### Tabla productos
+Campos: id_producto, nombre, serie, fecha, precio, imagen, categoria, unidades
+Almacena el catálogo de productos disponibles para venta
+
 ### Tabla contacto
-Campos: id_soporte, Nombre, Correo, Compania, Mensaje
+Campos: id_soporte, Nombre, Correo, Compania, Mensaje, fecha_creacion
 Almacena mensajes de soporte/contacto enviados por usuarios
 
 ## Esquema de Colores
