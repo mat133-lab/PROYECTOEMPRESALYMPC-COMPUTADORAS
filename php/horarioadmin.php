@@ -1,25 +1,4 @@
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Horario Administrador - L&M PC Computadoras</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../css/horariostyleadmin.css">
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Horario Administrador - L&M PC Computadoras</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../css/horariostyleadmin.css">
-</head>
-
-<body>
-    <?php
+<?php
     session_start();
     require_once '../includes/db.php';
 
@@ -29,11 +8,63 @@
         header('Location: ../php/login.php');
         exit();
     }
-    ?>
+?>
+<!DOCTYPE html>
+<html lang="es">
 
-    <nav class="navbar navbar-dark bg-warning fixed-top shadow-sm">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horario Administrador - L&M PC Computadoras</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/horariostyleadmin.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+
+    <nav class="navbar navbar-dark bg-warning fixed-top">
         <div class="container-fluid">
-            <a class="navbar-brand" href="../php/dashboardadmin.php">L&M PC Computadoras</a>
+            <!-- CARRITO / CANASTA -->
+            <div class="submenu me-3">
+                <img src="../img/canasta.webp" id="img-libro" alt="Canasta">
+
+                <div id="libro">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Nombre</th>
+                                <th>Serie</th>
+                                <th>Fecha</th>
+                                <th>Unidades</th>
+                                <th>Precio</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-libro"></tbody>
+                    </table>
+
+                    <div id="carrito-acciones" class="carrito-acciones disabled">
+                        <div class="carrito-acciones-izquierda">
+                            <button class="carrito-acciones-vaciar" id="carrito-acciones-vaciar">
+                                Vaciar Carrito
+                            </button>
+                        </div>
+
+                        <div class="carrito-acciones-derecha">
+                            <div class="carrito-acciones-total">
+                                <p>Compras Totales:</p>
+                                <p id="total">$0</p>
+                            </div>
+                            <button class="carrito-acciones-comprar" id="carrito-acciones-comprar">
+                                Comprar ahora
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <a class="navbar-brand" href="../php/dashboard.php">L&M PC Computadoras</a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
                 data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
@@ -41,29 +72,141 @@
             </button>
 
             <div class="offcanvas offcanvas-end text-bg-warning" tabindex="-1" id="offcanvasDarkNavbar">
+
                 <div class="offcanvas-header">
-                    <h5 class="offcanvas-title">Menú</h5>
+                    <h5 class="offcanvas-title">Menu</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
                 </div>
 
                 <div class="offcanvas-body">
                     <ul class="navbar-nav flex-grow-1 pe-3">
+
+                        <li class="nav-item">
+                            <a class="nav-link categoria-link active" href="../php/dashboard.php"
+                                data-categoria="todos">
+                                Home
+                            </a>
+                        </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                Cuenta y Configuración
+                                Pc de Escritorio
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item" href="../php/perfiladmin.php">Perfil</a></li>
-                                <li><a class="dropdown-item" href="#">Configuración</a></li>
-                                <li><a class="dropdown-item" href="#">Términos y Condiciones</a></li>
+                                <li>
+                                    <a class="dropdown-item categoria-link" href="../php/pc.php"
+                                        data-categoria="estructura">
+                                        Pc Dell
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item categoria-link" href="../php/hpdell.php"
+                                        data-categoria="techos">
+                                        Hp Dell
+                                    </a>
+                                </li>
                             </ul>
                         </li>
 
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                Laptops
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li><a class="dropdown-item categoria-link" href="../php/asus.php"
+                                        data-categoria="madera">ASUS</a>
+                                </li>
+                                <li><a class="dropdown-item categoria-link" href="../php/lenovo.php"
+                                        data-categoria="pisos">LENOVO</a>
+                                </li>
+                                <li><a class="dropdown-item categoria-link" href="../php/omnibook.php"
+                                        data-categoria="armarios">HP
+                                        OMNIBOOK </a></li>
+                                <li><a class="dropdown-item categoria-link" href="../php/msi.php"
+                                        data-categoria="armarios">MSI</a>
+                                </li>
+                                <li><a class="dropdown-item categoria-link" href="../php/dell.php"
+                                        data-categoria="armarios">DELL</a>
+                                </li>
+
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                Duplicadora
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li><a class="dropdown-item categoria-link" href="../php/duplicadoracd.php"
+                                        data-categoria="electricidad">CD</a></li>
+                                <li><a class="dropdown-item categoria-link" href="../php/duplicadoradvd.php"
+                                        data-categoria="iluminacion">DVD</a></li>
+                                <li><a class="dropdown-item categoria-link" href="../php/duplicadorablu.php"
+                                        data-categoria="domotica">BLU-RAY</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                Tablets
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="herramientas"></a>
+                                </li>
+                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="maquinaria"></a>
+                                </li>
+                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="seguridad"></a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                Servicio Tecnico
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li><a class="dropdown-item categoria-link" href="../php/horario.php"
+                                        data-categoria="bano">Horarios</a>
+                                </li>
+                                <li><a class="dropdown-item categoria-link" href="../php/contacto.php"
+                                        data-categoria="bano">Contacto</a>
+                                </li>
+                                <li><a class="dropdown-item categoria-link" href="../php/gestion_citas.php"
+                                        data-categoria="bano">Citas</a></li>
+                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="bano">Ubicacion</a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                Impresoras con Tinta Continua
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li><a class="dropdown-item categoria-link" href="../php/epson.php"
+                                        data-categoria="pintura">EPSON</a>
+                                </li>
+                                <li><a class="dropdown-item categoria-link" href="../php/canon.php"
+                                        data-categoria="pintura">CANON</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                Tintas
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta100.php"
+                                        data-categoria="pintura">Tinta de
+                                        100 ML</a></li>
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta1000.php"
+                                        data-categoria="pintura">Tinta de
+                                        1000 ML</a></li>
+                            </ul>
+                        </li>
                         <div class="d-flex align-items-center">
 
-                            <?php if (isset($_SESSION['admin_name'])): ?>
-                            <span class="text-white me-3">Buen dia,
-                                <b><?php echo $_SESSION['admin_name']; ?></b></span>
+                            <?php if (isset($_SESSION['usuario'])): ?>
+                            <span class="text-white me-3">Buen dia, <b><?php echo $_SESSION['usuario']; ?></b></span>
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
@@ -71,6 +214,7 @@
                             <?php endif; ?>
 
                         </div>
+
                     </ul>
                 </div>
             </div>
@@ -99,7 +243,7 @@
 
                     <ol class="calendar__days">
                         <?php 
-                        // Generamos 35 espacios para asegurar una cuadrícula rectangular (5 filas x 7 cols)
+                        // Generamos 35 espacios para asegurar una cuadrícula rectangular 5 filas x 7 cols
                         for ($d = 1; $d <= 35; $d++): 
                         ?>
                         <li class="calendar__day" data-day="<?php echo $d; ?>">
@@ -145,7 +289,7 @@
                                     $fechaDia = $fechaObj->format('d M'); // dia y mes
                                     $fechaHora = $fechaObj->format('H:i'); // hora y minutos
                                     
-                                    echo "<tr data-id=\"$id\">\n                                            <td>\n                                                <div class='cita-item-nombre'>$nombre</div>\n                                                <div class='cita-item-fecha'>\n                                                   $fechaDia <span class='ms-2'> $fechaHora</span>\n                                                </div>\n                                            </td>\n                                            <td class='text-end'>\n                                                <button class='btn-icon btn-edit-custom btn-edit' data-id='$id' title='Editar'>✏️</button>\n                                                <button class='btn-icon btn-delete-custom btn-delete' data-id='$id' title='Borrar'>🗑️</button>\n                                            </td>\n                                          </tr>";
+                                    echo "<tr data-id=\"$id\">\n<td>\n<div class='cita-item-nombre'>$nombre</div>\n<div class='cita-item-fecha'>\n $fechaDia <span class='ms-2'> $fechaHora</span>\n                                                </div>\n                                            </td>\n                                            <td class='text-end'>\n                                                <button class='btn-icon btn-edit-custom btn-edit' data-id='$id' title='Editar'>✏️</button>\n                                                <button class='btn-icon btn-delete-custom btn-delete' data-id='$id' title='Borrar'>🗑️</button>\n                                            </td>\n                                          </tr>";
                                 }
                                 ?>
                             </tbody>
@@ -156,7 +300,7 @@
 
         </div>
     </div>
-    
+
     <dialog class="dialog-nativo" id="admin-appointment-modal">
         <div class="modal__card p-4 rounded-3 shadow bg-white" style="max-width: 500px; width: 100%; margin: auto;">
             <header class="modal__header d-flex justify-content-between align-items-center mb-3">

@@ -92,7 +92,10 @@ class UI {
         li.style.cursor = 'pointer'; // Indicar que es clickeable
         li.innerHTML = `
             <div class="modal__item__info">
-                <h4 class="modal__item__title">${appointment.nombre} ${appointment.apellido} <span style="font-size:0.8em; color:#ff9100;">(Editar)</span></h4>
+                <h4 class="modal__item__title">${appointment.nombre} ${appointment.apellido} 
+                <button style="font-size:0.8em; 
+                color:#ffffff; background:#FFC107; border-radius: 5px; 
+                border-style: outset; border: none; padding: 5px 5px;">Editar</button></h4>
                 <p class="modal__item__description">${appointment.motivo}</p>
                 <p class="modal__item__time">${appointment.telefono} | ${appointment.correo}</p>
             </div>

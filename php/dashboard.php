@@ -34,7 +34,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
                 <img src="../img/canasta.webp" id="img-libro" alt="Canasta">
 
                 <div id="libro">
-                    <table >
+                    <table>
                         <thead>
                             <tr>
                                 <th>Producto</th>
@@ -103,7 +103,8 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item categoria-link" href="#" data-categoria="techos">
+                                    <a class="dropdown-item categoria-link" href="../php/hpdell.php"
+                                        data-categoria="techos">
                                         Hp Dell
                                     </a>
                                 </li>
@@ -115,15 +116,20 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
                                 Laptops
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="madera">ASUS</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/asus.php"
+                                        data-categoria="madera">ASUS</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="pisos">LENOVO</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/lenovo.php"
+                                        data-categoria="pisos">LENOVO</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="armarios">HP
+                                <li><a class="dropdown-item categoria-link" href="../php/omnibook.php"
+                                        data-categoria="armarios">HP
                                         OMNIBOOK </a></li>
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="armarios">MSI</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/msi.php"
+                                        data-categoria="armarios">MSI</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="armarios">DELL</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/dell.php"
+                                        data-categoria="armarios">DELL</a>
                                 </li>
 
                             </ul>
@@ -134,11 +140,11 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
                                 Duplicadora
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="#"
+                                <li><a class="dropdown-item categoria-link" href="../php/duplicadoracd.php"
                                         data-categoria="electricidad">CD</a></li>
-                                <li><a class="dropdown-item categoria-link" href="#"
+                                <li><a class="dropdown-item categoria-link" href="../php/duplicadoradvd.php"
                                         data-categoria="iluminacion">DVD</a></li>
-                                <li><a class="dropdown-item categoria-link" href="#"
+                                <li><a class="dropdown-item categoria-link" href="../php/duplicadorablu.php"
                                         data-categoria="domotica">BLU-RAY</a></li>
                             </ul>
                         </li>
@@ -157,15 +163,16 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
                             </ul>
                         </li>
 
-                        <!-- BAÑO -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                                 Servicio Tecnico
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="../php/horario.php" data-categoria="bano">Horarios</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/horario.php"
+                                        data-categoria="bano">Horarios</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="../php/contacto.php" data-categoria="bano">Contacto</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/contacto.php"
+                                        data-categoria="bano">Contacto</a>
                                 </li>
                                 <li><a class="dropdown-item categoria-link" href="../php/gestion_citas.php"
                                         data-categoria="bano">Citas</a></li>
@@ -179,9 +186,9 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
                                 Impresoras con Tinta Continua
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="pintura">EPSON</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/epson.php" data-categoria="pintura">EPSON</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="pintura">CANON</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/canon.php" data-categoria="pintura">CANON</a>
                                 </li>
                             </ul>
                         </li>
@@ -190,9 +197,9 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
                                 Tintas
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="pintura">Tinta de
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta100.php" data-categoria="pintura">Tinta de
                                         100 ML</a></li>
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="pintura">Tinta de
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta1000.php" data-categoria="pintura">Tinta de
                                         1000 ML</a></li>
                             </ul>
                         </li>

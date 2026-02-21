@@ -299,31 +299,6 @@ h1{
     border-color: var(--primary-color);
 }
 
-/* ================= FOOTER ================= */
-.footer {
-    background: #1D1D1B;
-    color: white;
-    padding: 50px 0;
-}
-
-.footer-content {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-}
-
-.link h3 {
-    color: var(--primary-color);
-}
-
-.link a {
-    color: #bbb;
-}
-
-.link a:hover {
-    color: var(--primary-color);
-}
-
 /* ================= RESPONSIVE ================= */
 @media (max-width: 991px) {
     .menu label {
@@ -338,6 +313,15 @@ h1{
     .submenu:hover #libro {
         width: 300px;
     }
+    /*
+
+    .footer-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 30px;
+    }
+    */
 }
 .btn-primary {
     background-color: #ff8400;
@@ -352,7 +336,7 @@ h1{
     background-color: #c5680a;
 }
 
-/* ================= COMPACT TABLES ================= */
+/* ================= COMPACTO TABLAS ================= */
 .table-wrapper {
     max-height: 260px;
     overflow: auto;

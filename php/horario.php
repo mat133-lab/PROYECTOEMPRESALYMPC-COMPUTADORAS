@@ -36,7 +36,7 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
                 <img src="../img/canasta.webp" id="img-libro" alt="Canasta">
 
                 <div id="libro">
-                    <table id="lista-libro">
+                    <table>
                         <thead>
                             <tr>
                                 <th>Producto</th>
@@ -47,7 +47,7 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
                                 <th>Precio</th>
                             </tr>
                         </thead>
-                        <tbody></tbody>
+                        <tbody id="lista-libro"></tbody>
                     </table>
 
                     <div id="carrito-acciones" class="carrito-acciones disabled">
@@ -99,13 +99,14 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
                                 <li>
-                                    <a class="dropdown-item categoria-link" href="../secciones/constructores.php"
+                                    <a class="dropdown-item categoria-link" href="../php/pc.php"
                                         data-categoria="estructura">
                                         Pc Dell
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item categoria-link" href="#" data-categoria="techos">
+                                    <a class="dropdown-item categoria-link" href="../php/hpdell.php"
+                                        data-categoria="techos">
                                         Hp Dell
                                     </a>
                                 </li>
@@ -117,15 +118,20 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
                                 Laptops
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="madera">ASUS</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/asus.php"
+                                        data-categoria="madera">ASUS</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="pisos">LENOVO</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/lenovo.php"
+                                        data-categoria="pisos">LENOVO</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="armarios">HP
+                                <li><a class="dropdown-item categoria-link" href="../php/omnibook.php"
+                                        data-categoria="armarios">HP
                                         OMNIBOOK </a></li>
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="armarios">MSI</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/msi.php"
+                                        data-categoria="armarios">MSI</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="armarios">DELL</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/dell.php"
+                                        data-categoria="armarios">DELL</a>
                                 </li>
 
                             </ul>
@@ -136,11 +142,11 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
                                 Duplicadora
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="#"
+                                <li><a class="dropdown-item categoria-link" href="../php/duplicadoracd.php"
                                         data-categoria="electricidad">CD</a></li>
-                                <li><a class="dropdown-item categoria-link" href="#"
+                                <li><a class="dropdown-item categoria-link" href="../php/duplicadoradvd.php"
                                         data-categoria="iluminacion">DVD</a></li>
-                                <li><a class="dropdown-item categoria-link" href="#"
+                                <li><a class="dropdown-item categoria-link" href="../php/duplicadorablu.php"
                                         data-categoria="domotica">BLU-RAY</a></li>
                             </ul>
                         </li>
@@ -159,15 +165,16 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
                             </ul>
                         </li>
 
-                        <!-- BAÑO -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                                 Servicio Tecnico
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="../php/horario.php" data-categoria="bano">Horarios</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/horario.php"
+                                        data-categoria="bano">Horarios</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="../php/contacto.php" data-categoria="bano">Contacto</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/contacto.php"
+                                        data-categoria="bano">Contacto</a>
                                 </li>
                                 <li><a class="dropdown-item categoria-link" href="../php/gestion_citas.php"
                                         data-categoria="bano">Citas</a></li>
@@ -181,9 +188,9 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
                                 Impresoras con Tinta Continua
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="pintura">EPSON</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/epson.php" data-categoria="pintura">EPSON</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="pintura">CANON</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/canon.php" data-categoria="pintura">CANON</a>
                                 </li>
                             </ul>
                         </li>
@@ -192,9 +199,9 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
                                 Tintas
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="pintura">Tinta de
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta100.php" data-categoria="pintura">Tinta de
                                         100 ML</a></li>
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="pintura">Tinta de
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta1000.php" data-categoria="pintura">Tinta de
                                         1000 ML</a></li>
                             </ul>
                         </li>
@@ -293,6 +300,30 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
         </section>
         </div>
     </dialog>
+    
+    <footer class="footer">
+        <div class="footer-content container">
+            <div class="link">
+                <h3>Pais - Ciudad</h3>
+                <ul>
+                    <li><a href="https://maps.app.goo.gl/BwLzsdgsGr3jjrmu5"> Ecuador - Quito</a></li>
+                </ul>
+            </div>
+            <div class="link">
+                <h3>Ubicaciones</h3>
+                <ul>
+                    <li><a href="https://maps.app.goo.gl/Hr7jt9W4ejWCdhmN7"> La Ecuatoriana - Las Orquídeas / Oe9 Martha
+                            Bucaram / S37-49 / S37a</a></li>
+                </ul>
+            </div>
+            <div class="link">
+                <h3>Soporte</h3>
+                <ul>
+                    <li><a href="https://www.facebook.com/LyM010/about?locale=es_LA"> +593 98 309 3667</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
     
     <!-- Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>

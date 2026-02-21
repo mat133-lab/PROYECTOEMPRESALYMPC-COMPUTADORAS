@@ -1,44 +1,29 @@
 <?php
 session_start();
-require_once '../includes/db.php';
+include_once '../includes/db.php';
 
 if (!isset($_SESSION['usuario'])) {
     header("Location: login.php");
     exit();
 }
 
-// Si el usuario es admin, lo enviamos a contactoadmin.php
-if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'admin') {
-    header("Location: ../php/contactoadmin.php");
-    exit();
-}
-if (isset($_POST['enviar'])) {
-    $compania  = $_POST['company'];
-    echo "Contacto registrado de la $compania";
-}  
 
-if(isset($_POST['enviar'])){
-    $nombre = $_POST['name'];
-    $correo = $_POST['email'];
-    $compania = $_POST['company'];
-    $mensaje = $_POST['message'];
-    
-    $stmt = $conn -> prepare("INSERT INTO contacto (Nombre, Correo, Compania, Mensaje) VALUES (?, ?, ?, ?)");
-    $stmt -> execute ([$nombre, $correo, $compania, $mensaje]);
-    header("Location: ../php/contacto.php"); // Recargar para limpiar el POST
-}
+$es_admin = (isset($_SESSION['rol']) && $_SESSION['rol'] === 'admin') ? true : false;
+
+$query = "SELECT * FROM productos WHERE categoria = 'CANON'";
+$result = $conn->query($query); 
 ?>
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contacto y Soporte - Dashboard</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="../img/logo.webp">
+    <title>Dashboard - L&M PC Computadoras</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="../css/stylecitas.css">
-    <link rel="stylesheet" href="../css/footer.css">
+    <link rel="stylesheet" href="../css/style.css">
 </head>
 
 <body>
@@ -235,39 +220,67 @@ if(isset($_POST['enviar'])){
             </div>
         </div>
     </nav>
-    <div class="main-content">
-        <h1>Contacto y Soporte</h1>
-        <div class="text-center">
-            <p>Hola <strong><?php echo $_SESSION['usuario']; ?></strong>, Bienvenido puede enviarnos un mensaje por
-                cualquier asunto que tenga con la empresa
-            </p>
+    <div class="container" style="margin-top: 100px;">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Impresoras CANON</h2>
+
+            <?php if ($es_admin): ?>
+            <a href="#" class="btn btn-success">
+                <i class="fas fa-plus"></i> Agregar Nuevo Producto
+            </a>
+            <?php endif; ?>
         </div>
-        <div class="form-section">
-            <form method="POST">
-                <div class="form-group">
-                    <p>Nombre</p>
-                    <input type="text" name="name" id="Nombre">
+
+        <div class="row">
+            <?php if ($result && $result->rowCount() > 0): ?>
+            <?php while($row = $result->fetch(PDO::FETCH_ASSOC)): ?>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <img src="../img/<?php echo $row['imagen']; ?>" class="card-img-top" alt="Producto"
+                        style="height: 200px; object-fit: cover;">
+
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title"><?php echo $row['nombre']; ?></h5>
+                        <p class="card-text text-muted"><?php echo $row['serie']; ?></p>
+
+                        <div class="mt-auto">
+                            <h4 class="text-primary">$<?php echo number_format($row['precio'], 2); ?></h4>
+                            <p class="text-secondary">Unidades disponibles: <span class="product-units"
+                                    data-id="<?php echo $row['id_producto']; ?>"><?php echo $row['unidades']; ?></span>
+                            </p>
+
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary agregar-libro"
+                                    data-id="<?php echo $row['id_producto']; ?>">Agregar al Carrito</button>
+
+                                <?php if ($es_admin): ?>
+                                <div class="d-flex gap-2 mt-2">
+                                    <a href="../php/editar.php?id=<?php echo $row['id_producto']; ?>"
+                                        class="btn btn-warning w-50">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </a>
+                                    <a href="../php/eliminar.php?id=<?php echo $row['id_producto']; ?>"
+                                        class="btn btn-danger w-50"
+                                        onclick="return confirm('¿Estás seguro de borrar esto?');">
+                                        <i class="fas fa-trash"></i> Borrar
+                                    </a>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <p>Correo Electronico</p>
-                    <input type="email" name="email" id="Correo">
-                </div>
-                <div class="form-group">
-                    <p>Compania u Organizacion</p>
-                    <input type="text" name="company" id="Compania">
-                </div>
-                <div class="form-group">
-                    <p>Mensaje</p>
-                    <textarea name="message" id="Mensaje" rows="5"></textarea>
-                </div>
-                <div class="form-group full">
-                    <button type="submit" name="enviar" class="btn btn-primary">
-                        Enviar
-                    </button>
-                </div>
-            </form>
+            </div>
+            <?php endwhile; ?>
+            <?php else: ?>
+            <div class="col-12">
+                <div class="alert alert-info">No hay productos disponibles en este momento.</div>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
+
     <footer class="footer">
         <div class="footer-content container">
             <div class="link">
