@@ -1,34 +1,32 @@
 document.addEventListener('DOMContentLoaded', cargarStorage);
 
 function sincronizarStorage() {
-    const cartBody = document.querySelector('#lista-libro tbody');
+    const cartBody = document.getElementById('lista-libro');
     const totalEl = document.getElementById('total');
     if (cartBody && totalEl) {
-        // Guarda el HTML de la tabla y el texto del total en la memoria del navegador
         localStorage.setItem('carritoHTML', cartBody.innerHTML);
         localStorage.setItem('carritoTotal', totalEl.textContent);
     }
 }
 
 function cargarStorage() {
-    const cartBody = document.querySelector('#lista-libro tbody');
+    const cartBody = document.getElementById('lista-libro');
     const totalEl = document.getElementById('total');
     const carritoAcciones = document.getElementById('carrito-acciones');
 
     if (cartBody && totalEl) {
-        // Recupera la información de la memoria (o lo deja vacío si no hay nada)
         cartBody.innerHTML = localStorage.getItem('carritoHTML') || '';
         totalEl.textContent = localStorage.getItem('carritoTotal') || '$0';
 
-        // Si hay productos recuperados, activa los botones de comprar/vaciar
         if (cartBody.innerHTML.trim() !== '') {
             if (carritoAcciones) carritoAcciones.classList.remove('disabled');
         }
     }
 }
+
 document.addEventListener('click', function (e) {
 
-    // AGREGAR PRODUCTO AL CARRITO
+    // --- AGREGAR PRODUCTO ---
     if (e.target.matches('.agregar-libro')) {
         e.preventDefault();
         const id = e.target.dataset.id;
@@ -39,28 +37,24 @@ document.addEventListener('click', function (e) {
             body: new URLSearchParams({ product_id: id, qty: 1, action: 'add' })
         }).then(r => r.json()).then(data => {
             if (data.ok) {
-                // Actualizar cantidad visible en el catálogo
                 const el = document.querySelector('.product-units[data-id="' + id + '"]');
                 if (el) el.textContent = data.stock;
 
-                // Actualizar total del carrito
                 const totalEl = document.getElementById('total');
                 if (totalEl) {
                     let current = parseFloat(totalEl.textContent.replace(/[^0-9.-]+/g, '')) || 0;
                     current = current + parseFloat(data.producto.precio);
                     totalEl.textContent = '$' + current.toFixed(2);
                 }
-                const cartBody = document.querySelector('#lista-libro');
+                
+                const cartBody = document.getElementById('lista-libro'); // Corregido
                 if (cartBody) {
-                    // Verificamos si la fila del producto ya existe
                     let filaExistente = cartBody.querySelector(`tr[data-id="${data.producto.id}"]`);
 
                     if (filaExistente) {
-                        // Si ya existe, le sumamos 1 a la columna de unidades
                         let tdUnidades = filaExistente.querySelector('.cart-qty');
                         tdUnidades.textContent = parseInt(tdUnidades.textContent) + 1;
                     } else {
-                        // Si no existe, creamos la fila completa
                         const row = document.createElement('tr');
                         row.setAttribute('data-id', data.producto.id);
                         row.innerHTML = `
@@ -75,9 +69,10 @@ document.addEventListener('click', function (e) {
                     }
                 }
 
-                // Habilitar botones del carrito
                 const carritoAcciones = document.getElementById('carrito-acciones');
                 if (carritoAcciones) carritoAcciones.classList.remove('disabled');
+
+                sincronizarStorage(); // Guardamos
 
             } else {
                 alert(data.msg);
@@ -88,8 +83,7 @@ document.addEventListener('click', function (e) {
         });
     }
 
-    // PROCESAR COMPRA
-
+    // --- PROCESAR COMPRA ---
     if (e.target.id === 'carrito-acciones-comprar') {
         e.preventDefault();
         fetch('../php/cart_action.php', {
@@ -100,15 +94,16 @@ document.addEventListener('click', function (e) {
             if (data.ok) {
                 alert(data.msg);
 
-                // Limpiar Total y Tabla
                 const totalEl = document.getElementById('total');
                 if (totalEl) totalEl.textContent = '$0';
 
-                const cartBody = document.querySelector('#lista-libro');
+                const cartBody = document.getElementById('lista-libro'); // Corregido
                 if (cartBody) cartBody.innerHTML = '';
 
                 const carritoAcciones = document.getElementById('carrito-acciones');
                 if (carritoAcciones) carritoAcciones.classList.add('disabled');
+                
+                sincronizarStorage(); // Borramos
             } else {
                 alert(data.msg);
             }
@@ -118,8 +113,7 @@ document.addEventListener('click', function (e) {
         });
     }
 
-    // VACIAR CARRITO
-
+    // --- VACIAR CARRITO ---
     if (e.target.id === 'carrito-acciones-vaciar') {
         e.preventDefault();
         fetch('../php/cart_action.php', {
@@ -128,17 +122,53 @@ document.addEventListener('click', function (e) {
             body: new URLSearchParams({ action: 'clear' })
         }).then(r => r.json()).then(data => {
             if (data.ok) {
-                // Limpiar Total y Tabla
                 const totalEl = document.getElementById('total');
                 if (totalEl) totalEl.textContent = '$0';
 
-                const cartBody = document.querySelector('#lista-libro');
+                const cartBody = document.getElementById('lista-libro'); // Corregido
                 if (cartBody) cartBody.innerHTML = '';
 
                 const carritoAcciones = document.getElementById('carrito-acciones');
                 if (carritoAcciones) carritoAcciones.classList.add('disabled');
 
+                sincronizarStorage(); // Borramos memoria
             }
         }).catch(err => { console.error(err); });
+    }
+});
+
+// ==========================================
+// 3. LÓGICA DEL BOTÓN "CARGAR MÁS OFERTAS"
+// ==========================================
+document.addEventListener('DOMContentLoaded', function () {
+    let currentItem = 4; // Productos a mostrar inicialmente
+    const btnLoadMore = document.getElementById('load-more');
+    const cajas = document.querySelectorAll('.box'); // <-- AHORA BUSCA LA CLASE .box CORRECTAMENTE
+
+    // Ocultar al principio los productos del 5 en adelante
+    for(let i = currentItem; i < cajas.length; i++){
+        cajas[i].style.display = 'none';
+    }
+
+    // Si hay 4 productos o menos, no necesitamos el botón
+    if (cajas.length <= currentItem && btnLoadMore) {
+        btnLoadMore.style.display = 'none';
+    }
+
+    if (btnLoadMore) {
+        btnLoadMore.addEventListener('click', function () {
+            // Mostrar los siguientes 4 productos
+            for (let i = currentItem; i < currentItem + 4; i++) {
+                if (cajas[i]) {
+                    cajas[i].style.display = ''; // Se borra el display:none para que se vea
+                }
+            }
+            currentItem += 4;
+
+            // Ocultar el botón si ya mostramos todos
+            if (currentItem >= cajas.length) {
+                btnLoadMore.style.display = 'none';
+            }
+        });
     }
 });

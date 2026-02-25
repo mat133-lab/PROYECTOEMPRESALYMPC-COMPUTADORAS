@@ -16,57 +16,34 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         $error = "El formato del correo electrónico no es válido";
     }
     else{
-        // Verificar si el correo existe en la base de datos
+        // Verificar si el correo existe EXCLUSIVAMENTE en la tabla usuarios
         $stmt = $conn->prepare("SELECT * FROM usuarios WHERE correo = ?");
         $stmt->execute([$email]);
         
         if($stmt->rowCount() > 0){
-            // Generar token de recuperación único
+            // El usuario SÍ existe, generamos el token
             $token = bin2hex(random_bytes(32));
             $expiration = date('Y-m-d H:i:s', strtotime('+1 hour'));
             
             try{
-                // Intentar guardar token en la base de datos
-                // Si la columna no existe, simplemente mostrar enlace alternativo
+                // Guardar token en la base de datos
                 $stmt = $conn->prepare("UPDATE usuarios SET reset_token = ?, reset_expiration = ? WHERE correo = ?");
                 $stmt->execute([$token, $expiration, $email]);
                 
-                // Construir enlace de recuperación
-                $reset_link = "http://" . $_SERVER['HTTP_HOST'] . "/lymPCComputadoras/php/reset_password.php?token=" . $token;
+                // Construir enlace de recuperación local
+                $reset_link = "../php/reset_password.php?token=" . $token;
                 
-                // Preparar correo
-                $subject = "Recuperar Contraseña - L&M PC Computadoras";
-                $message = "
-                <html>
-                <body>
-                <p>Hola,</p>
-                <p>Recibimos una solicitud para recuperar tu contraseña. Haz clic en el enlace de abajo para restablecerla:</p>
-                <p><a href='" . $reset_link . "'>Restablecer Contraseña</a></p>
-                <p>Este enlace expirará en 1 hora.</p>
-                <p>Si no solicitaste esto, ignora este correo.</p>
-                <p>Saludos,<br>L&M PC Computadoras</p>
-                </body>
-                </html>
-                ";
-                
-                $headers = "MIME-Version: 1.0" . "\r\n";
-                $headers .= "Content-type: text/html; charset=UTF-8" . "\r\n";
-                
-                // Enviar correo
-                if(mail($email, $subject, $message, $headers)){
-                    $success = "Instrucciones de recuperación enviadas a tu correo electrónico";
-                }
-                else{
-                    $error = "No se pudo enviar el correo. Intenta más tarde.";
-                }
+                // REDIRECCIONAR DIRECTAMENTE PARA PRUEBAS LOCALES
+                header("Location: " . $reset_link);
+                exit(); // Detenemos la ejecución aquí para que el salto sea inmediato
             }
             catch(PDOException $e){
                 $error = "Error al procesar la solicitud: " . $e->getMessage();
             }
         }
         else{
-            // Por seguridad, mostrar el mismo mensaje aunque el correo no exista
-            $success = "Si el correo existe en nuestro sistema, recibirás instrucciones para recuperar tu contraseña";
+            // EL CORREO NO EXISTE EN LA TABLA USUARIOS (Lanzamos error explícito)
+            $error = "Este correo electrónico no está registrado como usuario en el sistema.";
         }
     }
 }

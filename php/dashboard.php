@@ -186,9 +186,11 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
                                 Impresoras con Tinta Continua
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="../php/epson.php" data-categoria="pintura">EPSON</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/epson.php"
+                                        data-categoria="pintura">EPSON</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="../php/canon.php" data-categoria="pintura">CANON</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/canon.php"
+                                        data-categoria="pintura">CANON</a>
                                 </li>
                             </ul>
                         </li>
@@ -197,9 +199,11 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
                                 Tintas
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="../php/tinta100.php" data-categoria="pintura">Tinta de
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta100.php"
+                                        data-categoria="pintura">Tinta de
                                         100 ML</a></li>
-                                <li><a class="dropdown-item categoria-link" href="../php/tinta1000.php" data-categoria="pintura">Tinta de
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta1000.php"
+                                        data-categoria="pintura">Tinta de
                                         1000 ML</a></li>
                             </ul>
                         </li>
@@ -257,72 +261,32 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
         <p>
             Las mejores ofertas y descuentos en productos seleccionados
         </p>
+
         <div class="box-container" id="lista-1">
-            <div class="box" data-id="1">
-                <img src="../uploads/asus.jpeg" alt>
+            <?php
+            // Consultamos TODOS los productos de tu base de datos
+            $stmt = $conn->prepare("SELECT * FROM productos ORDER BY id_producto ASC");
+            $stmt->execute();
+            $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            // Por cada producto en tu base de datos, creamos un lugar para guardarlo
+            foreach ($productos as $row): 
+            ?>
+            <div class="box" data-id="<?= $row['id_producto'] ?>">
+                <img src="<?= htmlspecialchars($row['imagen']) ?>" alt="<?= htmlspecialchars($row['nombre']) ?>"
+                    style="width: 100%; max-height: 200px; object-fit: contain;">
                 <div class="product-txt">
-                    <h3>NOTEBOOK /ASUS RP058 CORE 7 240H/DISCO SOLIDO 1TB"1000gb" /MEMORIA RAM 16GB/RTX 5050 8G/
-                        PANTALLA16" 144HZ</h3>
-                    <p><span class="product-units" data-id="1">8</span> Unidades</p>
-                    <p>Serie Ultra Core</p>
-                    <p>precio inicial $1'666,00</p>
-                    <p>Descuento de $150.00</p>
-                    <p class="precio">$1'516.00</p>
-                    <a href="#" class="agregar-libro btn-3" data-id="1">Agregar al carrito</a>
+                    <h3><?= htmlspecialchars($row['nombre']) ?></h3>
+                    <p><span class="product-units" data-id="<?= $row['id_producto'] ?>"><?= $row['unidades'] ?></span>
+                        Unidades</p>
+                    <p><?= htmlspecialchars($row['serie']) ?></p>
+                    <p class="precio">$<?= number_format($row['precio'], 2) ?></p>
+                    <a href="#" class="agregar-libro btn-3" data-id="<?= $row['id_producto'] ?>">Agregar al carrito</a>
                 </div>
             </div>
-            <div class="box" data-id="2">
-                <img src="../uploads/pcdell.webp" alt>
-                <div class="product-txt">
-                    <h3>PC DELL</h3>
-                    <p><span class="product-units" data-id="2">8</span> Unidades</p>
-                    <p>SERIE 7000</p>
-                    <p>precio inicial $800.00</p>
-                    <p>Descuento de $1.50</p>
-                    <p class="precio">$798.50</p>
-                    <a href="#" class="agregar-libro btn-3" data-id="2">Agregar al carrito</a>
-                </div>
-            </div>
-
-            <div class="box" data-id="3">
-                <img src="../uploads/tablets.webp" alt>
-                <div class="product-txt">
-                    <h3>Tablet</h3>
-                    <p><span class="product-units" data-id="3">8</span> Unidades</p>
-                    <p>Ipad</p>
-                    <p>precio inicial $700</p>
-                    <p>Descuento de $1.50</p>
-                    <p class="precio">$698.50</p>
-                    <a href="#" class="agregar-libro btn-3" data-id="3">Agregar al carrito</a>
-                </div>
-            </div>
-            <div class="box" data-id="4">
-                <img src="../uploads/tinta.webp" alt>
-                <div class="product-txt">
-                    <h3>Tinta</h3>
-                    <p><span class="product-units" data-id="4">4</span> Unidades</p>
-                    <p>EPSON 1000 ML</p>
-                    <p>precio inicial $380</p>
-                    <p>Descuento de $80</p>
-                    <p class="precio">$300</p>
-                    <a href="#" class="agregar-libro btn-3" data-id="4">Agregar al carrito</a>
-                </div>
-            </div>
-            <div class="box" data-id="5">
-                <img src="../uploads/duplicadora.webp" alt>
-                <div class="product-txt">
-                    <h3>Duplicadora</h3>
-                    <p><span class="product-units" data-id="5">12</span> Unidades</p>
-                    <p>Fax 2001</p>
-                    <p>Precio Inicial $1200</p>
-                    <p>Descuento de $400</p>
-                    <p class="precio">$800</p>
-                    <a href="#" class="agregar-libro btn-3" data-id="5">Agregar al carrito</a>
-                </div>
-            </div>
-
+            <?php endforeach; ?>
         </div>
-        <div class="btn-2" id="load-more">Cargar mas Ofertas</div>
+
+        <div class="btn-2" id="load-more" style="cursor: pointer; text-align: center;">Cargar mas Ofertas</div>
     </main>
 
     <footer class="footer">
@@ -348,6 +312,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
             </div>
         </div>
     </footer>
+
     <script src="../js/dashboard.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
