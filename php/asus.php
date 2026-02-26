@@ -67,12 +67,19 @@ $result = $conn->query($query);
                 </div>
             </div>
 
-            <a class="navbar-brand" href="../php/dashboard.php">L&M PC Computadoras</a>
+            <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
+                href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+            <div class="d-flex align-items-center gap-2">
+                <form class="d-none d-lg-flex m-0" role="search">
+                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search" />
+                    <button class="btn btn-success" type="submit">Buscar</button>
+                </form>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
-                data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+                <button class="navbar-toggler m-0" type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
 
             <div class="offcanvas offcanvas-end text-bg-warning" tabindex="-1" id="offcanvasDarkNavbar">
 
@@ -82,6 +89,11 @@ $result = $conn->query($query);
                 </div>
 
                 <div class="offcanvas-body">
+                    <form class="d-flex d-lg-none mb-4" role="search">
+                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search" />
+                        <button class="btn btn-success" type="submit">Buscar</button>
+                    </form>
+
                     <ul class="navbar-nav flex-grow-1 pe-3">
 
                         <li class="nav-item">
@@ -185,9 +197,11 @@ $result = $conn->query($query);
                                 Impresoras con Tinta Continua
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="../php/epson.php" data-categoria="pintura">EPSON</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/epson.php"
+                                        data-categoria="pintura">EPSON</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="../php/canon.php" data-categoria="pintura">CANON</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/canon.php"
+                                        data-categoria="pintura">CANON</a>
                                 </li>
                             </ul>
                         </li>
@@ -196,13 +210,15 @@ $result = $conn->query($query);
                                 Tintas
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="../php/tinta100.php" data-categoria="pintura">Tinta de
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta100.php"
+                                        data-categoria="pintura">Tinta de
                                         100 ML</a></li>
-                                <li><a class="dropdown-item categoria-link" href="../php/tinta1000.php" data-categoria="pintura">Tinta de
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta1000.php"
+                                        data-categoria="pintura">Tinta de
                                         1000 ML</a></li>
                             </ul>
                         </li>
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center mt-3">
 
                             <?php if (isset($_SESSION['usuario'])): ?>
                             <span class="text-white me-3">Buen dia, <b><?php echo $_SESSION['usuario']; ?></b></span>

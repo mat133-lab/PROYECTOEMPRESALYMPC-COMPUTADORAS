@@ -70,12 +70,19 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
                 </div>
             </div>
 
-            <a class="navbar-brand" href="../php/dashboard.php">L&M PC Computadoras</a>
+            <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
+                href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+            <div class="d-flex align-items-center gap-2">
+                <form class="d-none d-lg-flex m-0" role="search">
+                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search" />
+                    <button class="btn btn-success" type="submit">Buscar</button>
+                </form>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
-                data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+                <button class="navbar-toggler m-0" type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
 
             <div class="offcanvas offcanvas-end text-bg-warning" tabindex="-1" id="offcanvasDarkNavbar">
 
@@ -85,6 +92,10 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
                 </div>
 
                 <div class="offcanvas-body">
+                    <form class="d-flex d-lg-none mb-4" role="search">
+                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search" />
+                        <button class="btn btn-success" type="submit">Buscar</button>
+                    </form>
                     <ul class="navbar-nav flex-grow-1 pe-3">
 
                         <li class="nav-item">
