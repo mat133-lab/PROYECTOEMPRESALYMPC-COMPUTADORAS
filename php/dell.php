@@ -70,9 +70,9 @@ $result = $conn->query($query);
             <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
                 href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
             <div class="d-flex align-items-center gap-2">
-                <form class="d-none d-lg-flex m-0" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search" />
-                    <button class="btn btn-success" type="submit">Buscar</button>
+                <form class="d-none d-lg-flex m-0" role="search" onsubmit="event.preventDefault();">
+                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search" id="search-input"/>
+                    <button class="btn btn-success" type="button">Buscar</button>
                 </form>
 
                 <button class="navbar-toggler m-0" type="button" data-bs-toggle="offcanvas"
@@ -89,9 +89,9 @@ $result = $conn->query($query);
                 </div>
 
                 <div class="offcanvas-body">
-                    <form class="d-flex d-lg-none mb-4" role="search">
-                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search" />
-                        <button class="btn btn-success" type="submit">Buscar</button>
+                    <form class="d-flex d-lg-none mb-4" role="search" onsubmit="event.preventDefault();">
+                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search" id="search-input-mobile"/>
+                        <button class="btn btn-success" type="button">Buscar</button>
                     </form>
                     <ul class="navbar-nav flex-grow-1 pe-3">
 
@@ -242,16 +242,16 @@ $result = $conn->query($query);
             <?php endif; ?>
         </div>
 
-        <div class="row">
+        <div class="row" id="product-container">
             <?php if ($result && $result->rowCount() > 0): ?>
             <?php while($row = $result->fetch(PDO::FETCH_ASSOC)): ?>
-            <div class="col-md-4 mb-4">
+            <div class="col-md-4 mb-4 box">
                 <div class="card h-100 shadow-sm">
                     <img src="../img/<?php echo $row['imagen']; ?>" class="card-img-top" alt="Producto"
                         style="height: 200px; object-fit: cover;">
 
                     <div class="card-body d-flex flex-column">
-                        <h5 class="card-title"><?php echo $row['nombre']; ?></h5>
+                        <h5 class="card-title product-name"><?php echo $row['nombre']; ?></h5>
                         <p class="card-text text-muted"><?php echo $row['serie']; ?></p>
 
                         <div class="mt-auto">
@@ -283,6 +283,11 @@ $result = $conn->query($query);
                 </div>
             </div>
             <?php endwhile; ?>
+            <div class="col-12 mt-4 text-center" id="no-results" style="display: none;">
+                <div class="alert alert-warning shadow-sm">
+                    <p>No se encontraron los productos con ese nombre o no estan disponibles en este momento.</p>
+                </div>
+            </div>
             <?php else: ?>
             <div class="col-12">
                 <div class="alert alert-info">No hay productos disponibles en este momento.</div>

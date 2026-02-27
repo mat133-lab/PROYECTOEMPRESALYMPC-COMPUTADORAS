@@ -46,8 +46,8 @@ document.addEventListener('click', function (e) {
                     current = current + parseFloat(data.producto.precio);
                     totalEl.textContent = '$' + current.toFixed(2);
                 }
-                
-                const cartBody = document.getElementById('lista-libro'); // Corregido
+
+                const cartBody = document.getElementById('lista-libro'); //a mostrar productos por su id en el carrito
                 if (cartBody) {
                     let filaExistente = cartBody.querySelector(`tr[data-id="${data.producto.id}"]`);
 
@@ -97,12 +97,12 @@ document.addEventListener('click', function (e) {
                 const totalEl = document.getElementById('total');
                 if (totalEl) totalEl.textContent = '$0';
 
-                const cartBody = document.getElementById('lista-libro'); // Corregido
+                const cartBody = document.getElementById('lista-libro'); // corregimos por su id vaciamos el carrito
                 if (cartBody) cartBody.innerHTML = '';
 
                 const carritoAcciones = document.getElementById('carrito-acciones');
                 if (carritoAcciones) carritoAcciones.classList.add('disabled');
-                
+
                 sincronizarStorage(); // Borramos
             } else {
                 alert(data.msg);
@@ -125,7 +125,7 @@ document.addEventListener('click', function (e) {
                 const totalEl = document.getElementById('total');
                 if (totalEl) totalEl.textContent = '$0';
 
-                const cartBody = document.getElementById('lista-libro'); // Corregido
+                const cartBody = document.getElementById('lista-libro'); // Corregido cuando queramos vaciar el carrito
                 if (cartBody) cartBody.innerHTML = '';
 
                 const carritoAcciones = document.getElementById('carrito-acciones');
@@ -137,16 +137,14 @@ document.addEventListener('click', function (e) {
     }
 });
 
-// ==========================================
-// 3. LÓGICA DEL BOTÓN "CARGAR MÁS OFERTAS"
-// ==========================================
+// LOGICA DEL BOTÓN CARGAR MÁS OFERTAS
 document.addEventListener('DOMContentLoaded', function () {
     let currentItem = 4; // Productos a mostrar inicialmente
     const btnLoadMore = document.getElementById('load-more');
-    const cajas = document.querySelectorAll('.box'); // <-- AHORA BUSCA LA CLASE .box CORRECTAMENTE
+    const cajas = document.querySelectorAll('.box'); // Ahora Busca la Clase .box
 
     // Ocultar al principio los productos del 5 en adelante
-    for(let i = currentItem; i < cajas.length; i++){
+    for (let i = currentItem; i < cajas.length; i++) {
         cajas[i].style.display = 'none';
     }
 
@@ -172,3 +170,53 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+
+//logica para el buscador
+document.addEventListener('DOMContentLoaded', () => {
+
+    const offcanvasSearchInput = document.getElementById('search-input-mobile');
+    const searchInput = document.getElementById('search-input');
+    const noResultMsg = document.getElementById('no-results');
+    function filtrarProductos(termino) {
+        const term = termino.toLowerCase().trim();
+        const cajasProductos = document.querySelectorAll('.box');
+        let resul = false;
+
+        cajasProductos.forEach(caja => {
+            const elementoP = caja.querySelector('.product-name');
+            if (elementoP) {
+                const nombreP = elementoP.textContent.toLowerCase();
+                if (nombreP.includes(term)) {
+                    caja.style.display = '';
+                    resul = true;
+                } else {
+                    caja.style.display = 'none';
+                }
+            }
+        });
+        if (resul) {
+            if (noResultMsg) noResultMsg.style.display = 'none';
+        } else {
+            if (noResultMsg) noResultMsg.style.display = 'block';
+        }
+    };
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => filtrarProductos(e.target.value));
+    }
+    if (offcanvasSearchInput) {
+        offcanvasSearchInput.addEventListener('input', (e) => filtrarProductos(e.target.value));
+    }
+    const botonB = document.querySelectorAll('form[role="search"] .btn-success');
+    botonB.forEach(boton => {
+        boton.addEventListener('click', () => {
+            if (searchInput) searchInput.blur();
+            if (offcanvasSearchInput) offcanvasSearchInput.blur();
+
+            const destinoScroll = document.querySelector('.products') || document.getElementById('product-container');
+            if (destinoScroll) {
+                destinoScroll.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+});
+
