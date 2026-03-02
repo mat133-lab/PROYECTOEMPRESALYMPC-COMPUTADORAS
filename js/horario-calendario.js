@@ -70,7 +70,7 @@ class UI {
         item.style.whiteSpace = 'nowrap';
         item.style.overflow = 'hidden';
         item.style.textOverflow = 'ellipsis';
-        
+
         list.appendChild(item);
     }
 
@@ -294,29 +294,52 @@ function abrirFormularioCrear(fechaSeleccionada) {
 }
 
 
-// Event Listeners Principales
+function inicializarBusqueda() {
+    const notyf = typeof Notyf !== 'undefined' ? new Notyf({ position: { x: 'right', y: 'top' } }) : null;
+    const searchForms = document.querySelectorAll('form[role="search"]');
+
+    searchForms.forEach(form => {
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const input = this.querySelector('input[type="search"]');
+            const termino = input.value.trim().toLowerCase();
+            input.blur();
+            if (termino === '') {
+                if (notyf) notyf.error('Por favor Ingrese un dato para buscar');
+                return;
+            }
+            const offcanvasMenu = document.getElementById('offcanvasDarkNavbar');
+            if (offcanvasMenu && offcanvasMenu.classList.contains('show')) {
+                const bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvasMenu);
+                if (bsOffcanvas) bsOffcanvas.hide();
+            }
+            setTimeout(() => {
+                buscarCitaGlobal(termino, notyf);
+            }, 300);
+        });
+        const btnBuscar = form.querySelector('.btn-success');
+        if (btnBuscar) {
+            btnBuscar.addEventListener('click', () => {
+                form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            })
+        }
+    });
+}
 document.addEventListener('DOMContentLoaded', () => {
     renderCalendar();
+    inicializarBusqueda();
 
-    // Listener unificado para el calendario
     if (calendarDays) {
         calendarDays.addEventListener('click', (e) => {
-            // Buscar si el clic fue dentro de un día
             const dayElement = e.target.closest('.calendar__day');
             if (!dayElement) return;
 
             const dayNumber = dayElement.dataset.day;
             if (!dayNumber) return;
 
-            // Decisión: ¿Ver citas o Crear cita?
-            // Si el clic fue directamente en un badge o el día tiene citas Y el usuario NO hizo clic en un espacio vacío explícitamente...
-            // Simplificamos: Si tiene citas -> Ver lista. Si no -> Crear.
-
             if (dayElement.classList.contains('calendar__day--content')) {
-                // VER CITAS
                 loadAppointmentsModal(dayElement);
             } else {
-                // CREAR CITA
                 const month = currentDate.getMonth() + 1;
                 const year = currentDate.getFullYear();
                 const selectedDate = `${year}-${String(month).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
@@ -325,11 +348,56 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Botones de navegación
     previousMonthBtn?.addEventListener('click', () => setMonth(-1));
     nextMonthBtn?.addEventListener('click', () => setMonth(1));
 
-    // Botones del modal de LISTA
     modalCloseBtn?.addEventListener('click', () => listModal.close());
     modalCancelBtn?.addEventListener('click', () => listModal.close());
 });
+
+async function buscarCitaGlobal(termino, notyf) {
+    try {
+        const response = await fetch(`../php/buscar_cita.php?q=${encodeURIComponent(termino)}`);
+        if (!response.ok) throw new Error('Error al conectar con el buscador');
+
+        const resultados = await response.json();
+
+        if (resultados && resultados.length > 0) {
+            const citaEncontrada = resultados[0];
+            const parts = citaEncontrada.fecha.split(' ')[0].split('-');
+            const anioCita = parseInt(parts[0]);
+            const mesCita = parseInt(parts[1]) - 1;
+            const diaCita = parseInt(parts[2]);
+
+            currentDate.setFullYear(anioCita);
+            currentDate.setMonth(mesCita);
+            await renderCalendar();
+
+            setTimeout(() => {
+                const diaElemento = document.querySelector(`.calendar__day[data-day="${diaCita}"]`);
+                if (diaElemento) {
+                    diaElemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    document.querySelectorAll('.resaltar-animacion').forEach(el => el.classList.remove('resaltar-animacion'));
+
+                    setTimeout(() => {
+                        diaElemento.classList.add('resaltar-animacion');
+                        if (notyf) notyf.success('Cita encontrada');
+
+                        if (diaElemento.classList.contains('calendar__day--content')) {
+                            loadAppointmentsModal(diaElemento);
+                        }
+
+                        setTimeout(() => {
+                            diaElemento.classList.remove('resaltar-animacion');
+                        }, 2000);
+                    }, 500);
+                }
+            }, 100);
+        } else {
+            if (notyf) notyf.error(`No se encontraron citas o días con: "${termino}".`);
+        }
+    } catch (error) {
+        console.error('Error en la búsqueda: ', error);
+        if (notyf) notyf.error(`Ocurrió un error al buscar la cita`);
+    }
+}
