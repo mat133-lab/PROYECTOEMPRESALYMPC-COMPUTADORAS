@@ -172,7 +172,7 @@
                                 </li>
                                 <li><a class="dropdown-item categoria-link" href="../php/gestion_citas.php"
                                         data-categoria="bano">Citas</a></li>
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="bano">Ubicacion</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/ubicacion.php" data-categoria="bano">Ubicacion</a>
                                 </li>
                             </ul>
                         </li>

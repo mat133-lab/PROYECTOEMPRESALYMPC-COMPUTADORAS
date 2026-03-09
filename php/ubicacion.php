@@ -10,16 +10,15 @@ if (!isset($_SESSION['usuario'])) {
 
 $es_admin = (isset($_SESSION['rol']) && $_SESSION['rol'] === 'admin') ? true : false;
 
-$query = "SELECT * FROM productos WHERE categoria = 'msi'";
-$result = $conn->query($query); 
+/*$query = "SELECT * FROM productos WHERE categoria = 'TINTA1000'";
+$result = $conn->query($query);*/
 ?>
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" href="../img/logo.webp">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - L&M PC Computadoras</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
@@ -72,7 +71,8 @@ $result = $conn->query($query);
                 href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
             <div class="d-flex align-items-center gap-2">
                 <form class="d-none d-lg-flex m-0" role="search" onsubmit="event.preventDefault();">
-                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search" id="search-input"/>
+                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search"
+                        id="search-input" />
                     <button class="btn btn-success" type="button">Buscar</button>
                 </form>
 
@@ -91,7 +91,8 @@ $result = $conn->query($query);
 
                 <div class="offcanvas-body">
                     <form class="d-flex d-lg-none mb-4" role="search" onsubmit="event.preventDefault();">
-                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search" id="search-input-mobile"/>
+                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search"
+                            id="search-input-mobile" />
                         <button class="btn btn-success" type="button">Buscar</button>
                     </form>
                     <ul class="navbar-nav flex-grow-1 pe-3">
@@ -197,9 +198,11 @@ $result = $conn->query($query);
                                 Impresoras con Tinta Continua
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="../php/epson.php" data-categoria="pintura">EPSON</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/epson.php"
+                                        data-categoria="pintura">EPSON</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="../php/canon.php" data-categoria="pintura">CANON</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/canon.php"
+                                        data-categoria="pintura">CANON</a>
                                 </li>
                             </ul>
                         </li>
@@ -208,9 +211,11 @@ $result = $conn->query($query);
                                 Tintas
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="../php/tinta100.php" data-categoria="pintura">Tinta de
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta100.php"
+                                        data-categoria="pintura">Tinta de
                                         100 ML</a></li>
-                                <li><a class="dropdown-item categoria-link" href="../php/tinta1000.php" data-categoria="pintura">Tinta de
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta1000.php"
+                                        data-categoria="pintura">Tinta de
                                         1000 ML</a></li>
                             </ul>
                         </li>
@@ -232,71 +237,17 @@ $result = $conn->query($query);
         </div>
     </nav>
     <div class="container" style="margin-top: 100px;">
-
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Laptops MSI</h2>
-
-            <?php if ($es_admin): ?>
-            <a href="#" class="btn btn-success">
-                <i class="fas fa-plus"></i> Agregar Nuevo Producto
-            </a>
-            <?php endif; ?>
-        </div>
-
-        <div class="row" id="product-container">
-            <?php if ($result && $result->rowCount() > 0): ?>
-            <?php while($row = $result->fetch(PDO::FETCH_ASSOC)): ?>
-            <div class="col-md-4 mb-4 box">
-                <div class="card h-100 shadow-sm">
-                    <img src="../img/<?php echo $row['imagen']; ?>" class="card-img-top" alt="Producto"
-                        style="height: 200px; object-fit: cover;">
-
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title product-name"><?php echo $row['nombre']; ?></h5>
-                        <p class="card-text text-muted"><?php echo $row['serie']; ?></p>
-                        
-                        <div class="mt-auto">
-                            <h4 class="text-primary">$<?php echo number_format($row['precio'], 2); ?></h4>
-                            <p class="text-secondary">Unidades disponibles: <span class="product-units"
-                                    data-id="<?php echo $row['id_producto']; ?>"><?php echo $row['unidades']; ?></span>
-                            </p>
-
-                            <div class="d-grid gap-2">
-                                <button class="btn btn-primary agregar-libro"
-                                    data-id="<?php echo $row['id_producto']; ?>">Agregar al Carrito</button>
-
-                                <?php if ($es_admin): ?>
-                                <div class="d-flex gap-2 mt-2">
-                                    <a href="../php/editar.php?id=<?php echo $row['id_producto']; ?>"
-                                        class="btn btn-warning w-50">
-                                        <i class="fas fa-edit"></i> Editar
-                                    </a>
-                                    <a href="../php/eliminar.php?id=<?php echo $row['id_producto']; ?>"
-                                        class="btn btn-danger w-50"
-                                        onclick="return confirm('¿Estás seguro de borrar esto?');">
-                                        <i class="fas fa-trash"></i> Borrar
-                                    </a>
-                                </div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <?php endwhile; ?>
-            <div class="col-12 mt-4 text-center" id="no-results" style="display: none;">
-                <div class="alert alert-warning shadow-sm">
-                    <p>No se encontraron los productos con ese nombre o no estan disponibles en este momento.</p>
-                </div>
-            </div>
-            <?php else: ?>
-            <div class="col-12">
-                <div class="alert alert-info">No hay productos disponibles en este momento.</div>
-            </div>
-            <?php endif; ?>
-        </div>
+        <h1>Ubicacion</h1>
+        <p>Puede saber mas de nosotros si va a nuestro local fisico que queda por la Joaquin Jativa - La Ecuatoriana -
+            Quito (170140)</p>
+        <iframe class="map"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63836.260019027104!2d-78.63433017832027!3d-0.2927195999999952!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x91d5a2217b7565b7%3A0xcc9936605ff3a7eb!2sL%26M%20Pc.!5e0!3m2!1ses!2sec!4v1773084114946!5m2!1ses!2sec"
+            width="1155" height="550" style="border:0;" allowfullscreen="" loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"></iframe>
     </div>
-
+    <div class="boton-ubicacion">
+        <button type="button" class="btn-gps" onclick="window.open('https://maps.app.goo.gl/V8ghM2XY9M4H8v6Z9','_blank')">Google Maps</button>
+    </div>
     <footer class="footer">
         <div class="footer-content container">
             <div class="link">

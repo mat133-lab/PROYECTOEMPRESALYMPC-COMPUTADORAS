@@ -769,3 +769,39 @@ th {
 .calendar__badge.multiple {
     background-color: #ff9100;
 }
+/*Estilo para el apartado de la ubicacion*/
+.map{
+    filter: grayscale(100%) invert(92%) contrast(93%);
+    padding-bottom: 10px;
+}
+.container h1, p{
+    text-align: center;
+    padding-bottom: 25px;
+}
+.boton-ubicacion{
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    margin-bottom: 50px;
+}
+.btn-gps{
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 28px;
+    background-color: #0f9d58;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(15, 157, 88, 0.2);
+}
+.btn-gps:hover{
+    transform: translateY(-3px);
+    box-shadow: 0 4px 6px rgba(15, 157, 88, 0.2);
+    background-color: #0c8a4d;
+}
