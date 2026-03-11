@@ -12,7 +12,6 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
     header("Location: dashboardadmin.php");
     exit();
 }
-
 ?>
 <!doctype html>
 <html lang="en">
@@ -25,12 +24,12 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body>
     <nav class="navbar navbar-dark bg-warning fixed-top">
         <div class="container-fluid position-relative">
-            <!-- CARRITO / CANASTA -->
             <div class="submenu me-3">
                 <img src="../img/canasta.webp" id="img-libro" alt="Canasta">
 
@@ -271,6 +270,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
                 </div>
             </div>
         </section>
+        
         <main class="products container">
             <h2>Productos Destacados</h2>
             <p>
@@ -282,25 +282,39 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
 
             <div class="box-container" id="lista-1">
                 <?php
-            // Consultamos TODOS los productos de tu base de datos
-            $stmt = $conn->prepare("SELECT * FROM productos ORDER BY id_producto ASC");
+            // CONSULTA ACTUALIZADA: Uniendo tabla productos con contacto
+            $stmt = $conn->prepare("SELECT p.*, con.Nombre AS nombre_contacto, con.Compania 
+                                    FROM productos p 
+                                    LEFT JOIN contacto con ON p.id_soporte = con.id_soporte 
+                                    ORDER BY p.id_producto ASC");
             $stmt->execute();
             $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
             // Por cada producto en tu base de datos, creamos un lugar para guardarlo
             foreach ($productos as $row): 
             ?>
                 <div class="box" data-id="<?= $row['id_producto'] ?>">
-                    <img src="<?= htmlspecialchars($row['imagen']) ?>" alt="<?= htmlspecialchars($row['nombre']) ?>"
-                        style="width: 100%; max-height: 200px; object-fit: contain;">
-                    <div class="product-txt">
-                        <h3 class="product-name"><?= htmlspecialchars($row['nombre']) ?></h3>
-                        <p><span class="product-units"
+                    <img src="../img/<?= htmlspecialchars($row['imagen']) ?>" alt="<?= htmlspecialchars($row['nombre']) ?>"
+                        style="width: 100%; max-height: 200px; object-fit: contain; padding-top: 10px;">
+                        
+                    <div class="product-txt d-flex flex-column h-100 w-100">
+                        <h3 class="product-name" style="font-size: 18px; font-weight: 600;"><?= htmlspecialchars($row['nombre']) ?></h3>
+                        
+                        <p style="margin-bottom: 5px;"><span class="product-units"
                                 data-id="<?= $row['id_producto'] ?>"><?= $row['unidades'] ?></span>
                             Unidades</p>
-                        <p><?= htmlspecialchars($row['serie']) ?></p>
-                        <p class="precio">$<?= number_format($row['precio'], 2) ?></p>
-                        <a href="#" class="agregar-libro btn-3" data-id="<?= $row['id_producto'] ?>">Agregar al
-                            carrito</a>
+                        <p class="text-muted" style="font-size: 14px; margin-bottom: 5px;"><?= htmlspecialchars($row['serie']) ?></p>
+
+                        <?php if (!empty($row['nombre_contacto'])): ?>
+                            <p style="font-size: 13px; color: #198754; margin-bottom: 10px;">
+                                <i class="fas fa-headset"></i> Soporte: <b><?= htmlspecialchars($row['nombre_contacto']) ?></b> (<?= htmlspecialchars($row['Compania']) ?>)
+                            </p>
+                        <?php endif; ?>
+
+                        <div class="mt-auto w-100">
+                            <p class="precio" style="font-size: 20px; font-weight: 700; color: #ff9100; margin: 10px 0;">$<?= number_format($row['precio'], 2) ?></p>
+                            <a href="#" class="agregar-libro btn-3 w-100 text-center" data-id="<?= $row['id_producto'] ?>" style="display:block;">Agregar al carrito</a>
+                        </div>
                     </div>
                 </div>
                 <?php endforeach; ?>

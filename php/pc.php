@@ -10,9 +10,8 @@ if (!isset($_SESSION['usuario'])) {
 $es_admin = (isset($_SESSION['rol']) && $_SESSION['rol'] === 'admin') ? true : false;
 
 // Usar INNER JOIN con la tabla categorias para obtener productos por marca
-$query = "SELECT p.*, c.nombre_categoria 
+$query = "SELECT p.*, con.Nombre AS nombre_contacto, con.Compania 
           FROM productos p 
-          LEFT JOIN categorias c ON p.id_categoria = c.id_categoria 
           LEFT JOIN contacto con ON p.id_soporte = con.id_soporte
           WHERE p.categoria = 'PC'";
 $result = $conn->query($query); 
@@ -246,11 +245,16 @@ $result = $conn->query($query);
                         alt="Producto" style="width: 100%; height: 180px; object-fit: contain; padding-top: 10px;">
 
                     <div class="product-txt d-flex flex-column h-100 w-100">
-                        <h5 class="card-title product-name" style="font-size: 18px; font-weight: 600;">
-                            <?php echo htmlspecialchars($row['nombre']); ?></h5>
-                        <p class="card-text text-muted" style="font-size: 14px;">
-                            <?php echo htmlspecialchars($row['serie']); ?></p>
+                        <h3 class="product-name" style="font-size: 18px; font-weight: 600;">
+                            <?php echo htmlspecialchars($row['nombre']); ?></h3>
+                        <p class="text-muted" style="font-size: 14px; margin-bottom: 5px;"><?php echo htmlspecialchars($row['serie']); ?></p>
 
+                        <?php if (!empty($row['nombre_contacto'])): ?>
+                            <p style="font-size: 13px; color: #198754; margin-bottom: 10px;">
+                                <i class="fas fa-headset"></i> Soporte: <b><?php echo htmlspecialchars($row['nombre_contacto']); ?></b> (<?php echo htmlspecialchars($row['Compania']); ?>)
+                            </p>
+                        <?php endif; ?>
+                        
                         <div class="mt-auto w-100">
                             <h4 class="text-primary"
                                 style="font-size: 20px; font-weight: 700; color: #ff9100; margin: 10px 0;">

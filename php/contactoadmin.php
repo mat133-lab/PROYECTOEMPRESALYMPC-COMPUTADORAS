@@ -7,21 +7,24 @@ if (!isset($_SESSION['usuario'])) {
     exit();
 }
 
-// Si el usuario NO es admin, lo enviamos a contacto.php
+// Si el usuario NO es admin, lo enviamos a contacto.php (vista normal)
 if (!isset($_SESSION['rol']) || strtolower($_SESSION['rol']) !== 'admin') {
     header("Location: ../php/contacto.php");
     exit();
 }
 
-if(isset($_POST['enviar'])){
-    $nombre = $_POST['name'];
-    $correo = $_POST['email'];
-    $compania = $_POST['company'];
-    $mensaje = $_POST['message'];
+if (isset($_POST['enviar'])) {
+    $nombre = trim($_POST['name']);
+    $correo = trim($_POST['email']);
+    $compania = trim($_POST['company']);
+    $mensaje = trim($_POST['message']);
     
-    $stmt = $conn -> prepare("INSERT INTO contacto (Nombre, Correo, Compania, Mensaje) VALUES (?, ?, ?, ?)");
-    $stmt -> execute ([$nombre, $correo, $compania, $mensaje]);
-    header("Location: ../php/contacto.php"); // Recargar para limpiar el POST
+    if(!empty($nombre) && !empty($correo) && !empty($mensaje)){
+        $stmt = $conn->prepare("INSERT INTO mensajes_clientes (nombre, correo, compania, mensaje) VALUES (?, ?, ?, ?)");
+        $stmt->execute([$nombre, $correo, $compania, $mensaje]);
+        header("Location: ../php/contactoadmin.php?status=success");
+        exit();
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -35,12 +38,12 @@ if(isset($_POST['enviar'])){
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="../css/stylecitas.css">
     <link rel="stylesheet" href="../css/footer.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body>
     <nav class="navbar navbar-dark bg-warning fixed-top">
         <div class="container-fluid">
-            <!-- CARRITO / CANASTA -->
             <div class="submenu me-3">
                 <img src="../img/canasta.webp" id="img-libro" alt="Canasta">
 
@@ -231,20 +234,28 @@ if(isset($_POST['enviar'])){
             </div>
         </div>
     </nav>
-    <div class="main-content">
+    <div class="main-content" style="margin-top: 100px;">
         <h1>Contacto y Soporte Administrador</h1>
         <div class="text-center">
-            <p>Hola <strong><?php echo $_SESSION['usuario']; ?></strong>, en esta sección puedes ver todas las citas registradas por los usuarios.</p>
+            <p>Hola <strong><?php echo htmlspecialchars($_SESSION['usuario']); ?></strong>, en esta sección puedes ver todos los mensajes enviados por los clientes.</p>
         </div>
+
         <div class="form-section">
+            <?php if(isset($_GET['status']) && $_GET['status'] == 'success'): ?>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle"></i> Mensaje de prueba enviado exitosamente.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <?php endif; ?>
+
             <form method="POST">
                 <div class="form-group">
                     <p>Nombre</p>
-                    <input type="text" name="name" id="Nombre">
+                    <input type="text" name="name" id="Nombre" required>
                 </div>
                 <div class="form-group">
                     <p>Correo Electronico</p>
-                    <input type="email" name="email" id="Correo">
+                    <input type="email" name="email" id="Correo" required>
                 </div>
                 <div class="form-group">
                     <p>Compania u Organizacion</p>
@@ -252,59 +263,71 @@ if(isset($_POST['enviar'])){
                 </div>
                 <div class="form-group">
                     <p>Mensaje</p>
-                    <textarea name="message" id="Mensaje" rows="5"></textarea>
+                    <textarea name="message" id="Mensaje" rows="5" required></textarea>
                 </div>
                 <div class="form-group full">
                     <button type="submit" name="enviar" class="btn btn-primary">
-                        Enviar
+                        Enviar Prueba
                     </button>
                 </div>
             </form>
         </div>
     </div>
+
     <?php
     // Solo mostrar tabla si el usuario es admin, técnico, encargado o pasante
     $rolesConAcceso = ['admin', 'tecnico', 'encargado', 'pasante'];
-    $puedeVerTabla = isset($_SESSION['rol']) && in_array($_SESSION['rol'], $rolesConAcceso);
+    $puedeVerTabla = isset($_SESSION['rol']) && in_array(strtolower($_SESSION['rol']), $rolesConAcceso);
     
     if ($puedeVerTabla) {
     ?>
-    <h1>Contactos Enviados</h1>
-    <div class="card compact-card">
-        <div class="table-wrapper">
-            <table class="compact-table">
-                <thead>
-                    <tr>
-                        <th>ID Soporte</th>
-                        <th>Nombre</th>
-                        <th>Correo</th>
-                        <th>Compania</th>
-                        <th>Mensaje</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                        $query = $conn->query("SELECT * FROM contacto ORDER BY id_soporte DESC");
-                        foreach($query as $row){
-                            echo "<tr>
-                                <td>#{$row['id_soporte']}</td>
-                                <td>{$row['Nombre']}</td>
-                                <td>{$row['Correo']}</td>
-                                <td>{$row['Compania']}</td>
-                                <td>{$row['Mensaje']}</td>
-                            </tr>";
-                        }
-                    ?>
-                </tbody>
-            </table>
-        </div>
-        <div style="margin-top:0.75rem; text-align:right;">
-            <button onclick="window.print()" class="btn btn-primary">Exportar PDF</button>
+    <div class="container mt-5 mb-5">
+        <h1>Buzón de Mensajes de Clientes</h1>
+        <div class="card compact-card shadow-sm p-3">
+            <div class="table-wrapper" style="overflow-x: auto;">
+                <table class="table table-striped table-hover compact-table">
+                    <thead class="table-dark">
+                        <tr>
+                            <th># ID</th>
+                            <th>Fecha</th>
+                            <th>Nombre</th>
+                            <th>Correo</th>
+                            <th>Compañía</th>
+                            <th>Mensaje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                            // CORRECCIÓN 2: Seleccionamos de la nueva tabla de mensajes
+                            $query = $conn->query("SELECT * FROM mensajes_clientes ORDER BY id_mensaje DESC");
+                            if ($query->rowCount() > 0) {
+                                foreach($query as $row){
+                                    // Agregamos seguridad con htmlspecialchars para evitar ataques XSS
+                                    echo "<tr>
+                                        <td>#{$row['id_mensaje']}</td>
+                                        <td>{$row['fecha']}</td>
+                                        <td>" . htmlspecialchars($row['nombre']) . "</td>
+                                        <td>" . htmlspecialchars($row['correo']) . "</td>
+                                        <td>" . htmlspecialchars($row['compania']) . "</td>
+                                        <td>" . htmlspecialchars($row['mensaje']) . "</td>
+                                    </tr>";
+                                }
+                            } else {
+                                echo "<tr><td colspan='6' class='text-center'>No hay mensajes en la bandeja de entrada.</td></tr>";
+                            }
+                        ?>
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-top:1rem; text-align:right;">
+                <button onclick="window.print()" class="btn btn-danger"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
+            </div>
         </div>
     </div>
     <?php
     }
     ?>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
     </script>

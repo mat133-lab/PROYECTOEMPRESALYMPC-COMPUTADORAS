@@ -10,8 +10,11 @@ if (!isset($_SESSION['usuario'])) {
 
 $es_admin = (isset($_SESSION['rol']) && $_SESSION['rol'] === 'admin') ? true : false;
 
-$query = "SELECT * FROM productos WHERE categoria = 'DUPLICADORADVD'";
-$result = $conn->query($query); 
+$query = "SELECT p.*, con.Nombre AS nombre_contacto, con.Compania 
+          FROM productos p 
+          LEFT JOIN contacto con ON p.id_soporte = con.id_soporte
+          WHERE p.categoria = 'DUPLICADORADVD'";
+$result = $conn->query($query);
 ?>
 <!doctype html>
 <html lang="en">
@@ -23,7 +26,8 @@ $result = $conn->query($query);
     <title>Dashboard - L&M PC Computadoras</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/style.css">  
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body>
@@ -251,18 +255,24 @@ $result = $conn->query($query);
                 
                 <div class="box h-100 w-100">
                     
-                    <img src="../img/<?php echo $row['imagen']; ?>" alt="Producto" style="width: 100%; height: 180px; object-fit: contain; padding-top: 10px;">
+                    <img src="../img/<?php echo htmlspecialchars($row['imagen']); ?>" alt="Producto" style="width: 100%; height: 180px; object-fit: contain; padding-top: 10px;">
 
                     <div class="product-txt d-flex flex-column h-100 w-100">
-                        <h5 class="product-name" style="font-size: 18px; font-weight: 600;"><?php echo $row['nombre']; ?></h5>
-                        <p class="text-muted" style="font-size: 14px;"><?php echo $row['serie']; ?></p>
+                        <h5 class="product-name" style="font-size: 18px; font-weight: 600;"><?php echo htmlspecialchars($row['nombre']); ?></h5>
+                        <p class="text-muted" style="font-size: 14px; margin-bottom: 5px;"><?php echo htmlspecialchars($row['serie']); ?></p>
+
+                        <?php if (!empty($row['nombre_contacto'])): ?>
+                            <p style="font-size: 13px; color: #198754; margin-bottom: 10px;">
+                                <i class="fas fa-headset"></i> Soporte: <b><?php echo htmlspecialchars($row['nombre_contacto']); ?></b> (<?php echo htmlspecialchars($row['Compania']); ?>)
+                            </p>
+                        <?php endif; ?>
 
                         <div class="mt-auto w-100">
                             <h4 class="precio" style="font-size: 20px; font-weight: 700; color: #ff9100; margin: 10px 0;">
                                 $<?php echo number_format($row['precio'], 2); ?>
                             </h4>
                             <p class="text-secondary" style="font-size: 13px;">Unidades disponibles: 
-                                <span class="product-units" data-id="<?php echo $row['id_producto']; ?>"><?php echo $row['unidades']; ?></span>
+                                <span class="product-units" data-id="<?php echo $row['id_producto']; ?>"><?php echo htmlspecialchars($row['unidades']); ?></span>
                             </p>
 
                             <button class="btn-3 agregar-libro w-100 border-0 mt-2" style="cursor: pointer;" data-id="<?php echo $row['id_producto']; ?>">

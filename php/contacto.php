@@ -13,19 +13,19 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'admin') {
     exit();
 }
 if (isset($_POST['enviar'])) {
-    $compania  = $_POST['company'];
-    echo "Contacto registrado de la $compania";
-}  
-
-if(isset($_POST['enviar'])){
-    $nombre = $_POST['name'];
-    $correo = $_POST['email'];
-    $compania = $_POST['company'];
-    $mensaje = $_POST['message'];
+    $nombre = trim($_POST['name']);
+    $correo = trim($_POST['email']);
+    $compania = trim($_POST['company']);
+    $mensaje = trim($_POST['message']);
+    $id_usuario = isset($_SESSION['id_usuario']) ? $_SESSION['id_usuario'] : null;
     
-    $stmt = $conn -> prepare("INSERT INTO contacto (Nombre, Correo, Compania, Mensaje) VALUES (?, ?, ?, ?)");
-    $stmt -> execute ([$nombre, $correo, $compania, $mensaje]);
-    header("Location: ../php/contacto.php"); // Recargar para limpiar el POST
+    if(!empty($nombre) && !empty($correo) && !empty($mensaje)){
+        $stmt = $conn->prepare("INSERT INTO mensajes_clientes (id_usuario, nombre, correo, compania, mensaje) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$id_usuario, $nombre, $correo, $compania, $mensaje]);
+        
+        header("Location: ../php/contacto.php?status=success");
+        exit();
+    }
 }
 ?>
 <!DOCTYPE html>
