@@ -293,7 +293,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
                     <img src="<?= htmlspecialchars($row['imagen']) ?>" alt="<?= htmlspecialchars($row['nombre']) ?>"
                         style="width: 100%; max-height: 200px; object-fit: contain;">
                     <div class="product-txt">
-                        <h3><?= htmlspecialchars($row['nombre']) ?></h3>
+                        <h3 class="product-name"><?= htmlspecialchars($row['nombre']) ?></h3>
                         <p><span class="product-units"
                                 data-id="<?= $row['id_producto'] ?>"><?= $row['unidades'] ?></span>
                             Unidades</p>

@@ -7,10 +7,14 @@ if (!isset($_SESSION['usuario'])) {
     exit();
 }
 
-
 $es_admin = (isset($_SESSION['rol']) && $_SESSION['rol'] === 'admin') ? true : false;
 
-$query = "SELECT * FROM productos WHERE categoria = 'PC'";
+// Usar INNER JOIN con la tabla categorias para obtener productos por marca
+$query = "SELECT p.*, c.nombre_categoria 
+          FROM productos p 
+          LEFT JOIN categorias c ON p.id_categoria = c.id_categoria 
+          LEFT JOIN contacto con ON p.id_soporte = con.id_soporte
+          WHERE p.categoria = 'PC'";
 $result = $conn->query($query); 
 ?>
 <!doctype html>
@@ -24,12 +28,12 @@ $result = $conn->query($query);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body>
     <nav class="navbar navbar-dark bg-warning fixed-top">
         <div class="container-fluid">
-            <!-- CARRITO / CANASTA -->
             <div class="submenu me-3">
                 <img src="../img/canasta.webp" id="img-libro" alt="Canasta">
 
@@ -70,9 +74,11 @@ $result = $conn->query($query);
 
             <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
                 href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+
             <div class="d-flex align-items-center gap-2">
                 <form class="d-none d-lg-flex m-0" role="search" onsubmit="event.preventDefault();">
-                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search" id="search-input"/>
+                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search"
+                        id="search-input" />
                     <button class="btn btn-success" type="button">Buscar</button>
                 </form>
 
@@ -83,7 +89,6 @@ $result = $conn->query($query);
             </div>
 
             <div class="offcanvas offcanvas-end text-bg-warning" tabindex="-1" id="offcanvasDarkNavbar">
-
                 <div class="offcanvas-header">
                     <h5 class="offcanvas-title">Menu</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
@@ -91,17 +96,19 @@ $result = $conn->query($query);
 
                 <div class="offcanvas-body">
                     <form class="d-flex d-lg-none mb-4" role="search" onsubmit="event.preventDefault();">
-                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search" id="search-input-mobile"/>
+                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search"
+                            id="search-input-mobile" />
                         <button class="btn btn-success" type="button">Buscar</button>
                     </form>
-                    <ul class="navbar-nav flex-grow-1 pe-3">
 
+                    <ul class="navbar-nav flex-grow-1 pe-3">
                         <li class="nav-item">
                             <a class="nav-link categoria-link active" href="../php/dashboard.php"
                                 data-categoria="todos">
                                 Home
                             </a>
                         </li>
+
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                                 Pc de Escritorio
@@ -109,15 +116,11 @@ $result = $conn->query($query);
                             <ul class="dropdown-menu dropdown-menu-dark">
                                 <li>
                                     <a class="dropdown-item categoria-link" href="../php/pc.php"
-                                        data-categoria="estructura">
-                                        Pc Dell
-                                    </a>
+                                        data-categoria="estructura">Pc Dell</a>
                                 </li>
                                 <li>
                                     <a class="dropdown-item categoria-link" href="../php/hpdell.php"
-                                        data-categoria="techos">
-                                        Hp Dell
-                                    </a>
+                                        data-categoria="techos">Hp Dell</a>
                                 </li>
                             </ul>
                         </li>
@@ -128,21 +131,15 @@ $result = $conn->query($query);
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
                                 <li><a class="dropdown-item categoria-link" href="../php/asus.php"
-                                        data-categoria="madera">ASUS</a>
-                                </li>
+                                        data-categoria="madera">ASUS</a></li>
                                 <li><a class="dropdown-item categoria-link" href="../php/lenovo.php"
-                                        data-categoria="pisos">LENOVO</a>
-                                </li>
+                                        data-categoria="pisos">LENOVO</a></li>
                                 <li><a class="dropdown-item categoria-link" href="../php/omnibook.php"
-                                        data-categoria="armarios">HP
-                                        OMNIBOOK </a></li>
+                                        data-categoria="armarios">HP OMNIBOOK </a></li>
                                 <li><a class="dropdown-item categoria-link" href="../php/msi.php"
-                                        data-categoria="armarios">MSI</a>
-                                </li>
+                                        data-categoria="armarios">MSI</a></li>
                                 <li><a class="dropdown-item categoria-link" href="../php/dell.php"
-                                        data-categoria="armarios">DELL</a>
-                                </li>
-
+                                        data-categoria="armarios">DELL</a></li>
                             </ul>
                         </li>
 
@@ -165,12 +162,12 @@ $result = $conn->query($query);
                                 Tablets
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="herramientas"></a>
-                                </li>
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="maquinaria"></a>
-                                </li>
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="seguridad"></a>
-                                </li>
+                                <li><a class="dropdown-item categoria-link" href="#"
+                                        data-categoria="herramientas">Opción 1</a></li>
+                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="maquinaria">Opción
+                                        2</a></li>
+                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="seguridad">Opción
+                                        3</a></li>
                             </ul>
                         </li>
 
@@ -180,15 +177,13 @@ $result = $conn->query($query);
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
                                 <li><a class="dropdown-item categoria-link" href="../php/horario.php"
-                                        data-categoria="bano">Horarios</a>
-                                </li>
+                                        data-categoria="bano">Horarios</a></li>
                                 <li><a class="dropdown-item categoria-link" href="../php/contacto.php"
-                                        data-categoria="bano">Contacto</a>
-                                </li>
+                                        data-categoria="bano">Contacto</a></li>
                                 <li><a class="dropdown-item categoria-link" href="../php/gestion_citas.php"
                                         data-categoria="bano">Citas</a></li>
-                                <li><a class="dropdown-item categoria-link" href="../php/ubicacion.php" data-categoria="bano">Ubicacion</a>
-                                </li>
+                                <li><a class="dropdown-item categoria-link" href="../php/ubicacion.php"
+                                        data-categoria="bano">Ubicacion</a></li>
                             </ul>
                         </li>
 
@@ -197,25 +192,26 @@ $result = $conn->query($query);
                                 Impresoras con Tinta Continua
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="../php/epson.php" data-categoria="pintura">EPSON</a>
-                                </li>
-                                <li><a class="dropdown-item categoria-link" href="../php/canon.php" data-categoria="pintura">CANON</a>
-                                </li>
+                                <li><a class="dropdown-item categoria-link" href="../php/epson.php"
+                                        data-categoria="pintura">EPSON</a></li>
+                                <li><a class="dropdown-item categoria-link" href="../php/canon.php"
+                                        data-categoria="pintura">CANON</a></li>
                             </ul>
                         </li>
+
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                                 Tintas
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="../php/tinta100.php" data-categoria="pintura">Tinta de
-                                        100 ML</a></li>
-                                <li><a class="dropdown-item categoria-link" href="../php/tinta1000.php" data-categoria="pintura">Tinta de
-                                        1000 ML</a></li>
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta100.php"
+                                        data-categoria="pintura">Tinta de 100 ML</a></li>
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta1000.php"
+                                        data-categoria="pintura">Tinta de 1000 ML</a></li>
                             </ul>
                         </li>
-                        <div class="d-flex align-items-center">
 
+                        <div class="d-flex align-items-center mt-3 mt-lg-0">
                             <?php if (isset($_SESSION['usuario'])): ?>
                             <span class="text-white me-3">Buen dia, <b><?php echo $_SESSION['usuario']; ?></b></span>
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
@@ -223,16 +219,14 @@ $result = $conn->query($query);
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
                             <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
-
                         </div>
-
                     </ul>
                 </div>
             </div>
         </div>
     </nav>
-    <div class="container" style="margin-top: 100px;">
 
+    <div class="container" style="margin-top: 100px;">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Pc de Escritorio</h2>
 
@@ -246,80 +240,91 @@ $result = $conn->query($query);
         <div class="row" id="product-container">
             <?php if ($result && $result->rowCount() > 0): ?>
             <?php while($row = $result->fetch(PDO::FETCH_ASSOC)): ?>
-            <div class="col-md-4 mb-4 box">
-                <div class="card h-100 shadow-sm">
-                    <img src="../img/<?php echo $row['imagen']; ?>" class="card-img-top" alt="Producto"
-                        style="height: 200px; object-fit: cover;">
+            <div class="col-md-4 mb-4">
+                <div class="box h-100 w-100">
+                    <img src="../img/<?php echo htmlspecialchars($row['imagen']); ?>" class="card-img-top"
+                        alt="Producto" style="width: 100%; height: 180px; object-fit: contain; padding-top: 10px;">
 
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title product-name"><?php echo $row['nombre']; ?></h5>
-                        <p class="card-text text-muted"><?php echo $row['serie']; ?></p>
-                        
-                        <div class="mt-auto">
-                            <h4 class="text-primary">$<?php echo number_format($row['precio'], 2); ?></h4>
-                            <p class="text-secondary">Unidades disponibles: <span class="product-units"
-                                    data-id="<?php echo $row['id_producto']; ?>"><?php echo $row['unidades']; ?></span>
+                    <div class="product-txt d-flex flex-column h-100 w-100">
+                        <h5 class="card-title product-name" style="font-size: 18px; font-weight: 600;">
+                            <?php echo htmlspecialchars($row['nombre']); ?></h5>
+                        <p class="card-text text-muted" style="font-size: 14px;">
+                            <?php echo htmlspecialchars($row['serie']); ?></p>
+
+                        <div class="mt-auto w-100">
+                            <h4 class="text-primary"
+                                style="font-size: 20px; font-weight: 700; color: #ff9100; margin: 10px 0;">
+                                $<?php echo number_format($row['precio'], 2); ?></h4>
+                            <p class="text-secondary" style="font-size: 13px;">Unidades disponibles: <span
+                                    class="product-units"
+                                    data-id="<?php echo $row['id_producto']; ?>"><?php echo htmlspecialchars($row['unidades']); ?></span>
                             </p>
 
-                            <div class="d-grid gap-2">
-                                <button class="btn btn-primary agregar-libro"
-                                    data-id="<?php echo $row['id_producto']; ?>">Agregar al Carrito</button>
+                            <button class="btn-3 agregar-libro w-100 border-0 mt-2" style="cursor: pointer;"
+                                data-id="<?php echo $row['id_producto']; ?>">
+                                Agregar al Carrito
+                            </button>
 
-                                <?php if ($es_admin): ?>
-                                <div class="d-flex gap-2 mt-2">
-                                    <a href="../principal/editar.php?id=<?php echo $row['id_producto']; ?>"
-                                        class="btn btn-warning w-50">
-                                        <i class="fas fa-edit"></i> Editar
-                                    </a>
-                                    <a href="../principal/eliminar.php?id=<?php echo $row['id_producto']; ?>"
-                                        class="btn btn-danger w-50"
-                                        onclick="return confirm('¿Estás seguro de borrar esto?');">
-                                        <i class="fas fa-trash"></i> Borrar
-                                    </a>
-                                </div>
-                                <?php endif; ?>
+                            <?php if ($es_admin): ?>
+                            <div class="d-flex gap-2 mt-3">
+                                <a href="../php/editar.php?id=<?php echo $row['id_producto']; ?>"
+                                    class="btn btn-warning w-50 btn-sm text-dark fw-bold">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                                <a href="../php/eliminar.php?id=<?php echo $row['id_producto']; ?>"
+                                    class="btn btn-danger w-50 btn-sm fw-bold"
+                                    onclick="return confirm('¿Estás seguro de borrar esto?');">
+                                    <i class="fas fa-trash"></i> Borrar
+                                </a>
                             </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
             </div>
             <?php endwhile; ?>
+
             <div class="col-12 mt-4 text-center" id="no-results" style="display: none;">
                 <div class="alert alert-warning shadow-sm">
-                    <p>No se encontraron los productos con ese nombre o no estan disponibles en este momento.</p>
+                    <p>No se encontraron productos con ese nombre.</p>
                 </div>
             </div>
+
             <?php else: ?>
             <div class="col-12">
-                <div class="alert alert-info">No hay productos disponibles en este momento.</div>
+                <div class="alert alert-info text-center">No hay productos disponibles en la categoría HP Omnibook en
+                    este momento.</div>
             </div>
             <?php endif; ?>
         </div>
     </div>
 
-    <footer class="footer">
-        <div class="footer-content container">
+    <footer class="footer mt-5">
+        <div class="footer-content container d-flex justify-content-between flex-wrap">
             <div class="link">
                 <h3>Pais - Ciudad</h3>
                 <ul>
-                    <li><a href="https://maps.app.goo.gl/BwLzsdgsGr3jjrmu5"> Ecuador - Quito</a></li>
+                    <li><a href="https://maps.app.goo.gl/BwLzsdgsGr3jjrmu5" class="text-decoration-none text-dark">
+                            Ecuador - Quito</a></li>
                 </ul>
             </div>
             <div class="link">
                 <h3>Ubicaciones</h3>
                 <ul>
-                    <li><a href="https://maps.app.goo.gl/Hr7jt9W4ejWCdhmN7"> La Ecuatoriana - Las Orquídeas / Oe9 Martha
-                            Bucaram / S37-49 / S37a</a></li>
+                    <li><a href="https://maps.app.goo.gl/Hr7jt9W4ejWCdhmN7" class="text-decoration-none text-dark"> La
+                            Ecuatoriana - Las Orquídeas / Oe9 Martha Bucaram / S37-49 / S37a</a></li>
                 </ul>
             </div>
             <div class="link">
                 <h3>Soporte</h3>
                 <ul>
-                    <li><a href="https://www.facebook.com/LyM010/about?locale=es_LA"> +593 98 309 3667</a></li>
+                    <li><a href="https://www.facebook.com/LyM010/about?locale=es_LA"
+                            class="text-decoration-none text-dark"> +593 98 309 3667</a></li>
                 </ul>
             </div>
         </div>
     </footer>
+
     <script src="../js/dashboard.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">

@@ -86,24 +86,49 @@ document.addEventListener('click', function (e) {
     // --- PROCESAR COMPRA ---
     if (e.target.id === 'carrito-acciones-comprar') {
         e.preventDefault();
-        fetch('../php/cart_action.php', {
+        
+        // Recopilar los datos del carrito desde el HTML
+        const cartBody = document.getElementById('lista-libro');
+        const rows = cartBody.querySelectorAll('tr');
+        const carrito = [];
+        
+        rows.forEach(row => {
+            const id = row.dataset.id;
+            const qtyCell = row.querySelector('.cart-qty');
+            if (id && qtyCell) {
+                carrito.push({
+                    id: parseInt(id),
+                    cantidad: parseInt(qtyCell.textContent)
+                });
+            }
+        });
+
+        if (carrito.length === 0) {
+            alert('El carrito está vacío');
+            return;
+        }
+
+        // Enviar al nuevo endpoint de procesamiento de compra
+        fetch('../php/procesar_compra.php', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({ action: 'purchase' })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ carrito: carrito })
         }).then(r => r.json()).then(data => {
             if (data.ok) {
-                alert(data.msg);
+                alert(data.msg + '\nPedido #: ' + data.id_pedido + '\nTotal: $' + parseFloat(data.total).toFixed(2));
 
                 const totalEl = document.getElementById('total');
                 if (totalEl) totalEl.textContent = '$0';
 
-                const cartBody = document.getElementById('lista-libro'); // corregimos por su id vaciamos el carrito
                 if (cartBody) cartBody.innerHTML = '';
 
                 const carritoAcciones = document.getElementById('carrito-acciones');
                 if (carritoAcciones) carritoAcciones.classList.add('disabled');
 
-                sincronizarStorage(); // Borramos
+                sincronizarStorage();
+                
+                // Recargar la página para actualizar los stocks
+                setTimeout(() => location.reload(), 1500);
             } else {
                 alert(data.msg);
             }
@@ -138,52 +163,62 @@ document.addEventListener('click', function (e) {
 });
 
 // LOGICA DEL BOTÓN CARGAR MÁS OFERTAS
-document.addEventListener('DOMContentLoaded', function () {
-    let currentItem = 4; // Productos a mostrar inicialmente
+document.addEventListener('DOMContentLoaded', () => {
+    
+    let currentItem = 4; // Cuántos productos se muestran al inicio
+    const cajas = document.querySelectorAll('.box');
     const btnLoadMore = document.getElementById('load-more');
-    const cajas = document.querySelectorAll('.box'); // Ahora Busca la Clase .box
+    const noResultMsg = document.getElementById('no-results');
 
-    // Ocultar al principio los productos del 5 en adelante
-    for (let i = currentItem; i < cajas.length; i++) {
-        cajas[i].style.display = 'none';
+    // Función que controla cuántos productos se ven (Para el botón Cargar Más)
+    function actualizarVistaCargarMas() {
+        for (let i = 0; i < cajas.length; i++) {
+            if (i < currentItem) {
+                cajas[i].style.display = '';
+            } else {
+                cajas[i].style.display = 'none';
+            }
+        }
+        // Mostrar u ocultar el botón si ya no hay más productos
+        if (btnLoadMore) {
+            btnLoadMore.style.display = (currentItem >= cajas.length) ? 'none' : 'inline-block';
+        }
     }
 
-    // Si hay 4 productos o menos, no necesitamos el botón
-    if (cajas.length <= currentItem && btnLoadMore) {
-        btnLoadMore.style.display = 'none';
-    }
+    // 1. Ejecutar al cargar la página
+    actualizarVistaCargarMas();
 
+    // 2. Darle vida al botón "Cargar más"
     if (btnLoadMore) {
         btnLoadMore.addEventListener('click', function () {
-            // Mostrar los siguientes 4 productos
-            for (let i = currentItem; i < currentItem + 4; i++) {
-                if (cajas[i]) {
-                    cajas[i].style.display = ''; // Se borra el display:none para que se vea
-                }
-            }
             currentItem += 4;
-
-            // Ocultar el botón si ya mostramos todos
-            if (currentItem >= cajas.length) {
-                btnLoadMore.style.display = 'none';
-            }
+            actualizarVistaCargarMas();
         });
     }
-});
 
-//logica para el buscador
-document.addEventListener('DOMContentLoaded', () => {
-
-    const offcanvasSearchInput = document.getElementById('search-input-mobile');
+    // 3. Darle vida al Buscador
     const searchInput = document.getElementById('search-input');
-    const noResultMsg = document.getElementById('no-results');
+    const offcanvasSearchInput = document.getElementById('search-input-mobile');
+
     function filtrarProductos(termino) {
         const term = termino.toLowerCase().trim();
-        const cajasProductos = document.querySelectorAll('.box');
         let resul = false;
 
-        cajasProductos.forEach(caja => {
-            const elementoP = caja.querySelector('.product-name');
+        // Si el buscador se queda vacío, regresamos al estado de "Cargar más"
+        if (term === '') {
+            actualizarVistaCargarMas();
+            if (noResultMsg) noResultMsg.style.display = 'none';
+            return;
+        }
+
+        // Si el usuario escribe algo, ocultamos el botón de cargar más temporalmente
+        if (btnLoadMore) btnLoadMore.style.display = 'none';
+
+        // Filtramos buscando coincidencias
+        cajas.forEach(caja => {
+            // Asegúrate de que el título de tus productos en el HTML tenga la clase "product-name"
+            const elementoP = caja.querySelector('.product-name'); 
+            
             if (elementoP) {
                 const nombreP = elementoP.textContent.toLowerCase();
                 if (nombreP.includes(term)) {
@@ -194,18 +229,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
+
+        // Mostrar el mensaje de "No se encontró" si no hay resultados
         if (resul) {
             if (noResultMsg) noResultMsg.style.display = 'none';
         } else {
             if (noResultMsg) noResultMsg.style.display = 'block';
         }
-    };
+    }
+
+    // Activar el filtro al escribir en los buscadores (PC y Móvil)
     if (searchInput) {
         searchInput.addEventListener('input', (e) => filtrarProductos(e.target.value));
     }
     if (offcanvasSearchInput) {
         offcanvasSearchInput.addEventListener('input', (e) => filtrarProductos(e.target.value));
     }
+
+    // Lógica de los botones verdes de "Buscar" (solo para hacer scroll)
     const botonB = document.querySelectorAll('form[role="search"] .btn-success');
     botonB.forEach(boton => {
         boton.addEventListener('click', () => {
@@ -219,4 +260,3 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
-

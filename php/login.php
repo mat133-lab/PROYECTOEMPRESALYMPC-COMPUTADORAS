@@ -21,6 +21,7 @@ $row = $stmt->fetch(PDO::FETCH_ASSOC);
 if($row && password_verify($pass, $row['contraseña'])){
     $_SESSION['correo'] = $row['correo'];
     $_SESSION['id'] = $row['id'];
+    $_SESSION['id_usuario'] = $row['id_usuario']; // Guardar el ID del usuario
     // Guardar nombre de usuario si existe en la tabla
     // Asegurar que la variable de sesión se cree incluso si el campo usuario está vacío
     $_SESSION['usuario'] = !empty($row['usuario']) ? $row['usuario'] : 'Usuario';

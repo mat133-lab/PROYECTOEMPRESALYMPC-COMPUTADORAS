@@ -9,7 +9,12 @@ if (!isset($_SESSION['usuario'])) {
 
 $es_admin = (isset($_SESSION['rol']) && $_SESSION['rol'] === 'admin') ? true : false;
 
-$query = "SELECT * FROM productos WHERE categoria = 'ASUS'";
+// Usar INNER JOIN con la tabla categorias para obtener productos por marca
+$query = "SELECT p.*, c.nombre_categoria 
+          FROM productos p 
+          LEFT JOIN categorias c ON p.id_categoria = c.id_categoria 
+          LEFT JOIN contacto con ON p.id_soporte = con.id_soporte
+          WHERE p.categoria = 'ASUS'";
 $result = $conn->query($query); 
 ?>
 <!doctype html>
@@ -69,9 +74,10 @@ $result = $conn->query($query);
 
             <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
                 href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
-           <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center gap-2">
                 <form class="d-none d-lg-flex m-0" role="search" onsubmit="event.preventDefault();">
-                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search" id="search-input"/>
+                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search"
+                        id="search-input" />
                     <button class="btn btn-success" type="button">Buscar</button>
                 </form>
 
@@ -90,7 +96,8 @@ $result = $conn->query($query);
 
                 <div class="offcanvas-body">
                     <form class="d-flex d-lg-none mb-4" role="search" onsubmit="event.preventDefault();">
-                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search" id="search-input-mobile"/>
+                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search"
+                            id="search-input-mobile" />
                         <button class="btn btn-success" type="button">Buscar</button>
                     </form>
 
@@ -187,7 +194,8 @@ $result = $conn->query($query);
                                 </li>
                                 <li><a class="dropdown-item categoria-link" href="../php/gestion_citas.php"
                                         data-categoria="bano">Citas</a></li>
-                                <li><a class="dropdown-item categoria-link" href="../php/ubicacion.php" data-categoria="bano">Ubicacion</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/ubicacion.php"
+                                        data-categoria="bano">Ubicacion</a>
                                 </li>
                             </ul>
                         </li>
@@ -250,52 +258,63 @@ $result = $conn->query($query);
         <div class="row" id="product-container">
             <?php if ($result && $result->rowCount() > 0): ?>
             <?php while($row = $result->fetch(PDO::FETCH_ASSOC)): ?>
-            <div class="col-md-4 mb-4 box">
-                <div class="card h-100 shadow-sm">
-                    <img src="../img/<?php echo $row['imagen']; ?>" class="card-img-top" alt="Producto"
-                        style="height: 200px; object-fit: cover;">
 
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title product-name"><?php echo $row['nombre']; ?></h5>
-                        <p class="card-text text-muted"><?php echo $row['serie']; ?></p>
+            <div class="col-md-4 mb-4">
 
-                        <div class="mt-auto">
-                            <h4 class="text-primary">$<?php echo number_format($row['precio'], 2); ?></h4>
-                            <p class="text-secondary">Unidades disponibles: <span class="product-units"
+                <div class="box h-100 w-100">
+
+                    <img src="../img/<?php echo $row['imagen']; ?>" alt="Producto"
+                        style="width: 100%; height: 180px; object-fit: contain; padding-top: 10px;">
+
+                    <div class="product-txt d-flex flex-column h-100 w-100">
+                        <h3 class="product-name" style="font-size: 18px; font-weight: 600;">
+                            <?php echo $row['nombre']; ?></h3>
+                        <p class="text-muted" style="font-size: 14px;"><?php echo $row['serie']; ?></p>
+
+                        <div class="mt-auto w-100">
+                            <p class="precio"
+                                style="font-size: 20px; font-weight: 700; color: #ff9100; margin: 10px 0;">
+                                $<?php echo number_format($row['precio'], 2); ?>
+                            </p>
+                            <p class="text-secondary" style="font-size: 13px;">Unidades disponibles:
+                                <span class="product-units"
                                     data-id="<?php echo $row['id_producto']; ?>"><?php echo $row['unidades']; ?></span>
                             </p>
 
-                            <div class="d-grid gap-2">
-                                <button class="btn btn-primary agregar-libro"
-                                    data-id="<?php echo $row['id_producto']; ?>">Agregar al Carrito</button>
+                            <button class="btn-3 agregar-libro w-100 border-0 mt-2" style="cursor: pointer;"
+                                data-id="<?php echo $row['id_producto']; ?>">
+                                Agregar al Carrito
+                            </button>
 
-                                <?php if ($es_admin): ?>
-                                <div class="d-flex gap-2 mt-2">
-                                    <a href="../php/editar.php?id=<?php echo $row['id_producto']; ?>"
-                                        class="btn btn-warning w-50">
-                                        <i class="fas fa-edit"></i> Editar
-                                    </a>
-                                    <a href="../php/eliminar.php?id=<?php echo $row['id_producto']; ?>"
-                                        class="btn btn-danger w-50"
-                                        onclick="return confirm('¿Estás seguro de borrar esto?');">
-                                        <i class="fas fa-trash"></i> Borrar
-                                    </a>
-                                </div>
-                                <?php endif; ?>
+                            <?php if ($es_admin): ?>
+                            <div class="d-flex gap-2 mt-3">
+                                <a href="../php/editar.php?id=<?php echo $row['id_producto']; ?>"
+                                    class="btn btn-warning w-50 btn-sm text-dark fw-bold">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                                <a href="../php/eliminar.php?id=<?php echo $row['id_producto']; ?>"
+                                    class="btn btn-danger w-50 btn-sm fw-bold"
+                                    onclick="return confirm('¿Estás seguro de borrar esto?');">
+                                    <i class="fas fa-trash"></i> Borrar
+                                </a>
                             </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
             </div>
             <?php endwhile; ?>
+
             <div class="col-12 mt-4 text-center" id="no-results" style="display: none;">
                 <div class="alert alert-warning shadow-sm">
-                    <p>No se encontraron los productos con ese nombre o no estan disponibles en este momento.</p>
+                    <p>No se encontraron productos con ese nombre.</p>
                 </div>
             </div>
+
             <?php else: ?>
             <div class="col-12">
-                <div class="alert alert-info">No hay productos disponibles en este momento.</div>
+                <div class="alert alert-info text-center">No hay productos disponibles en la categoría ASUS en este
+                    momento.</div>
             </div>
             <?php endif; ?>
         </div>

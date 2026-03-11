@@ -14,21 +14,24 @@ $desde = isset($_GET['desde']) ? $_GET['desde'] : date('Y-m-01');
 $hasta = isset($_GET['hasta']) ? $_GET['hasta'] . ' 23:59:59' : date('Y-m-t 23:59:59');
 
 try {
-    // Consultar citas del usuario en el rango de fechas
+    // Consultar citas del usuario en el rango de fechas usando INNER JOIN
     $stmt = $conn->prepare("
         SELECT 
-            id_cita as id,
-            nombre,
-            apellido,
-            correo,
-            fecha,
-            telefono,
-            motivo
-        FROM citas 
-        WHERE correo = ? AND fecha BETWEEN ? AND ?
-        ORDER BY fecha ASC
+            c.id_cita as id,
+            c.nombre,
+            c.apellido,
+            c.correo,
+            c.fecha,
+            c.telefono,
+            c.motivo,
+            u.usuario as nombre_usuario,
+            u.correo as correo_usuario
+        FROM citas c
+        INNER JOIN usuarios u ON c.id_usuario = u.id_usuario
+        WHERE c.id_usuario = ? AND c.fecha BETWEEN ? AND ?
+        ORDER BY c.fecha ASC
     ");
-    $stmt->execute([$_SESSION['correo'], $desde, $hasta]);
+    $stmt->execute([$_SESSION['id_usuario'], $desde, $hasta]);
     $citas = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // Retornar JSON

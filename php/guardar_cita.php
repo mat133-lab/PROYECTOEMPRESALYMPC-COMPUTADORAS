@@ -7,24 +7,26 @@ if (!isset($_SESSION['usuario'])) {
     exit();
 }
 
-// Usar SOLO usuario como nombre
-$nombre   = $_SESSION['usuario'];
-$apellido = $_POST['apellido'] ;
-$correo   = $_POST['correo'];
-$telefono = $_POST['telefono'];
-$fecha   = $_POST['fecha'];
-$motivo  = $_POST['motivo'];
+// Usar id_usuario de la sesión
+$id_usuario = $_SESSION['id_usuario'] ?? null;
+$nombre     = $_SESSION['usuario'];
+$apellido  = $_POST['apellido'] ?? '';
+$correo    = $_POST['correo'] ?? $_SESSION['correo'];
+$telefono  = $_POST['telefono'];
+$fecha     = $_POST['fecha'];
+$motivo    = $_POST['motivo'];
 
 if (!$fecha || !$motivo) {
     header("Location: ../php/horario.php?error=datos");
     exit();
 }
 
-$sql = "INSERT INTO citas (nombre, apellido, correo, fecha, telefono, motivo)
-        VALUES (?, ?, ?, ?, ?, ?)";
+// Insertar cita con id_usuario
+$sql = "INSERT INTO citas (id_usuario, nombre, apellido, correo, fecha, telefono, motivo)
+        VALUES (?, ?, ?, ?, ?, ?, ?)";
 
 $stmt = $conn->prepare($sql);
-$stmt->execute([$nombre,$apellido,$correo,$fecha,$telefono,$motivo]);
+$stmt->execute([$id_usuario, $nombre, $apellido, $correo, $fecha, $telefono, $motivo]);
 
 header("Location: ../php/horario.php?ok=1");
 exit();

@@ -245,52 +245,54 @@ $result = $conn->query($query);
        <div class="row" id="product-container">
             <?php if ($result && $result->rowCount() > 0): ?>
             <?php while($row = $result->fetch(PDO::FETCH_ASSOC)): ?>
-            <div class="col-md-4 mb-4 box">
-                <div class="card h-100 shadow-sm">
-                    <img src="../img/<?php echo $row['imagen']; ?>" class="card-img-top" alt="Producto"
-                        style="height: 200px; object-fit: cover;">
+            
+            <div class="col-md-4 mb-4">
+                
+                <div class="box h-100 w-100">
+                    
+                    <img src="../img/<?php echo $row['imagen']; ?>" alt="Producto" style="width: 100%; height: 180px; object-fit: contain; padding-top: 10px;">
 
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title product-name"><?php echo $row['nombre']; ?></h5>
-                        <p class="card-text text-muted"><?php echo $row['serie']; ?></p>
+                    <div class="product-txt d-flex flex-column h-100 w-100">
+                        <h5 class="product-name" style="font-size: 18px; font-weight: 600;"><?php echo $row['nombre']; ?></h5>
+                        <p class="text-muted" style="font-size: 14px;"><?php echo $row['serie']; ?></p>
 
-                        <div class="mt-auto">
-                            <h4 class="text-primary">$<?php echo number_format($row['precio'], 2); ?></h4>
-                            <p class="text-secondary">Unidades disponibles: <span class="product-units"
-                                    data-id="<?php echo $row['id_producto']; ?>"><?php echo $row['unidades']; ?></span>
+                        <div class="mt-auto w-100">
+                            <h4 class="precio" style="font-size: 20px; font-weight: 700; color: #ff9100; margin: 10px 0;">
+                                $<?php echo number_format($row['precio'], 2); ?>
+                            </h4>
+                            <p class="text-secondary" style="font-size: 13px;">Unidades disponibles: 
+                                <span class="product-units" data-id="<?php echo $row['id_producto']; ?>"><?php echo $row['unidades']; ?></span>
                             </p>
 
-                            <div class="d-grid gap-2">
-                                <button class="btn btn-primary agregar-libro"
-                                    data-id="<?php echo $row['id_producto']; ?>">Agregar al Carrito</button>
+                            <button class="btn-3 agregar-libro w-100 border-0 mt-2" style="cursor: pointer;" data-id="<?php echo $row['id_producto']; ?>">
+                                Agregar al Carrito
+                            </button>
 
-                                <?php if ($es_admin): ?>
-                                <div class="d-flex gap-2 mt-2">
-                                    <a href="../php/editar.php?id=<?php echo $row['id_producto']; ?>"
-                                        class="btn btn-warning w-50">
-                                        <i class="fas fa-edit"></i> Editar
-                                    </a>
-                                    <a href="../php/eliminar.php?id=<?php echo $row['id_producto']; ?>"
-                                        class="btn btn-danger w-50"
-                                        onclick="return confirm('¿Estás seguro de borrar esto?');">
-                                        <i class="fas fa-trash"></i> Borrar
-                                    </a>
-                                </div>
-                                <?php endif; ?>
+                            <?php if ($es_admin): ?>
+                            <div class="d-flex gap-2 mt-3">
+                                <a href="../php/editar.php?id=<?php echo $row['id_producto']; ?>" class="btn btn-warning w-50 btn-sm text-dark fw-bold">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                                <a href="../php/eliminar.php?id=<?php echo $row['id_producto']; ?>" class="btn btn-danger w-50 btn-sm fw-bold" onclick="return confirm('¿Estás seguro de borrar esto?');">
+                                    <i class="fas fa-trash"></i> Borrar
+                                </a>
                             </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
             </div>
             <?php endwhile; ?>
+            
             <div class="col-12 mt-4 text-center" id="no-results" style="display: none;">
                 <div class="alert alert-warning shadow-sm">
-                    <p>No se encontraron los productos con ese nombre o no estan disponibles en este momento.</p>
+                    <p>No se encontraron productos con ese nombre.</p>
                 </div>
             </div>
+            
             <?php else: ?>
             <div class="col-12">
-                <div class="alert alert-info">No hay productos disponibles en este momento.</div>
+                <div class="alert alert-info text-center">No hay productos disponibles en la categoría Duplicadoras BLU-RAY en este momento.</div>
             </div>
             <?php endif; ?>
         </div>
