@@ -40,11 +40,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registro_admin'])) {
             $mensaje = 'Este correo ya está registrado';
             $tipo_mensaje = 'error';
         } else {
-            // Registrar nuevo admin
+            $ruta_ruc = null;
+            $ruta_cedula = null;
+            $directorio_subida = "../uploads/";
+
+            // Subir RUC
+            if (isset($_FILES['archivo_ruc']) && $_FILES['archivo_ruc']['error'] === UPLOAD_ERR_OK){
+                $destino_ruc = $directorio_subida . time() . "_ruc_" . basename($_FILES['archivo_ruc']['name']);
+                if (move_uploaded_file($_FILES['archivo_ruc']['tmp_name'], $destino_ruc)) {
+                    $ruta_ruc = $destino_ruc;
+                }
+            }
+
+            // Subir Cédula
+            if (isset($_FILES['archivo_cedula']) && $_FILES['archivo_cedula']['error'] === UPLOAD_ERR_OK){
+                $destino_cedula = $directorio_subida . time() . "_cedula_" . basename($_FILES['archivo_cedula']['name']);
+                if (move_uploaded_file($_FILES['archivo_cedula']['tmp_name'], $destino_cedula)) {
+                    $ruta_cedula = $destino_cedula;
+                }
+            }
+
+            // Registrar nuevo admin (con campos de archivos)
             $contraseña_hash = password_hash($contrasena, PASSWORD_BCRYPT);
-            $stmt = $conn->prepare("INSERT INTO usuarios (usuario, correo, contraseña, rol) VALUES (?, ?, ?, ?)");
+            $stmt = $conn->prepare("INSERT INTO usuarios (usuario, correo, contraseña, rol, archivo_ruc, archivo_cedula) VALUES (?, ?, ?, ?, ?, ?)");
             
-            if ($stmt->execute([$usuario, $correo, $contraseña_hash, 'admin'])) {
+            if ($stmt->execute([$usuario, $correo, $contraseña_hash, 'admin', $ruta_ruc, $ruta_cedula])) {
                 $mensaje = 'Administrador registrado exitosamente. Por favor, inicia sesión.';
                 $tipo_mensaje = 'success';
                 // Limpiar formulario
@@ -79,14 +99,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registro_admin'])) {
             </div>
 
             <?php if ($mensaje): ?>
-            <div class="alert <?php echo $tipo_mensaje === 'success' ? 'alert-success' : 'alert-error'; ?>">
-                <i
-                    class="fas fa-<?php echo $tipo_mensaje === 'success' ? 'check-circle' : 'exclamation-circle'; ?>"></i>
+            <div class="alert <?php echo $tipo_mensaje === 'success' ? 'alert-success' : 'alert-error'; ?>" style="padding: 10px; margin-bottom: 15px; border-radius: 5px; text-align: center; border: 1px solid <?php echo $tipo_mensaje === 'success' ? '#c3e6cb' : '#f5c6cb'; ?>; background-color: <?php echo $tipo_mensaje === 'success' ? '#d4edda' : '#f8d7da'; ?>; color: <?php echo $tipo_mensaje === 'success' ? '#155724' : '#721c24'; ?>;">
+                <i class="fas fa-<?php echo $tipo_mensaje === 'success' ? 'check-circle' : 'exclamation-circle'; ?>"></i>
                 <?php echo $mensaje; ?>
             </div>
             <?php endif; ?>
 
-            <form method="POST" class="login-form">
+            <form method="POST" class="login-form" enctype="multipart/form-data">
 
                 <div class="input-group">
                     <label>Nombre de Usuario</label>
@@ -101,6 +120,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registro_admin'])) {
                     <div class="input-container">
                         <i class="fas fa-envelope input-icon"></i>
                         <input type="email" name="correo" required value="<?php echo $_POST['correo'] ?? ''; ?>">
+                    </div>
+                </div>
+
+                <div class="input-group" style="background: rgba(0,0,0,0.03); padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed #ccc;">
+                    <label style="color: var(--text-color, #ff7700); font-weight: bold; margin-bottom: 10px; display: block;">Documentos</label>
+                    
+                    <label for="archivo_ruc" style="font-size: 0.85rem;">Subir RUC:</label>
+                    <div class="input-container" style="margin-bottom: 10px;">
+                        <i class="fas fa-file-pdf input-icon"></i>
+                        <input type="file" id="archivo_ruc" name="archivo_ruc" accept=".pdf, .jpg, .png" style="padding-left: 40px; font-size: 0.85rem;">
+                    </div>
+
+                    <label for="archivo_cedula" style="font-size: 0.85rem;">Subir Copia de Cédula:</label>
+                    <div class="input-container">
+                        <i class="fas fa-id-card input-icon"></i>
+                        <input type="file" id="archivo_cedula" name="archivo_cedula" accept=".pdf, .jpg, .png" style="padding-left: 40px; font-size: 0.85rem;">
                     </div>
                 </div>
 
@@ -134,9 +169,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registro_admin'])) {
                 </button>
 
             </form>
+            
             <div class="login-footer">
                 <div class="login-link-container">
-                    <a href="../php/login.php">
+                    <a href="../php/login.php" style="color:#2b6cb0; text-decoration:none;">
                         <i class="fas fa-arrow-left"></i> Volver al inicio
                     </a>
                 </div>
@@ -149,6 +185,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registro_admin'])) {
     </div>
 
 </body>
-
-
 </html>

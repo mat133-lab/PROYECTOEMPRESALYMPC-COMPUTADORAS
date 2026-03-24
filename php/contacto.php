@@ -12,16 +12,41 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'admin') {
     header("Location: ../php/contactoadmin.php");
     exit();
 }
+
 if (isset($_POST['enviar'])) {
     $nombre = trim($_POST['name']);
     $correo = trim($_POST['email']);
     $compania = trim($_POST['company']);
     $mensaje = trim($_POST['message']);
+    $cedula = trim($_POST['cedula']); // Nuevo campo capturado
+    
     $id_usuario = isset($_SESSION['id_usuario']) ? $_SESSION['id_usuario'] : null;
     
     if(!empty($nombre) && !empty($correo) && !empty($mensaje)){
-        $stmt = $conn->prepare("INSERT INTO mensajes_clientes (id_usuario, nombre, correo, compania, mensaje) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$id_usuario, $nombre, $correo, $compania, $mensaje]);
+        
+        $ruta_ruc = null;
+        $ruta_cedula = null;
+        $directorio_subida = "../docs/";
+
+        // Procesar subida de RUC
+        if (isset($_FILES['archivo_ruc']) && $_FILES['archivo_ruc']['error'] === UPLOAD_ERR_OK){
+            $destino_ruc = $directorio_subida . time() . "_ruc_" . basename($_FILES['archivo_ruc']['name']);
+            if (move_uploaded_file($_FILES['archivo_ruc']['tmp_name'], $destino_ruc)) {
+                $ruta_ruc = $destino_ruc;
+            }
+        }
+
+        // Procesar subida de Cédula
+        if (isset($_FILES['archivo_cedula']) && $_FILES['archivo_cedula']['error'] === UPLOAD_ERR_OK){
+            $destino_cedula = $directorio_subida . time() . "_cedula_" . basename($_FILES['archivo_cedula']['name']);
+            if (move_uploaded_file($_FILES['archivo_cedula']['tmp_name'], $destino_cedula)) {
+                $ruta_cedula = $destino_cedula;
+            }
+        }
+
+        // INSERT actualizado con 8 campos y 8 signos de interrogación
+        $stmt = $conn->prepare("INSERT INTO contacto (id_usuario, nombre, correo, compania, mensaje, cedula, archivo_ruc, archivo_cedula) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$id_usuario, $nombre, $correo, $compania, $mensaje, $cedula, $ruta_ruc, $ruta_cedula]);
         
         header("Location: ../php/contacto.php?status=success");
         exit();
@@ -34,7 +59,7 @@ if (isset($_POST['enviar'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contacto y Soporte - Dashboard</title>
+    <title>Contactanos - Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="../css/stylecitas.css">
@@ -247,29 +272,48 @@ if (isset($_POST['enviar'])) {
         </div>
     </nav>
     <div class="main-content">
-        <h1>Contacto y Soporte</h1>
+        <h1>Contactanos</h1>
         <div class="text-center">
             <p>Hola <strong><?php echo $_SESSION['usuario']; ?></strong>, Bienvenido puede enviarnos un mensaje por
                 cualquier asunto que tenga con la empresa
             </p>
         </div>
         <div class="form-section">
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <div class="form-group">
                     <p>Nombre</p>
-                    <input type="text" name="name" id="Nombre">
+                    <input type="text" name="name" id="Nombre" required>
                 </div>
                 <div class="form-group">
                     <p>Correo Electronico</p>
-                    <input type="email" name="email" id="Correo">
+                    <input type="email" name="email" id="Correo" required>
                 </div>
+                
+                <div class="form-group mb-3">
+                    <p>Número de Cédula</p>
+                    <input type="text" class="form-control" name="cedula" id="cedula" maxlength="10" required>
+                </div>
+
                 <div class="form-group">
-                    <p>Compania u Organizacion</p>
+                    <p>Compañía u Organización (Opcional)</p>
                     <input type="text" name="company" id="Compania">
                 </div>
+
+                <div id="div_documentos" class="border p-3 mb-3 bg-light rounded">
+                    <div class="mb-3">
+                        <label for="archivo_ruc" class="form-label">Subir RUC (Opcional si no es una empresa)</label>
+                        <input class="form-control" type="file" name="archivo_ruc" id="archivo_ruc" accept=".pdf, .jpg, .png, .webp">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="archivo_cedula" class="form-label">Subir Copia de Cédula</label>
+                        <input class="form-control" type="file" name="archivo_cedula" id="archivo_cedula" accept=".pdf, .jpg, .png, .webp">
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <p>Mensaje</p>
-                    <textarea name="message" id="Mensaje" rows="5"></textarea>
+                    <textarea name="message" id="Mensaje" rows="5" required></textarea>
                 </div>
                 <div class="form-group full">
                     <button type="submit" name="enviar" class="btn btn-primary">

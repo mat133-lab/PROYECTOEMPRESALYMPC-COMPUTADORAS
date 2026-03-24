@@ -18,10 +18,32 @@ if (isset($_POST['enviar'])) {
     $correo = trim($_POST['email']);
     $compania = trim($_POST['company']);
     $mensaje = trim($_POST['message']);
+    $cedula = trim($_POST['cedula']); // Nuevo campo
     
-    if(!empty($nombre) && !empty($correo) && !empty($mensaje)){
-        $stmt = $conn->prepare("INSERT INTO mensajes_clientes (nombre, correo, compania, mensaje) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$nombre, $correo, $compania, $mensaje]);
+    $id_usuario = isset($_SESSION['id_usuario']) ? $_SESSION['id_usuario'] : null;
+
+    if(!empty($nombre) && !empty($correo) && !empty($mensaje) && !empty($cedula)){
+        
+        $ruta_ruc = null;
+        $ruta_cedula = null;
+        $directorio_subida = "../docs/";
+
+        // Procesar subida de RUC
+        if (isset($_FILES['archivo_ruc']) && $_FILES['archivo_ruc']['error'] === UPLOAD_ERR_OK){
+            $destino_ruc = $directorio_subida . time() . "_ruc_" . basename($_FILES['archivo_ruc']['name']);
+            if (move_uploaded_file($_FILES['archivo_ruc']['tmp_name'], $destino_ruc)) $ruta_ruc = $destino_ruc;
+        }
+
+        // Procesar subida de Cédula
+        if (isset($_FILES['archivo_cedula']) && $_FILES['archivo_cedula']['error'] === UPLOAD_ERR_OK){
+            $destino_cedula = $directorio_subida . time() . "_cedula_" . basename($_FILES['archivo_cedula']['name']);
+            if (move_uploaded_file($_FILES['archivo_cedula']['tmp_name'], $destino_cedula)) $ruta_cedula = $destino_cedula;
+        }
+
+        // INSERT actualizado con los nuevos campos
+        $stmt = $conn->prepare("INSERT INTO contacto (id_usuario, nombre, correo, compania, mensaje, cedula, archivo_ruc, archivo_cedula) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$id_usuario, $nombre, $correo, $compania, $mensaje, $cedula, $ruta_ruc, $ruta_cedula]);
+        
         header("Location: ../php/contactoadmin.php?status=success");
         exit();
     }
@@ -33,7 +55,7 @@ if (isset($_POST['enviar'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contacto Administrador</title>
+    <title>Contactanos - Administrador</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="../css/stylecitas.css">
@@ -44,43 +66,6 @@ if (isset($_POST['enviar'])) {
 <body>
     <nav class="navbar navbar-dark bg-warning fixed-top">
         <div class="container-fluid">
-            <div class="submenu me-3">
-                <img src="../img/canasta.webp" id="img-libro" alt="Canasta">
-
-                <div id="libro">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Producto</th>
-                                <th>Nombre</th>
-                                <th>Serie</th>
-                                <th>Fecha</th>
-                                <th>Unidades</th>
-                                <th>Precio</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lista-libro"></tbody>
-                    </table>
-
-                    <div id="carrito-acciones" class="carrito-acciones disabled">
-                        <div class="carrito-acciones-izquierda">
-                            <button class="carrito-acciones-vaciar" id="carrito-acciones-vaciar">
-                                Vaciar Carrito
-                            </button>
-                        </div>
-
-                        <div class="carrito-acciones-derecha">
-                            <div class="carrito-acciones-total">
-                                <p>Compras Totales:</p>
-                                <p id="total">$0</p>
-                            </div>
-                            <button class="carrito-acciones-comprar" id="carrito-acciones-comprar">
-                                Comprar ahora
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <a class="navbar-brand" href="../php/dashboard.php">L&M PC Computadoras</a>
 
@@ -235,7 +220,7 @@ if (isset($_POST['enviar'])) {
         </div>
     </nav>
     <div class="main-content" style="margin-top: 100px;">
-        <h1>Contacto y Soporte Administrador</h1>
+        <h1>Contactanos - Administrador</h1>
         <div class="text-center">
             <p>Hola <strong><?php echo htmlspecialchars($_SESSION['usuario']); ?></strong>, en esta sección puedes ver todos los mensajes enviados por los clientes.</p>
         </div>
@@ -248,7 +233,7 @@ if (isset($_POST['enviar'])) {
                 </div>
             <?php endif; ?>
 
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <div class="form-group">
                     <p>Nombre</p>
                     <input type="text" name="name" id="Nombre" required>
@@ -257,10 +242,29 @@ if (isset($_POST['enviar'])) {
                     <p>Correo Electronico</p>
                     <input type="email" name="email" id="Correo" required>
                 </div>
+
+                <div class="form-group mb-3">
+                    <p>Número de Cédula (Requerido)</p>
+                    <input type="text" class="form-control" name="cedula" id="cedula" maxlength="10" required>
+                </div>
+
                 <div class="form-group">
                     <p>Compania u Organizacion</p>
                     <input type="text" name="company" id="Compania">
                 </div>
+
+                <div id="div_documentos" class="border p-3 mb-3 bg-white">
+                    <div class="mb-3">
+                        <label for="archivo_ruc" class="form-label">Subir RUC (Opcional si no es empresa)</label>
+                        <input class="form-control" type="file" name="archivo_ruc" id="archivo_ruc" accept=".pdf, .jpg, .png, .webp">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="archivo_cedula" class="form-label">Subir Copia de Cédula</label>
+                        <input class="form-control" type="file" name="archivo_cedula" id="archivo_cedula" accept=".pdf, .jpg, .png, .webp">
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <p>Mensaje</p>
                     <textarea name="message" id="Mensaje" rows="5" required></textarea>
@@ -275,7 +279,6 @@ if (isset($_POST['enviar'])) {
     </div>
 
     <?php
-    // Solo mostrar tabla si el usuario es admin, técnico, encargado o pasante
     $rolesConAcceso = ['admin', 'tecnico', 'encargado', 'pasante'];
     $puedeVerTabla = isset($_SESSION['rol']) && in_array(strtolower($_SESSION['rol']), $rolesConAcceso);
     
@@ -291,29 +294,37 @@ if (isset($_POST['enviar'])) {
                             <th># ID</th>
                             <th>Fecha</th>
                             <th>Nombre</th>
+                            <th>Cédula</th>
                             <th>Correo</th>
                             <th>Compañía</th>
                             <th>Mensaje</th>
+                            <th>Archivos (Docs)</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php
-                            // CORRECCIÓN 2: Seleccionamos de la nueva tabla de mensajes
-                            $query = $conn->query("SELECT * FROM mensajes_clientes ORDER BY id_mensaje DESC");
+                            $query = $conn->query("SELECT * FROM contacto ORDER BY id_mensaje DESC");
                             if ($query->rowCount() > 0) {
                                 foreach($query as $row){
-                                    // Agregamos seguridad con htmlspecialchars para evitar ataques XSS
+                                    
+                                    // Generar botones de descarga para RUC y Cédula
+                                    $btnRuc = !empty($row['archivo_ruc']) ? "<a href='{$row['archivo_ruc']}' target='_blank' class='btn btn-sm btn-info mb-1 d-block' style='font-size:0.75rem;'>RUC</a>" : "";
+                                    $btnCedula = !empty($row['archivo_cedula']) ? "<a href='{$row['archivo_cedula']}' target='_blank' class='btn btn-sm btn-secondary d-block' style='font-size:0.75rem;'>Cédula</a>" : "";
+                                    $archivos = ($btnRuc == "" && $btnCedula == "") ? "<span class='text-muted' style='font-size:0.8rem;'>Ninguno</span>" : $btnRuc . $btnCedula;
+
                                     echo "<tr>
                                         <td>#{$row['id_mensaje']}</td>
                                         <td>{$row['fecha']}</td>
                                         <td>" . htmlspecialchars($row['nombre']) . "</td>
+                                        <td>" . htmlspecialchars($row['cedula'] ?? 'N/A') . "</td>
                                         <td>" . htmlspecialchars($row['correo']) . "</td>
-                                        <td>" . htmlspecialchars($row['compania']) . "</td>
+                                        <td>" . htmlspecialchars($row['compania'] ?? 'N/A') . "</td>
                                         <td>" . htmlspecialchars($row['mensaje']) . "</td>
+                                        <td>{$archivos}</td>
                                     </tr>";
                                 }
                             } else {
-                                echo "<tr><td colspan='6' class='text-center'>No hay mensajes en la bandeja de entrada.</td></tr>";
+                                echo "<tr><td colspan='8' class='text-center'>No hay mensajes en la bandeja de entrada.</td></tr>";
                             }
                         ?>
                     </tbody>

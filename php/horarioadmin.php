@@ -25,44 +25,6 @@
 
     <nav class="navbar navbar-dark bg-warning fixed-top">
         <div class="container-fluid">
-            <!-- CARRITO / CANASTA -->
-            <div class="submenu me-3">
-                <img src="../img/canasta.webp" id="img-libro" alt="Canasta">
-
-                <div id="libro">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Producto</th>
-                                <th>Nombre</th>
-                                <th>Serie</th>
-                                <th>Fecha</th>
-                                <th>Unidades</th>
-                                <th>Precio</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lista-libro"></tbody>
-                    </table>
-
-                    <div id="carrito-acciones" class="carrito-acciones disabled">
-                        <div class="carrito-acciones-izquierda">
-                            <button class="carrito-acciones-vaciar" id="carrito-acciones-vaciar">
-                                Vaciar Carrito
-                            </button>
-                        </div>
-
-                        <div class="carrito-acciones-derecha">
-                            <div class="carrito-acciones-total">
-                                <p>Compras Totales:</p>
-                                <p id="total">$0</p>
-                            </div>
-                            <button class="carrito-acciones-comprar" id="carrito-acciones-comprar">
-                                Comprar ahora
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <a class="navbar-brand" href="../php/dashboard.php">L&M PC Computadoras</a>
 

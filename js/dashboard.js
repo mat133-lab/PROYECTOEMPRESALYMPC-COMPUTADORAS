@@ -216,7 +216,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Filtramos buscando coincidencias
         cajas.forEach(caja => {
-            // Asegúrate de que el título de tus productos en el HTML tenga la clase "product-name"
             const elementoP = caja.querySelector('.product-name'); 
             
             if (elementoP) {
@@ -238,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Activar el filtro al escribir en los buscadores (PC y Móvil)
+    // Activar el filtro al escribir en los buscadores PC y Móvil
     if (searchInput) {
         searchInput.addEventListener('input', (e) => filtrarProductos(e.target.value));
     }

@@ -117,7 +117,7 @@ $adminName = isset($_SESSION['admin_name']) ? htmlspecialchars($_SESSION['admin_
                     <a href="contactoadmin.php" class="box" style="text-decoration:none;">
                         <img src="../img/contact.webp" alt="Contactos" onerror="this.style.display='none'">
                         <div class="product-txt">
-                            <h3>Contacto</h3>
+                            <h3>Contactos</h3>
                             <p>Revisar mensajes enviados desde el formulario de contacto.</p>
                             <span class="precio">Ir a Contacto</span>
                         </div>
@@ -129,6 +129,15 @@ $adminName = isset($_SESSION['admin_name']) ? htmlspecialchars($_SESSION['admin_
                             <h3>Citas</h3>
                             <p>Listado y administración de citas por usuario.</p>
                             <span class="precio">Ver Citas</span>
+                        </div>
+                    </a>
+
+                    <a href="soporteadmin.php" class="box" style="text-decoration:none;">
+                        <img src="../img/marcas.webp" alt="Soporte" onerror="this.style.display='none'">
+                        <div class="product-txt">
+                            <h3>Proveedores</h3>
+                            <p>Gestionar directorio de marcas, técnicos y empresas de soporte.</p>
+                            <span class="precio">Ir a Proveedores</span>
                         </div>
                     </a>
                 </div>

@@ -8,29 +8,31 @@ if(isset($_SESSION['usuario'])){
     exit;
 }
 
-if($_SERVER['REQUEST_METHOD']=== 'POST'){
+if($_SERVER['REQUEST_METHOD'] === 'POST'){
     $user = trim($_POST['correo']); // Limpiar espacios en blanco
     $pass = $_POST['contrasena'];
 
-//consulta segura de las sentencias
-$stmt = $conn->prepare("SELECT * FROM usuarios WHERE correo = ?");
-$stmt->execute([$user]);
-$row = $stmt->fetch(PDO::FETCH_ASSOC);
+    // Consulta segura de las sentencias
+    $stmt = $conn->prepare("SELECT * FROM usuarios WHERE correo = ?");
+    $stmt->execute([$user]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Verificar credenciales con hash seguro
-if($row && password_verify($pass, $row['contraseña'])){
-    $_SESSION['correo'] = $row['correo'];
-    $_SESSION['id'] = $row['id'];
-    $_SESSION['id_usuario'] = $row['id_usuario']; // Guardar el ID del usuario
-    // Guardar nombre de usuario si existe en la tabla
-    // Asegurar que la variable de sesión se cree incluso si el campo usuario está vacío
-    $_SESSION['usuario'] = !empty($row['usuario']) ? $row['usuario'] : 'Usuario';
-    $_SESSION['rol'] = $row['rol'];
-    header("Location: ../php/dashboard.php");
-    exit;
-}else{
-    $error = "Credenciales Inválidas";
-}
+    // Verificar credenciales con hash seguro
+    if($row && password_verify($pass, $row['contraseña'])){
+        
+        // GUARDAMOS LOS DATOS CORRECTAMENTE EN LA SESIÓN
+        $_SESSION['id_usuario'] = $row['id_usuario']; // Aseguramos que sea 'id_usuario'
+        $_SESSION['correo'] = $row['correo'];
+        $_SESSION['rol'] = $row['rol'];
+        
+        // Guardar nombre de usuario si existe en la tabla
+        $_SESSION['usuario'] = !empty($row['usuario']) ? $row['usuario'] : 'Usuario';
+        
+        header("Location: ../php/dashboard.php");
+        exit;
+    } else {
+        $error = "Credenciales Inválidas";
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -101,8 +103,6 @@ if($row && password_verify($pass, $row['contraseña'])){
                     </a>
                 </div>
             </form>
-
-
             <div id="loginMessage" class="message hidden"></div>
 
             <div class="login-footer">

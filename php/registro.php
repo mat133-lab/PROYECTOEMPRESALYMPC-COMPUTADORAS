@@ -14,7 +14,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 
     // Validaciones
     if(empty($username) || empty($email) || empty($password) || empty($confirmPassword) || empty($role)){
-        $error = "Todos los campos son obligatorios";
+        $error = "Todos los campos obligatorios deben estar llenos.";
     }
     elseif(strlen($username) < 3){
         $error = "El nombre de usuario debe tener al menos 3 caracteres";
@@ -39,11 +39,31 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         else{
             // Hash de la contraseña
             $hashed_password = password_hash($password, PASSWORD_BCRYPT);
-            
-            // Insertar nuevo usuario
+
+            $ruta_ruc = null;
+            $ruta_cedula = null;
+            $directorio_subida = "../uploads/";
+
+            // Subir RUC
+            if (isset($_FILES['archivo_ruc']) && $_FILES['archivo_ruc']['error'] === UPLOAD_ERR_OK){
+                $destino_ruc = $directorio_subida . time() . "_ruc_" . basename($_FILES['archivo_ruc']['name']);
+                if (move_uploaded_file($_FILES['archivo_ruc']['tmp_name'], $destino_ruc)) {
+                    $ruta_ruc = $destino_ruc;
+                }
+            }
+
+            // Subir Cédula
+            if (isset($_FILES['archivo_cedula']) && $_FILES['archivo_cedula']['error'] === UPLOAD_ERR_OK){
+                $destino_cedula = $directorio_subida . time() . "_cedula_" . basename($_FILES['archivo_cedula']['name']);
+                if (move_uploaded_file($_FILES['archivo_cedula']['tmp_name'], $destino_cedula)) {
+                    $ruta_cedula = $destino_cedula;
+                }
+            }
+
+            // Insertar nuevo usuario (Ahora con los campos de archivos)
             try{
-                $stmt = $conn->prepare("INSERT INTO usuarios (usuario, correo, contraseña, rol) VALUES (?, ?, ?, ?)");
-                $stmt->execute([$username, $email, $hashed_password, $role]);
+                $stmt = $conn->prepare("INSERT INTO usuarios (usuario, correo, contraseña, rol, archivo_ruc, archivo_cedula) VALUES (?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$username, $email, $hashed_password, $role, $ruta_ruc, $ruta_cedula]);
                 
                 $success = "Registro exitoso. Redirigiendo al login...";
                 header("Refresh: 2; url=../php/login.php");
@@ -78,33 +98,50 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             </div>
 
             <?php if($error): ?>
-                <div class="alert alert-error">
+                <div class="alert alert-error" style="background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 15px; border-radius: 5px; text-align: center; border: 1px solid #f5c6cb;">
                     <i class="fas fa-exclamation-circle"></i>
                     <?= htmlspecialchars($error) ?>
                 </div>
             <?php endif; ?>
 
             <?php if($success): ?>
-                <div class="alert alert-success">
+                <div class="alert alert-success" style="background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 15px; border-radius: 5px; text-align: center; border: 1px solid #c3e6cb;">
                     <i class="fas fa-check-circle"></i>
                     <?= htmlspecialchars($success) ?>
                 </div>
             <?php endif; ?>
 
-            <form id="registerForm" class="login-form" method="POST">
+            <form id="registerForm" class="login-form" method="POST" enctype="multipart/form-data">
                 
-            <div class="input-group">
+                <div class="input-group">
                     <label for="regUsername">Nombre de Usuario: </label>
                     <div class="input-container">
                         <i class="fas fa-user input-icon"></i>
                         <input type="text" id="regUsername" name="username" placeholder="Nombre de usuario" required>
                     </div>
                 </div> 
+
                 <div class="input-group">
                     <label for="regEmail">Correo Electrónico: </label>
                     <div class="input-container">
                         <i class="fas fa-envelope input-icon"></i>
                         <input type="email" id="regEmail" name="email" placeholder="ejemplo@correo.com" required>
+                    </div>
+                </div>
+
+                <div class="input-group" style="background: rgba(0,0,0,0.03); padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed #ccc;">
+                    <label style="color: var(--text-color, #ff7700); font-weight: bold; margin-bottom: 10px; display: block;">Documentos</label>
+                    
+                    <label for="archivo_ruc" style="font-size: 0.85rem;">Subir RUC (Si eres empresa):</label>
+                    <div class="input-container" style="margin-bottom: 10px;">
+                        <i class="fas fa-file-pdf input-icon"></i>
+                        <input type="file" id="archivo_ruc" name="archivo_ruc" accept=".pdf, .jpg, .png" style="padding-left: 40px; font-size: 0.85rem;">
+                    </div>
+
+                    <label for="archivo_cedula" style="font-size: 0.85rem;">Subir Copia de Cédula:</label>
+                    <div class="input-container">
+                        <i class="fas fa-id-card input-icon"></i>
+                        <input type="file" id="archivo_cedula" name="archivo_cedula" accept=".pdf, .jpg, .png" style="padding-left: 40px; font-size: 0.85rem;">
                     </div>
                 </div>
 
@@ -128,7 +165,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                     <label for="regRole">Tipo de Usuario</label>
                     <div class="input-container">
                         <i class="fas fa-users-cog input-icon"></i>
-                        <select id="regRole" name="role" class="tech-select" required>
+                        <select id="regRole" name="role" class="tech-select" required style="width: 100%; padding: 10px 10px 10px 40px; border: 1px solid #ccc; border-radius: 5px; outline: none;">
                             <option value="" disabled selected>Seleccione un rol...</option>
                             <option value="usuario">Usuario Común</option>
                             <option value="tecnico">Técnico</option>
@@ -139,15 +176,16 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                     </div>
                 </div>
 
-                <div class="register-footer">
+                <div class="register-footer" style="margin-top: 20px;">
                     <button type="submit" class="login-btn">
                         <span class="btn-text">Registrarse</span>
                         <i class="fas fa-user-plus btn-icon"></i>
                     </button>
                 </div>
+
                 <div style="margin-top:12px; text-align:center;">
                     <a href="../php/login.php" id="showLogin"
-                        style="font-size:14px; color:#2b6cb0; text-decoration:none; display:block; gap:8px; align-items:center;">
+                        style="font-size:14px; color:#2b6cb0; text-decoration:none; display:flex; justify-content: center; gap:8px; align-items:center;">
                         <span>¿Ya tienes Cuenta? Inicia Sesion Aqui</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
@@ -159,5 +197,5 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             </div>
         </div>
     </div>
-    </body>
+</body>
 </html>
