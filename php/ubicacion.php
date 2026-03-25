@@ -28,54 +28,10 @@ $result = $conn->query($query);*/
 <body>
     <nav class="navbar navbar-dark bg-warning fixed-top">
         <div class="container-fluid">
-            <!-- CARRITO / CANASTA -->
-            <div class="submenu me-3">
-                <img src="../img/canasta.webp" id="img-libro" alt="Canasta">
-
-                <div id="libro">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Producto</th>
-                                <th>Nombre</th>
-                                <th>Serie</th>
-                                <th>Fecha</th>
-                                <th>Unidades</th>
-                                <th>Precio</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lista-libro"></tbody>
-                    </table>
-
-                    <div id="carrito-acciones" class="carrito-acciones disabled">
-                        <div class="carrito-acciones-izquierda">
-                            <button class="carrito-acciones-vaciar" id="carrito-acciones-vaciar">
-                                Vaciar Carrito
-                            </button>
-                        </div>
-
-                        <div class="carrito-acciones-derecha">
-                            <div class="carrito-acciones-total">
-                                <p>Compras Totales:</p>
-                                <p id="total">$0</p>
-                            </div>
-                            <button class="carrito-acciones-comprar" id="carrito-acciones-comprar">
-                                Comprar ahora
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
                 href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
             <div class="d-flex align-items-center gap-2">
-                <form class="d-none d-lg-flex m-0" role="search" onsubmit="event.preventDefault();">
-                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search"
-                        id="search-input" />
-                    <button class="btn btn-success" type="button">Buscar</button>
-                </form>
-
                 <button class="navbar-toggler m-0" type="button" data-bs-toggle="offcanvas"
                     data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
                     <span class="navbar-toggler-icon"></span>

@@ -30,6 +30,12 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
 <body>
     <nav class="navbar navbar-dark bg-warning fixed-top">
         <div class="container-fluid position-relative">
+            <?php 
+            //Verificamos si el usuario actual es parte del personal para que nos muestre el carrito de compras
+            $rolesStf = ['admin', 'tecnico', 'encargado', 'pasante'];
+            $esStf = isset($_SESSION['rol']) && in_array(strtolower($_SESSION['rol']), $rolesStf);
+            if(!$esStf):
+            ?>
             <div class="submenu me-3">
                 <img src="../img/canasta.webp" id="img-libro" alt="Canasta">
 
@@ -67,12 +73,14 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
 
             <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
                 href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
-            <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center gap-2 ms-auto">
                 <form class="d-none d-lg-flex m-0" role="search" onsubmit="event.preventDefault();">
-                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search" id="search-input"/>
+                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search"
+                        id="search-input" />
                     <button class="btn btn-success" type="button">Buscar</button>
                 </form>
 
@@ -282,10 +290,9 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
 
             <div class="box-container" id="lista-1">
                 <?php
-            // CONSULTA ACTUALIZADA: Uniendo tabla productos con contacto
-            $stmt = $conn->prepare("SELECT p.*, con.Nombre AS nombre_contacto, con.Compania 
+            $stmt = $conn->prepare("SELECT p.*, s.Nombre AS nombre_contacto, s.Compania 
                                     FROM productos p 
-                                    LEFT JOIN contacto con ON p.id_soporte = con.id_soporte 
+                                    LEFT JOIN soporte s ON p.id_soporte = s.id_soporte 
                                     ORDER BY p.id_producto ASC");
             $stmt->execute();
             $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);

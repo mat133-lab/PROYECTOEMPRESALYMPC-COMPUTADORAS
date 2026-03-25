@@ -69,7 +69,12 @@ if (isset($_POST['enviar'])) {
 <body>
     <nav class="navbar navbar-dark bg-warning fixed-top">
         <div class="container-fluid">
-            <!-- CARRITO / CANASTA -->
+            <?php 
+            //Verificamos si el usuario actual es parte del personal para que nos muestre el carrito de compras
+            $rolesStf = ['admin', 'tecnico', 'encargado', 'pasante'];
+            $esStf = isset($_SESSION['rol']) && in_array(strtolower($_SESSION['rol']), $rolesStf);
+            if(!$esStf):
+            ?>
             <div class="submenu me-3">
                 <img src="../img/canasta.webp" id="img-libro" alt="Canasta">
 
@@ -107,13 +112,15 @@ if (isset($_POST['enviar'])) {
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
 
             <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
                 href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
-            <div class="d-flex align-items-center gap-2">
-                <form class="d-none d-lg-flex m-0" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search" />
-                    <button class="btn btn-success" type="submit">Buscar</button>
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <form class="d-none d-lg-flex m-0" role="search" onsubmit="event.preventDefault();">
+                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search"
+                        id="search-input" />
+                    <button class="btn btn-success" type="button">Buscar</button>
                 </form>
 
                 <button class="navbar-toggler m-0" type="button" data-bs-toggle="offcanvas"

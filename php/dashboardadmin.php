@@ -13,23 +13,26 @@ $adminName = isset($_SESSION['admin_name']) ? htmlspecialchars($_SESSION['admin_
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Panel Admin — L&M PC Computadoras</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="shortcut icon" href="../img/logo.webp">
+    <title>Dashboard - L&M PC Computadoras</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="../css/estiloadmin.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body>
     <nav class="navbar navbar-dark bg-warning fixed-top">
         <div class="container-fluid">
 
-            <a class="navbar-brand" href="../php/dashboardadmin.php">L&M PC Computadoras</a>
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
-                data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
+                href="../php/dashboardadmin.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
 
             <div class="offcanvas offcanvas-end text-bg-warning" tabindex="-1" id="offcanvasDarkNavbar">
 
@@ -110,7 +113,7 @@ $adminName = isset($_SESSION['admin_name']) ? htmlspecialchars($_SESSION['admin_
                         <div class="product-txt">
                             <h3>Usuarios</h3>
                             <p>Crea cuentas para los administradores</p>
-                            <span class="precio">Gestionar Usuarios</span>
+                            <span class="precio">Ir a Gestionar Usuarios</span>
                         </div>
                     </a>
 
@@ -138,6 +141,15 @@ $adminName = isset($_SESSION['admin_name']) ? htmlspecialchars($_SESSION['admin_
                             <h3>Proveedores</h3>
                             <p>Gestionar directorio de marcas, técnicos y empresas de soporte.</p>
                             <span class="precio">Ir a Proveedores</span>
+                        </div>
+                    </a>
+
+                    <a href="productos.php" class="box" style="text-decoration:none;">
+                        <img src="../img/productos.webp" alt="Soporte" onerror="this.style.display='none'">
+                        <div class="product-txt">
+                            <h3>Productos</h3>
+                            <p>Gestionar los productos de cada proveedor o incluso eliminar.</p>
+                            <span class="precio">Ir a Productos</span>
                         </div>
                     </a>
                 </div>
