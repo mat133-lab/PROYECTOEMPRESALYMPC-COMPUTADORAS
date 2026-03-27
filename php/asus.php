@@ -254,10 +254,68 @@ $result = $conn->query($query);
             <h2>Laptop Asus</h2>
 
             <?php if ($es_admin): ?>
-            <a href="#" class="btn btn-success">
-                <i class="fas fa-plus"></i> Agregar Nuevo Producto
-            </a>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal"
+                data-bs-whatever="@mdo">+ Agregar Nuevo Producto</button>
+
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header" style="background: #ffc107">
+                            <header class="modal__header d-flex justify-content-between align-items-center mb-3">
+                                <h3 class="modal__heading m-0 fw-bold text-white">Agregar Producto</h3>
+                            </header>
+                        </div>
+                        <div class="modal-body">
+                            <form action="../php/guardar_producto.php" method="POST" enctype="multipart/form-data">
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label for="nombre" class="col-form-label">Nombre:</label>
+                                        <input type="text" class="form-control" id="nombre" name="nombre" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="serie" class="col-form-label">Serie:</label>
+                                        <input type="text" class="form-control" id="serie" name="serie" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="fecha" class="col-form-label">Fecha:</label>
+                                        <input type="date" class="form-control" id="fecha" name="fecha" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="unidades" class="col-form-label">Unidades:</label>
+                                        <input type="number" class="form-control" id="unidades" name="unidades"
+                                            required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="precio" class="col-form-label">Precio:</label>
+                                        <input type="number" step="0.01" class="form-control" id="precio" name="precio"
+                                            required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="imagen" class="form-label">Subir una Imagen del Producto:</label>
+                                        <input type="file" class="form-control" id="imagen" name="imagen"
+                                            accept="image/*" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="categoria" class="form-label">Categoría:</label>
+                                        <select class="form-select" id="categoria" name="categoria" required>
+                                            <option value="" selected>Seleccione la Categoría..</option>
+                                            <option value="ASUS">ASUS</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary"
+                                        data-bs-dismiss="modal">Cerrar</button>
+                                    <button type="submit" class="btn btn-warning">Guardar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <?php endif; ?>
+
         </div>
 
         <div class="row" id="product-container">
@@ -274,12 +332,15 @@ $result = $conn->query($query);
                     <div class="product-txt d-flex flex-column h-100 w-100">
                         <h3 class="product-name" style="font-size: 18px; font-weight: 600;">
                             <?php echo htmlspecialchars($row['nombre']); ?></h3>
-                        <p class="text-muted" style="font-size: 14px; margin-bottom: 5px;"><?php echo htmlspecialchars($row['serie']); ?></p>
+                        <p class="text-muted" style="font-size: 14px; margin-bottom: 5px;">
+                            <?php echo htmlspecialchars($row['serie']); ?></p>
 
                         <?php if (!empty($row['nombre_contacto'])): ?>
-                            <p style="font-size: 13px; color: #198754; margin-bottom: 10px;">
-                                <i class="fas fa-headset"></i> Soporte: <b><?php echo htmlspecialchars($row['nombre_contacto']); ?></b> (<?php echo htmlspecialchars($row['Compania']); ?>)
-                            </p>
+                        <p style="font-size: 13px; color: #198754; margin-bottom: 10px;">
+                            <i class="fas fa-headset"></i> Soporte:
+                            <b><?php echo htmlspecialchars($row['nombre_contacto']); ?></b>
+                            (<?php echo htmlspecialchars($row['Compania']); ?>)
+                        </p>
                         <?php endif; ?>
 
                         <div class="mt-auto w-100">

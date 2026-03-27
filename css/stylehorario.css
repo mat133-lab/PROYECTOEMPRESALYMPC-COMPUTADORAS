@@ -229,7 +229,7 @@ body {
 }
 
 .modal__header {
-    background: linear-gradient(135deg, #ff9100 0%, #ff7b00 100%);
+    background-color: #ffc107;
     color: #fff;
     padding: 20px;
     display: flex;
@@ -322,12 +322,12 @@ body {
 }
 
 .modal__button--close {
-    background-color: #e9e9e9;
-    color: #333;
+    background-color: #ffc107;
+    color: #ffffff;
 }
 
 .modal__button--close:hover {
-    background-color: #d0d0d0;
+    background-color: #ffc907;
 }
 
 .modal__button--primary {

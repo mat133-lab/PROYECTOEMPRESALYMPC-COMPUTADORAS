@@ -264,9 +264,9 @@
     </div>
 
     <dialog class="dialog-nativo" id="admin-appointment-modal">
-        <div class="modal__card p-4 rounded-3 shadow bg-white" style="max-width: 500px; width: 100%; margin: auto;">
+        <div class="modal__card p-4 rounded-3 shadow bg-white" style="max-width: 500px; width: 100%; margin: auto; ">
             <header class="modal__header d-flex justify-content-between align-items-center mb-3">
-                <h3 class="modal__heading m-0 fw-bold text-dark">Gestionar Cita</h3>
+                <h3 class="modal__heading m-0 fw-bold text-white">Gestionar Cita</h3>
                 <button type="button" class="btn-close" id="admin-modal-close-icon"></button>
             </header>
 
@@ -318,15 +318,15 @@
     <dialog class="dialog-nativo" id="modal-calendar">
         <div class="modal__card rounded-3 shadow p-4"
             style="max-width: 400px; width: 100%; margin: auto; background: white;">
-            <header class="modal__header d-flex justify-content-between align-items-center mb-3">
-                <h5 class="modal__heading m-0" id="modal-heading">Citas del día</h5>
-                <button type="button" class="btn-close" id="modal-close-btn"></button>
+            <header class="modal__header d-flex justify-content-between align-items-center mb-3" style="background-color: #ffc107;">
+                <h5 class="modal__heading m-0 text-white fw-bold" id="modal-heading">Citas del día</h5>
+                <button type="button" class="btn-close btn-close-white" id="modal-close-btn"></button>
             </header>
 
             <ul class="modal__list list-unstyled mb-3" id="modal-calendar-list"></ul>
 
             <div class="text-end border-top pt-2">
-                <button class="btn btn-secondary btn-sm"
+                <button class="btn btn-secondary btn-sm" style="background-color: #ffc107;"
                     onclick="document.getElementById('modal-calendar').close()">Cerrar</button>
             </div>
         </div>

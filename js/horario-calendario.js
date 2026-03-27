@@ -282,7 +282,7 @@ function abrirFormularioCrear(fechaSeleccionada) {
                 <label class="form-label">Motivo</label>
                 <textarea name="motivo" class="form-control" required></textarea>
             </div>
-            <button type="submit" class="btn btn-warning w-100">Agendar cita física</button>
+            <button type="submit" class="btn btn-warning w-100" style="color: #ffffff">Agendar cita física</button>
         </form>
     `;
 

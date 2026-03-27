@@ -264,13 +264,18 @@ function loadAppointmentsListModal(calendarDay) {
 }
 
 // 2. Abrir Formulario (Crear o Editar)
+// 2. Abrir Formulario (Crear o Editar)
 function openAdminForm(cita = null, fechaPreseleccionada = null) {
     if (!adminModal) return;
 
     const modalTitle = adminModal.querySelector('.modal__heading');
+    const modalHeaderContainer = modalTitle.parentElement;
 
     if (cita) {
         // MODO EDICIÓN
+        modalHeaderContainer.style.backgroundColor = '#ffc107'; // Fondo para edición (Opcional)
+        modalTitle.style.color = '#ffffff'; // Letras blancas
+        
         adminFieldId.value = cita.id_cita || cita.id || '';
         adminFieldNombre.value = cita.nombre || '';
         adminFieldApellido.value = cita.apellido || '';
@@ -287,6 +292,9 @@ function openAdminForm(cita = null, fechaPreseleccionada = null) {
         if (btnDeleteAppointment) btnDeleteAppointment.style.display = 'block'; // Mostrar botón borrar
     } else {
         // MODO CREACIÓN
+        modalHeaderContainer.style.backgroundColor = '#ffc107'; // Cambia el color del fondo (ej. oscuro)
+        modalTitle.style.color = '#ffffff'; // <--- ESTA ES LA LÍNEA QUE PONE LA LETRA BLANCA
+        
         modalTitle.textContent = 'Nueva Cita Administrativa';
         adminFieldId.value = ''; // ID vacío indica creación
         adminFieldNombre.value = '';
@@ -295,6 +303,7 @@ function openAdminForm(cita = null, fechaPreseleccionada = null) {
         adminFieldTelefono.value = '';
         adminFieldMotivo.value = '';
         adminFieldFecha.value = '';
+        
 
         if (fechaPreseleccionada) {
             adminFieldFecha.value = `${fechaPreseleccionada}T09:00`;
