@@ -86,12 +86,12 @@ document.addEventListener('click', function (e) {
     // --- PROCESAR COMPRA ---
     if (e.target.id === 'carrito-acciones-comprar') {
         e.preventDefault();
-        
+
         // Recopilar los datos del carrito desde el HTML
         const cartBody = document.getElementById('lista-libro');
         const rows = cartBody.querySelectorAll('tr');
         const carrito = [];
-        
+
         rows.forEach(row => {
             const id = row.dataset.id;
             const qtyCell = row.querySelector('.cart-qty');
@@ -126,7 +126,7 @@ document.addEventListener('click', function (e) {
                 if (carritoAcciones) carritoAcciones.classList.add('disabled');
 
                 sincronizarStorage();
-                
+
                 // Recargar la página para actualizar los stocks
                 setTimeout(() => location.reload(), 1500);
             } else {
@@ -164,7 +164,7 @@ document.addEventListener('click', function (e) {
 
 // LOGICA DEL BOTÓN CARGAR MÁS OFERTAS
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     let currentItem = 4; // Cuántos productos se muestran al inicio
     const cajas = document.querySelectorAll('.box');
     const btnLoadMore = document.getElementById('load-more');
@@ -216,8 +216,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Filtramos buscando coincidencias
         cajas.forEach(caja => {
-            const elementoP = caja.querySelector('.product-name'); 
-            
+            const elementoP = caja.querySelector('.product-name');
+
             if (elementoP) {
                 const nombreP = elementoP.textContent.toLowerCase();
                 if (nombreP.includes(term)) {
@@ -258,4 +258,35 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+});
+function confirmarBorrado(id_producto) {
+    let respuesta = confirm("¿Seguro que deseas Borrar?");
+    if (respuesta === true) {
+        window.location.href = "../php/eliminar.php?id=" + id_producto;
+    } else {
+        console.log("Decidio no borrar");
+    }
+}
+document.addEventListener('DOMContentLoaded', function () {
+    const botonesEditar = document.querySelectorAll('.btn-editar');
+
+    if (botonesEditar.length > 0) {
+        const modalEditarUnico = new bootstrap.Modal(document.getElementById('modalEditarUnico'));
+
+        botonesEditar.forEach(boton => {
+            boton.addEventListener('click', function () {
+                // Llenamos el formulario con los datos del botón
+                document.getElementById('edit_id_producto').value = this.getAttribute('data-id');
+                document.getElementById('edit_nombre').value = this.getAttribute('data-nombre');
+                document.getElementById('edit_serie').value = this.getAttribute('data-serie');
+                document.getElementById('edit_fecha').value = this.getAttribute('data-fecha');
+                document.getElementById('edit_unidades').value = this.getAttribute('data-unidades');
+                document.getElementById('edit_precio').value = this.getAttribute('data-precio');
+                document.getElementById('edit_categoria').value = this.getAttribute('data-categoria');
+
+                // Abrimos el modal
+                modalEditarUnico.show();
+            });
+        });
+    }
 });

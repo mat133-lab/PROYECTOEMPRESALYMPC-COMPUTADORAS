@@ -8,12 +8,20 @@ if (!isset($_SESSION['usuario'])) {
     exit();
 }
 
+// Verificar rol
+    $rolesConAcceso = ['admin', 'tecnico', 'encargado', 'pasante'];
+    if (!isset($_SESSION['usuario']) || !in_array($_SESSION['usuario'], $rolesConAcceso)) {
+        header('Location: ../php/dashboard.php');
+        exit();
+    }
+
 // Obtener datos del usuario
 $usuario = isset($_SESSION['usuario']) ? htmlspecialchars($_SESSION['usuario']) : 'Usuario';
 $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,13 +29,16 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <!-- Scripts -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" integrity="sha512-XcIsjKMcuVe0Ucj/xgIXQnytNwBttJbNjltBV18IOnru2lDPe9KRRyvCXw6Y5H415vbBLRm8+q6fmLUU7DfO6Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css"
+        integrity="sha512-XcIsjKMcuVe0Ucj/xgIXQnytNwBttJbNjltBV18IOnru2lDPe9KRRyvCXw6Y5H415vbBLRm8+q6fmLUU7DfO6Q=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- Styles -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
     <link rel="stylesheet" href="../css/stylehorario.css">
     <link rel="stylesheet" href="../css/style.css">
 
 </head>
+
 <body>
     <nav class="navbar navbar-dark bg-warning fixed-top">
         <div class="container-fluid">
@@ -74,7 +85,8 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
                 href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
             <div class="d-flex align-items-center gap-2">
                 <form class="d-none d-lg-flex m-0" role="search" onsubmit="event.preventDefault();">
-                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search" id="search-input"/>
+                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search"
+                        id="search-input" />
                     <button class="btn btn-success" type="button">Buscar</button>
                 </form>
 
@@ -93,7 +105,8 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
 
                 <div class="offcanvas-body">
                     <form class="d-flex d-lg-none mb-4" role="search" onsubmit="event.preventDefault();">
-                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search" id="search-input-mobile"/>
+                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search"
+                            id="search-input-mobile" />
                         <button class="btn btn-success" type="button">Buscar</button>
                     </form>
                     <ul class="navbar-nav flex-grow-1 pe-3">
@@ -189,7 +202,8 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
                                 </li>
                                 <li><a class="dropdown-item categoria-link" href="../php/gestion_citas.php"
                                         data-categoria="bano">Citas</a></li>
-                                <li><a class="dropdown-item categoria-link" href="../php/ubicacion.php" data-categoria="bano">Ubicacion</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/ubicacion.php"
+                                        data-categoria="bano">Ubicacion</a>
                                 </li>
                             </ul>
                         </li>
@@ -199,9 +213,11 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
                                 Impresoras con Tinta Continua
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="../php/epson.php" data-categoria="pintura">EPSON</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/epson.php"
+                                        data-categoria="pintura">EPSON</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="../php/canon.php" data-categoria="pintura">CANON</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/canon.php"
+                                        data-categoria="pintura">CANON</a>
                                 </li>
                             </ul>
                         </li>
@@ -210,9 +226,11 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
                                 Tintas
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="../php/tinta100.php" data-categoria="pintura">Tinta de
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta100.php"
+                                        data-categoria="pintura">Tinta de
                                         100 ML</a></li>
-                                <li><a class="dropdown-item categoria-link" href="../php/tinta1000.php" data-categoria="pintura">Tinta de
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta1000.php"
+                                        data-categoria="pintura">Tinta de
                                         1000 ML</a></li>
                             </ul>
                         </li>
@@ -240,78 +258,221 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
             <section class="calendar">
                 <header class="calendar__header">
                     <div class="header__container">
-                        <button class="calendar__button calendar__button--previous" aria-label="Ir al Anterior Mes"><i class="ri-arrow-left-s-line"></i></button>
+                        <button class="calendar__button calendar__button--previous" aria-label="Ir al Anterior Mes"><i
+                                class="ri-arrow-left-s-line"></i></button>
                         <h3 class="container__heading" id="calendar-date"></h3>
-                        <button class="calendar__button calendar__button--next" aria-label="Ir al Siguiente Mes"><i class="ri-arrow-right-s-line"></i></button>
+                        <button class="calendar__button calendar__button--next" aria-label="Ir al Siguiente Mes"><i
+                                class="ri-arrow-right-s-line"></i></button>
                     </div>
                 </header>
-                
+
                 <!-- Días de la semana -->
                 <section class="calendar__weekdays">
-                    <div class="calendar__weekday"><h4>Lunes</h4><abbr>Lun</abbr></div>
-                    <div class="calendar__weekday"><h4>Martes</h4><abbr>Mar</abbr></div>
-                    <div class="calendar__weekday"><h4>Miércoles</h4><abbr>Mié</abbr></div>
-                    <div class="calendar__weekday"><h4>Jueves</h4><abbr>Jue</abbr></div>
-                    <div class="calendar__weekday"><h4>Viernes</h4><abbr>Vie</abbr></div>
-                    <div class="calendar__weekday"><h4>Sábado</h4><abbr>Sáb</abbr></div>
-                    <div class="calendar__weekday"><h4>Domingo</h4><abbr>Dom</abbr></div>
+                    <div class="calendar__weekday">
+                        <h4>Lunes</h4><abbr>Lun</abbr>
+                    </div>
+                    <div class="calendar__weekday">
+                        <h4>Martes</h4><abbr>Mar</abbr>
+                    </div>
+                    <div class="calendar__weekday">
+                        <h4>Miércoles</h4><abbr>Mié</abbr>
+                    </div>
+                    <div class="calendar__weekday">
+                        <h4>Jueves</h4><abbr>Jue</abbr>
+                    </div>
+                    <div class="calendar__weekday">
+                        <h4>Viernes</h4><abbr>Vie</abbr>
+                    </div>
+                    <div class="calendar__weekday">
+                        <h4>Sábado</h4><abbr>Sáb</abbr>
+                    </div>
+                    <div class="calendar__weekday">
+                        <h4>Domingo</h4><abbr>Dom</abbr>
+                    </div>
                 </section>
-            
+
                 <!-- Días del mes -->
                 <ol class="calendar__days">
-                    <li class="calendar__day" data-day="1"><div class="day__info"><h5>1</h5></div></li>
-                    <li class="calendar__day" data-day="2"><div class="day__info"><h5>2</h5></div></li>
-                    <li class="calendar__day" data-day="3"><div class="day__info"><h5>3</h5></div></li>
-                    <li class="calendar__day" data-day="4"><div class="day__info"><h5>4</h5></div></li>
-                    <li class="calendar__day" data-day="5"><div class="day__info"><h5>5</h5></div></li>
-                    <li class="calendar__day" data-day="6"><div class="day__info"><h5>6</h5></div></li>
-                    <li class="calendar__day" data-day="7"><div class="day__info"><h5>7</h5></div></li>
-                    <li class="calendar__day" data-day="8"><div class="day__info"><h5>8</h5></div></li>
-                    <li class="calendar__day" data-day="9"><div class="day__info"><h5>9</h5></div></li>
-                    <li class="calendar__day" data-day="10"><div class="day__info"><h5>10</h5></div></li>
-                    <li class="calendar__day" data-day="11"><div class="day__info"><h5>11</h5></div></li>
-                    <li class="calendar__day" data-day="12"><div class="day__info"><h5>12</h5></div></li>
-                    <li class="calendar__day" data-day="13"><div class="day__info"><h5>13</h5></div></li>
-                    <li class="calendar__day" data-day="14"><div class="day__info"><h5>14</h5></div></li>
-                    <li class="calendar__day" data-day="15"><div class="day__info"><h5>15</h5></div></li>
-                    <li class="calendar__day" data-day="16"><div class="day__info"><h5>16</h5></div></li>
-                    <li class="calendar__day" data-day="17"><div class="day__info"><h5>17</h5></div></li>
-                    <li class="calendar__day" data-day="18"><div class="day__info"><h5>18</h5></div></li>
-                    <li class="calendar__day" data-day="19"><div class="day__info"><h5>19</h5></div></li>
-                    <li class="calendar__day" data-day="20"><div class="day__info"><h5>20</h5></div></li>
-                    <li class="calendar__day" data-day="21"><div class="day__info"><h5>21</h5></div></li>
-                    <li class="calendar__day" data-day="22"><div class="day__info"><h5>22</h5></div></li>
-                    <li class="calendar__day" data-day="23"><div class="day__info"><h5>23</h5></div></li>
-                    <li class="calendar__day" data-day="24"><div class="day__info"><h5>24</h5></div></li>
-                    <li class="calendar__day" data-day="25"><div class="day__info"><h5>25</h5></div></li>
-                    <li class="calendar__day" data-day="26"><div class="day__info"><h5>26</h5></div></li>
-                    <li class="calendar__day" data-day="27"><div class="day__info"><h5>27</h5></div></li>
-                    <li class="calendar__day" data-day="28"><div class="day__info"><h5>28</h5></div></li>
-                    <li class="calendar__day" data-day="29"><div class="day__info"><h5>29</h5></div></li>
-                    <li class="calendar__day" data-day="30"><div class="day__info"><h5>30</h5></div></li>
-                    <li class="calendar__day" data-day="31"><div class="day__info"><h5>31</h5></div></li>
+                    <li class="calendar__day" data-day="1">
+                        <div class="day__info">
+                            <h5>1</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="2">
+                        <div class="day__info">
+                            <h5>2</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="3">
+                        <div class="day__info">
+                            <h5>3</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="4">
+                        <div class="day__info">
+                            <h5>4</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="5">
+                        <div class="day__info">
+                            <h5>5</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="6">
+                        <div class="day__info">
+                            <h5>6</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="7">
+                        <div class="day__info">
+                            <h5>7</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="8">
+                        <div class="day__info">
+                            <h5>8</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="9">
+                        <div class="day__info">
+                            <h5>9</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="10">
+                        <div class="day__info">
+                            <h5>10</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="11">
+                        <div class="day__info">
+                            <h5>11</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="12">
+                        <div class="day__info">
+                            <h5>12</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="13">
+                        <div class="day__info">
+                            <h5>13</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="14">
+                        <div class="day__info">
+                            <h5>14</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="15">
+                        <div class="day__info">
+                            <h5>15</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="16">
+                        <div class="day__info">
+                            <h5>16</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="17">
+                        <div class="day__info">
+                            <h5>17</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="18">
+                        <div class="day__info">
+                            <h5>18</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="19">
+                        <div class="day__info">
+                            <h5>19</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="20">
+                        <div class="day__info">
+                            <h5>20</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="21">
+                        <div class="day__info">
+                            <h5>21</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="22">
+                        <div class="day__info">
+                            <h5>22</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="23">
+                        <div class="day__info">
+                            <h5>23</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="24">
+                        <div class="day__info">
+                            <h5>24</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="25">
+                        <div class="day__info">
+                            <h5>25</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="26">
+                        <div class="day__info">
+                            <h5>26</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="27">
+                        <div class="day__info">
+                            <h5>27</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="28">
+                        <div class="day__info">
+                            <h5>28</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="29">
+                        <div class="day__info">
+                            <h5>29</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="30">
+                        <div class="day__info">
+                            <h5>30</h5>
+                        </div>
+                    </li>
+                    <li class="calendar__day" data-day="31">
+                        <div class="day__info">
+                            <h5>31</h5>
+                        </div>
+                    </li>
                 </ol>
             </section>
         </main>
     </div>
 
-    <dialog class="modal" id="appointments-modal" role="dialog" aria-labelledby="Modal vista de Citas" aria-describedby="Citas para un día en específico">
+    <dialog class="modal" id="appointments-modal" role="dialog" aria-labelledby="Modal vista de Citas"
+        aria-describedby="Citas para un día en específico">
         <div class="modal__container">
             <section class="modal__card">
-            <header class="modal__header">
-                <h3 class="modal__heading"></h3>
-                <button type="button" class="modal__close" aria-label="Cerrar Modal"><i class="ri-close-line"></i></button>
-            </header>
-            <div class="modal__list__container">
-                <ul class="modal__list"></ul>
-            </div>
-            <footer class="modal__footer">
-                <button type="button" class="modal__button modal__button--close" aria-label="Cancelar y Cerrar Modal">Cancelar</button>
-            </footer>
-        </section>
+                <header class="modal__header">
+                    <h3 class="modal__heading"></h3>
+                    <button type="button" class="modal__close" aria-label="Cerrar Modal"><i
+                            class="ri-close-line"></i></button>
+                </header>
+                <div class="modal__list__container">
+                    <ul class="modal__list"></ul>
+                </div>
+                <footer class="modal__footer">
+                    <button type="button" class="modal__button modal__button--close"
+                        aria-label="Cancelar y Cerrar Modal">Cancelar</button>
+                </footer>
+            </section>
         </div>
     </dialog>
-    
+
     <footer class="footer">
         <div class="footer-content container">
             <div class="link">
@@ -335,7 +496,7 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
             </div>
         </div>
     </footer>
-    
+
     <!-- Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -344,10 +505,11 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
     </script>
 
     <script>
-        // Pasar correo de sesión a JS para el formulario
-        window.currentUserEmail = "<?php echo isset($_SESSION['correo']) ? $_SESSION['correo'] : ''; ?>";
+    // Pasar correo de sesión a JS para el formulario
+    window.currentUserEmail = "<?php echo isset($_SESSION['correo']) ? $_SESSION['correo'] : ''; ?>";
     </script>
     <!-- Calendar Module -->
     <script src="../js/horario-calendario.js" type="module"></script>
 </body>
+
 </html>

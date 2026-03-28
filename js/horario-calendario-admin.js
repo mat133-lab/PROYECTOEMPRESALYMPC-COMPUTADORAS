@@ -80,7 +80,7 @@ class UI {
 
         // --- LIMPIEZA ---
         // He eliminado todos los item.style.display, item.style.marginBottom, etc.
-        // porque la clase .cita-estilo de tu CSS ya se encarga de eso.
+        // porque la clase .cita-estilo del CSS ya se encarga de eso.
 
         list.appendChild(item);
     }
@@ -210,8 +210,6 @@ export function setMonth(step) {
 }
 
 // --- MODALES Y FORMULARIOS ---
-
-// 1. Mostrar Lista de Citas (Solo lectura/selección)
 // 1. Mostrar Lista de Citas (Solo lectura/selección)
 function loadAppointmentsListModal(calendarDay) {
     // --- PROTECCIÓN CONTRA EL CONGELAMIENTO ---
@@ -262,8 +260,6 @@ function loadAppointmentsListModal(calendarDay) {
 
     listModal.showModal();
 }
-
-// 2. Abrir Formulario (Crear o Editar)
 // 2. Abrir Formulario (Crear o Editar)
 function openAdminForm(cita = null, fechaPreseleccionada = null) {
     if (!adminModal) return;
@@ -293,7 +289,7 @@ function openAdminForm(cita = null, fechaPreseleccionada = null) {
     } else {
         // MODO CREACIÓN
         modalHeaderContainer.style.backgroundColor = '#ffc107'; // Cambia el color del fondo (ej. oscuro)
-        modalTitle.style.color = '#ffffff'; // <--- ESTA ES LA LÍNEA QUE PONE LA LETRA BLANCA
+        modalTitle.style.color = '#ffffff';
         
         modalTitle.textContent = 'Nueva Cita Administrativa';
         adminFieldId.value = ''; // ID vacío indica creación
