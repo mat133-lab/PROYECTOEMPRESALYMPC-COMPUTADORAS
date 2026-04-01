@@ -116,7 +116,6 @@ body {
     /* Sombra más fuerte para que destaque */
     border-radius: 12px;
     border: 1px solid #eee;
-    /* Borde sutil */
 }
 
 /* Tabla del carrito */
@@ -170,6 +169,7 @@ th {
     border-radius: 5px;
     cursor: pointer;
     font-size: 14px;
+    margin-top: 95px;
 }
 
 .carrito-acciones-comprar {
@@ -233,7 +233,6 @@ th {
 
 .btn-1:hover {
     background-color: #d2841f;
-    color: rgb(0, 0, 0);
 }
 
 /* ================= SECCIÓN INFO (BANNER NARANJA) ================= */
@@ -355,7 +354,6 @@ th {
 
 .btn-2:hover {
     background-color: #d2841f;
-    color: rgb(0, 0, 0);
 }
 
 .btn-3 {

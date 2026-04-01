@@ -257,7 +257,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
                         relacionado a computacion, desde componentes hasta
                         accesorios y mucho mas.
                     </p>
-                    <a href="https://www.facebook.com/LyM010?locale=es_LA" class="btn-1">Mas Informacion</a>
+                    <a href="https://www.facebook.com/LyM010?locale=es_LA" class="btn-2" style="text-decoration:none; font-weight: 700;">Mas Informacion</a>
                 </div>
             </div>
 
@@ -274,7 +274,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
                         gama de productos y accesorios de alta calidad para satisfacer todas tus
                         necesidades tecnológicas.
                     </p>
-                    <a href="https://www.facebook.com/LyM010?locale=es_LA" class="btn-1">Mas Informacion</a>
+                    <a href="https://www.facebook.com/LyM010?locale=es_LA" class="btn-2" style="font-weight: 700; text-decoration:none;">Mas Informacion</a>
                 </div>
             </div>
         </section>
@@ -320,14 +320,14 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
 
                         <div class="mt-auto w-100">
                             <p class="precio" style="font-size: 20px; font-weight: 700; color: #ff9100; margin: 10px 0;">$<?= number_format($row['precio'], 2) ?></p>
-                            <a href="#" class="agregar-libro btn-3 w-100 text-center" data-id="<?= $row['id_producto'] ?>" style="display:block;">Agregar al carrito</a>
+                            <a href="#" class="agregar-libro btn-3 w-100 text-center" data-id="<?= $row['id_producto'] ?>" style="display:block; text-decoration:none;">Agregar al carrito</a>
                         </div>
                     </div>
                 </div>
                 <?php endforeach; ?>
             </div>
 
-            <div class="btn-2" id="load-more" style="cursor: pointer; text-align: center;">Cargar mas Ofertas</div>
+            <div class="btn-2" id="load-more" style="text-decoration:none; font-weight: 700; cursor: pointer;">Cargar mas Ofertas</div>
         </main>
 
         <footer class="footer">

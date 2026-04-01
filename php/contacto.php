@@ -67,14 +67,9 @@ if (isset($_POST['enviar'])) {
 </head>
 
 <body>
-    <nav class="navbar navbar-dark bg-warning fixed-top">
+   <nav class="navbar navbar-dark bg-warning fixed-top">
         <div class="container-fluid">
-            <?php 
-            //Verificamos si el usuario actual es parte del personal para que nos muestre el carrito de compras
-            $rolesStf = ['admin', 'tecnico', 'encargado', 'pasante'];
-            $esStf = isset($_SESSION['rol']) && in_array(strtolower($_SESSION['rol']), $rolesStf);
-            if(!$esStf):
-            ?>
+            <!-- CARRITO / CANASTA -->
             <div class="submenu me-3">
                 <img src="../img/canasta.webp" id="img-libro" alt="Canasta">
 
@@ -112,22 +107,13 @@ if (isset($_POST['enviar'])) {
                     </div>
                 </div>
             </div>
-            <?php endif; ?>
 
-            <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
-                href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
-            <div class="d-flex align-items-center gap-2 ms-auto">
-                <form class="d-none d-lg-flex m-0" role="search" onsubmit="event.preventDefault();">
-                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search"
-                        id="search-input" />
-                    <button class="btn btn-success" type="button">Buscar</button>
-                </form>
+            <a class="navbar-brand" href="../php/dashboard.php">L&M PC Computadoras</a>
 
-                <button class="navbar-toggler m-0" type="button" data-bs-toggle="offcanvas"
-                    data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-            </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
             <div class="offcanvas offcanvas-end text-bg-warning" tabindex="-1" id="offcanvasDarkNavbar">
 
@@ -137,10 +123,6 @@ if (isset($_POST['enviar'])) {
                 </div>
 
                 <div class="offcanvas-body">
-                    <form class="d-flex d-lg-none mb-4" role="search">
-                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search" />
-                        <button class="btn btn-success" type="submit">Buscar</button>
-                    </form>
                     <ul class="navbar-nav flex-grow-1 pe-3">
 
                         <li class="nav-item">

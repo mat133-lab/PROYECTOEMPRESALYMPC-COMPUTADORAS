@@ -28,10 +28,55 @@ $result = $conn->query($query);*/
 <body>
     <nav class="navbar navbar-dark bg-warning fixed-top">
         <div class="container-fluid">
+            <?php 
+            //Verificamos si el usuario actual es parte del personal para que nos muestre el carrito de compras
+            $rolesStf = ['admin', 'tecnico', 'encargado', 'pasante'];
+            $esStf = isset($_SESSION['rol']) && in_array(strtolower($_SESSION['rol']), $rolesStf);
+            if(!$esStf):
+            ?>
+            <div class="submenu me-3">
+                <img src="../img/canasta.webp" id="img-libro" alt="Canasta">
+
+                <div id="libro">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Nombre</th>
+                                <th>Serie</th>
+                                <th>Fecha</th>
+                                <th>Unidades</th>
+                                <th>Precio</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-libro"></tbody>
+                    </table>
+
+                    <div id="carrito-acciones" class="carrito-acciones disabled">
+                        <div class="carrito-acciones-izquierda">
+                            <button class="carrito-acciones-vaciar" id="carrito-acciones-vaciar">
+                                Vaciar Carrito
+                            </button>
+                        </div>
+
+                        <div class="carrito-acciones-derecha">
+                            <div class="carrito-acciones-total">
+                                <p>Compras Totales:</p>
+                                <p id="total">$0</p>
+                            </div>
+                            <button class="carrito-acciones-comprar" id="carrito-acciones-comprar">
+                                Comprar ahora
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
 
             <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
                 href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
-            <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center gap-2 ms-auto">
+
                 <button class="navbar-toggler m-0" type="button" data-bs-toggle="offcanvas"
                     data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
                     <span class="navbar-toggler-icon"></span>
@@ -47,8 +92,7 @@ $result = $conn->query($query);*/
 
                 <div class="offcanvas-body">
                     <form class="d-flex d-lg-none mb-4" role="search" onsubmit="event.preventDefault();">
-                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search"
-                            id="search-input-mobile" />
+                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search" id="search-input-mobile"/>
                         <button class="btn btn-success" type="button">Buscar</button>
                     </form>
                     <ul class="navbar-nav flex-grow-1 pe-3">
@@ -154,11 +198,9 @@ $result = $conn->query($query);*/
                                 Impresoras con Tinta Continua
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="../php/epson.php"
-                                        data-categoria="pintura">EPSON</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/epson.php" data-categoria="pintura">EPSON</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="../php/canon.php"
-                                        data-categoria="pintura">CANON</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/canon.php" data-categoria="pintura">CANON</a>
                                 </li>
                             </ul>
                         </li>
@@ -167,11 +209,9 @@ $result = $conn->query($query);*/
                                 Tintas
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="../php/tinta100.php"
-                                        data-categoria="pintura">Tinta de
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta100.php" data-categoria="pintura">Tinta de
                                         100 ML</a></li>
-                                <li><a class="dropdown-item categoria-link" href="../php/tinta1000.php"
-                                        data-categoria="pintura">Tinta de
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta1000.php" data-categoria="pintura">Tinta de
                                         1000 ML</a></li>
                             </ul>
                         </li>

@@ -359,7 +359,7 @@ $result = $conn->query($query);
 
                             <?php if ($es_admin): ?>
                             <div class="d-flex gap-2 mt-3">
-                                
+
                                 <button type="button" class="btn btn-warning w-50 btn-sm text-dark fw-bold btn-editar"
                                     data-id="<?php echo $row['id_producto']; ?>"
                                     data-nombre="<?php echo htmlspecialchars($row['nombre']); ?>"
@@ -370,8 +370,9 @@ $result = $conn->query($query);
                                     data-categoria="<?php echo htmlspecialchars($row['categoria'] ?? 'ASUS'); ?>">
                                     <i class="fas fa-edit"></i> Editar
                                 </button>
-                                
-                                <button type="button" class="btn btn-danger w-50 btn-sm fw-bold" onclick="confirmarBorrado(<?php echo $row['id_producto']?>)">
+
+                                <button type="button" class="btn btn-danger w-50 btn-sm fw-bold"
+                                    onclick="confirmarBorrado(<?php echo $row['id_producto']?>)">
                                     <i class="fas fa-trash"></i>Borrar
                                 </button>
                             </div>
@@ -405,7 +406,7 @@ $result = $conn->query($query);
                 </div>
                 <div class="modal-body text-start">
                     <form action="../php/editar.php" method="POST" enctype="multipart/form-data">
-                        
+
                         <input type="hidden" id="edit_id_producto" name="id_producto" value="">
 
                         <div class="mb-3">
@@ -426,7 +427,8 @@ $result = $conn->query($query);
                         </div>
                         <div class="mb-3">
                             <label for="edit_precio" class="col-form-label">Precio:</label>
-                            <input type="number" step="0.01" class="form-control" id="edit_precio" name="precio" required>
+                            <input type="number" step="0.01" class="form-control" id="edit_precio" name="precio"
+                                required>
                         </div>
                         <div class="mb-3">
                             <label for="edit_imagen" class="form-label">Actualizar Imagen (Opcional):</label>
@@ -440,7 +442,7 @@ $result = $conn->query($query);
                         </div>
 
                         <div class="modal-footer px-0 pb-0">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Cancelar</button>
                             <button type="submit" class="btn btn-warning">Guardar Cambios</button>
                         </div>
                     </form>
