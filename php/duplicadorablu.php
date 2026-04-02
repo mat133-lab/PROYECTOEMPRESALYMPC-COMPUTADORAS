@@ -77,6 +77,11 @@ $result = $conn->query($query);
             </div>
             <?php endif; ?>
 
+            <?php
+            $rolesStf = ['admin', 'tecnico', 'encargado', 'pasante'];
+            $esStf = isset($_SESSION['rol'])  && in_array(strtolower($_SESSION['rol']), $rolesStf);
+            if(!$esStf):
+            ?>
             <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
                 href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
             <div class="d-flex align-items-center gap-2 ms-auto">
@@ -101,9 +106,11 @@ $result = $conn->query($query);
 
                 <div class="offcanvas-body">
                     <form class="d-flex d-lg-none mb-4" role="search" onsubmit="event.preventDefault();">
-                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search" id="search-input-mobile"/>
+                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search"
+                            id="search-input-mobile" />
                         <button class="btn btn-success" type="button">Buscar</button>
                     </form>
+
                     <ul class="navbar-nav flex-grow-1 pe-3">
 
                         <li class="nav-item">
@@ -197,7 +204,8 @@ $result = $conn->query($query);
                                 </li>
                                 <li><a class="dropdown-item categoria-link" href="../php/gestion_citas.php"
                                         data-categoria="bano">Citas</a></li>
-                                <li><a class="dropdown-item categoria-link" href="../php/ubicacion.php" data-categoria="bano">Ubicacion</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/ubicacion.php"
+                                        data-categoria="bano">Ubicacion</a>
                                 </li>
                             </ul>
                         </li>
@@ -207,9 +215,11 @@ $result = $conn->query($query);
                                 Impresoras con Tinta Continua
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="../php/epson.php" data-categoria="pintura">EPSON</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/epson.php"
+                                        data-categoria="pintura">EPSON</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="../php/canon.php" data-categoria="pintura">CANON</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/canon.php"
+                                        data-categoria="pintura">CANON</a>
                                 </li>
                             </ul>
                         </li>
@@ -218,16 +228,77 @@ $result = $conn->query($query);
                                 Tintas
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="../php/tinta100.php" data-categoria="pintura">Tinta de
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta100.php"
+                                        data-categoria="pintura">Tinta de
                                         100 ML</a></li>
-                                <li><a class="dropdown-item categoria-link" href="../php/tinta1000.php" data-categoria="pintura">Tinta de
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta1000.php"
+                                        data-categoria="pintura">Tinta de
                                         1000 ML</a></li>
                             </ul>
                         </li>
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center mt-3">
 
                             <?php if (isset($_SESSION['usuario'])): ?>
                             <span class="text-white me-3">Buen dia, <b><?php echo $_SESSION['usuario']; ?></b></span>
+                            <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
+                            <?php else: ?>
+                            <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
+                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <?php endif; ?>
+
+                        </div>
+                    </ul>
+                </div>
+            </div>
+            <?php elseif($esStf): ?>
+            <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
+                href="../php/dashboardadmin.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+
+            <div class="offcanvas offcanvas-end text-bg-warning" tabindex="-1" id="offcanvasDarkNavbar">
+
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title">Menu</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+                </div>
+
+                <div class="offcanvas-body">
+                    <ul class="navbar-nav flex-grow-1 pe-3">
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                Cuenta y Configuración
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li>
+                                    <a class="dropdown-item categoria-link" href="../php/perfiladmin.php"
+                                        data-categoria="estructura">
+                                        Perfil
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item categoria-link" href="#" data-categoria="techos">
+                                        Configuracion
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item categoria-link" href="#" data-categoria="techos">
+                                        Termino y Condiciones
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <div class="d-flex align-items-center">
+
+                            <?php if (isset($_SESSION['admin_name'])): ?>
+                            <span class="text-white me-3">Buen dia,
+                                <b><?php echo $_SESSION['admin_name']; ?></b></span>
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
@@ -239,6 +310,8 @@ $result = $conn->query($query);
                     </ul>
                 </div>
             </div>
+            <?php endif; ?>
+
         </div>
     </nav>
     <div class="container" style="margin-top: 100px;">
@@ -247,52 +320,127 @@ $result = $conn->query($query);
             <h2>Duplicadoras de BLU-RAY</h2>
 
             <?php if ($es_admin): ?>
-            <a href="#" class="btn btn-success">
-                <i class="fas fa-plus"></i> Agregar Nuevo Producto
-            </a>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal"
+                data-bs-whatever="@mdo">+ Agregar Nuevo Producto</button>
+
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header" style="background: #ffc107">
+                            <header class="modal__header d-flex justify-content-between align-items-center mb-3">
+                                <h3 class="modal__heading m-0 fw-bold text-white">Agregar Producto</h3>
+                            </header>
+                        </div>
+                        <div class="modal-body">
+                            <form action="../php/guardar_producto.php" method="POST" enctype="multipart/form-data">
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label for="nombre" class="col-form-label">Nombre:</label>
+                                        <input type="text" class="form-control" id="nombre" name="nombre" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="serie" class="col-form-label">Serie:</label>
+                                        <input type="text" class="form-control" id="serie" name="serie" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="fecha" class="col-form-label">Fecha:</label>
+                                        <input type="date" class="form-control" id="fecha" name="fecha" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="unidades" class="col-form-label">Unidades:</label>
+                                        <input type="number" class="form-control" id="unidades" name="unidades"
+                                            required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="precio" class="col-form-label">Precio:</label>
+                                        <input type="number" step="0.01" class="form-control" id="precio" name="precio"
+                                            required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="imagen" class="form-label">Subir una Imagen del Producto:</label>
+                                        <input type="file" class="form-control" id="imagen" name="imagen"
+                                            accept="image/*" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="categoria" class="form-label">Categoría:</label>
+                                        <select class="form-select" id="categoria" name="categoria" required>
+                                            <option value="" selected>Seleccione la Categoría..</option>
+                                            <option value="DUPLICADORABLU">DUPLICADORA BLU-RAY</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary"
+                                        data-bs-dismiss="modal">Cerrar</button>
+                                    <button type="submit" class="btn btn-warning">Guardar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <?php endif; ?>
         </div>
 
        <div class="row" id="product-container">
             <?php if ($result && $result->rowCount() > 0): ?>
             <?php while($row = $result->fetch(PDO::FETCH_ASSOC)): ?>
-            
+
             <div class="col-md-4 mb-4">
-                
+
                 <div class="box h-100 w-100">
-                    
-                    <img src="../img/<?php echo htmlspecialchars($row['imagen']); ?>" alt="Producto" style="width: 100%; height: 180px; object-fit: contain; padding-top: 10px;">
+
+                    <img src="../img/<?php echo htmlspecialchars($row['imagen']); ?>" alt="Producto"
+                        style="width: 100%; height: 180px; object-fit: contain; padding-top: 10px;">
 
                     <div class="product-txt d-flex flex-column h-100 w-100">
-                        <h5 class="product-name" style="font-size: 18px; font-weight: 600;"><?php echo htmlspecialchars($row['nombre']); ?></h5>
-                        <p class="text-muted" style="font-size: 14px; margin-bottom: 5px;"><?php echo htmlspecialchars($row['serie']); ?></p>
+                        <h3 class="product-name" style="font-size: 18px; font-weight: 600;">
+                            <?php echo htmlspecialchars($row['nombre']); ?></h3>
+                        <p class="text-muted" style="font-size: 14px; margin-bottom: 5px;">
+                            <?php echo htmlspecialchars($row['serie']); ?></p>
 
                         <?php if (!empty($row['nombre_contacto'])): ?>
-                            <p style="font-size: 13px; color: #198754; margin-bottom: 10px;">
-                                <i class="fas fa-headset"></i> Soporte: <b><?php echo htmlspecialchars($row['nombre_contacto']); ?></b> (<?php echo htmlspecialchars($row['Compania']); ?>)
-                            </p>
+                        <p style="font-size: 13px; color: #198754; margin-bottom: 10px;">
+                            <i class="fas fa-headset"></i> Soporte:
+                            <b><?php echo htmlspecialchars($row['nombre_contacto']); ?></b>
+                            (<?php echo htmlspecialchars($row['Compania']); ?>)
+                        </p>
                         <?php endif; ?>
 
                         <div class="mt-auto w-100">
-                            <h4 class="precio" style="font-size: 20px; font-weight: 700; color: #ff9100; margin: 10px 0;">
+                            <p class="precio"
+                                style="font-size: 20px; font-weight: 700; color: #ff9100; margin: 10px 0;">
                                 $<?php echo number_format($row['precio'], 2); ?>
-                            </h4>
-                            <p class="text-secondary" style="font-size: 13px;">Unidades disponibles: 
-                                <span class="product-units" data-id="<?php echo $row['id_producto']; ?>"><?php echo htmlspecialchars($row['unidades']); ?></span>
+                            </p>
+                            <p class="text-secondary" style="font-size: 13px;">Unidades disponibles:
+                                <span class="product-units"
+                                    data-id="<?php echo $row['id_producto']; ?>"><?php echo htmlspecialchars($row['unidades']); ?></span>
                             </p>
 
-                            <button class="btn-3 agregar-libro w-100 border-0 mt-2" style="cursor: pointer;" data-id="<?php echo $row['id_producto']; ?>">
+                            <button class="btn-3 agregar-libro w-100 border-0 mt-2" style="cursor: pointer;"
+                                data-id="<?php echo $row['id_producto']; ?>">
                                 Agregar al Carrito
                             </button>
 
                             <?php if ($es_admin): ?>
                             <div class="d-flex gap-2 mt-3">
-                                <a href="../php/editar.php?id=<?php echo $row['id_producto']; ?>" class="btn btn-warning w-50 btn-sm text-dark fw-bold">
+
+                                <button type="button" class="btn btn-warning w-50 btn-sm text-dark fw-bold btn-editar"
+                                    data-id="<?php echo $row['id_producto']; ?>"
+                                    data-nombre="<?php echo htmlspecialchars($row['nombre']); ?>"
+                                    data-serie="<?php echo htmlspecialchars($row['serie']); ?>"
+                                    data-fecha="<?php echo htmlspecialchars($row['fecha'] ?? ''); ?>"
+                                    data-unidades="<?php echo htmlspecialchars($row['unidades']); ?>"
+                                    data-precio="<?php echo htmlspecialchars($row['precio']); ?>"
+                                    data-categoria="<?php echo htmlspecialchars($row['categoria'] ?? 'DUPLICADORABLU'); ?>">
                                     <i class="fas fa-edit"></i> Editar
-                                </a>
-                                <a href="../php/eliminar.php?id=<?php echo $row['id_producto']; ?>" class="btn btn-danger w-50 btn-sm fw-bold" onclick="return confirm('¿Estás seguro de borrar esto?');">
-                                    <i class="fas fa-trash"></i> Borrar
-                                </a>
+                                </button>
+
+                                <button type="button" class="btn btn-danger w-50 btn-sm fw-bold"
+                                    onclick="confirmarBorrado(<?php echo $row['id_producto']?>)">
+                                    <i class="fas fa-trash"></i>Borrar
+                                </button>
                             </div>
                             <?php endif; ?>
                         </div>
@@ -300,20 +448,75 @@ $result = $conn->query($query);
                 </div>
             </div>
             <?php endwhile; ?>
-            
+
             <div class="col-12 mt-4 text-center" id="no-results" style="display: none;">
                 <div class="alert alert-warning shadow-sm">
                     <p>No se encontraron productos con ese nombre.</p>
                 </div>
             </div>
-            
+
             <?php else: ?>
             <div class="col-12">
-                <div class="alert alert-info text-center">No hay productos disponibles en la categoría Duplicadoras BLU-RAY en este momento.</div>
+                <div class="alert alert-info text-center">No hay productos disponibles en la categoría DUPLICADORA BLU-RAY en este
+                    momento.</div>
             </div>
             <?php endif; ?>
         </div>
     </div>
+    <div class="modal fade" id="modalEditarUnico" tabindex="-1" aria-labelledby="modalLabelEditar" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" style="background: #ffc107">
+                    <h5 class="modal-title fw-bold text-white" id="modalLabelEditar">Editar Producto</h5>
+                </div>
+                <div class="modal-body text-start">
+                    <form action="../php/editar.php" method="POST" enctype="multipart/form-data">
+
+                        <input type="hidden" id="edit_id_producto" name="id_producto" value="">
+
+                        <div class="mb-3">
+                            <label for="edit_nombre" class="col-form-label">Nombre:</label>
+                            <input type="text" class="form-control" id="edit_nombre" name="nombre" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_serie" class="col-form-label">Serie:</label>
+                            <input type="text" class="form-control" id="edit_serie" name="serie" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_fecha" class="col-form-label">Fecha:</label>
+                            <input type="date" class="form-control" id="edit_fecha" name="fecha" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_unidades" class="col-form-label">Unidades:</label>
+                            <input type="number" class="form-control" id="edit_unidades" name="unidades" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_precio" class="col-form-label">Precio:</label>
+                            <input type="number" step="0.01" class="form-control" id="edit_precio" name="precio"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_imagen" class="form-label">Actualizar Imagen (Opcional):</label>
+                            <input type="file" class="form-control" id="edit_imagen" name="imagen" accept="image/*">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_categoria" class="form-label">Categoría:</label>
+                            <select class="form-select" id="edit_categoria" name="categoria" required>
+                                <option value="" selected>Seleccione la Categoría..</option>
+                                <option value="DUPLICADORABLU">DUPLICADORA BLU-RAY</option>
+                            </select>
+                        </div>
+
+                        <div class="modal-footer px-0 pb-0">
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-warning">Guardar Cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <footer class="footer">
         <div class="footer-content container">

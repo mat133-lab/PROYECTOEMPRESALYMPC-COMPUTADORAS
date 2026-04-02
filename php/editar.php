@@ -39,7 +39,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
         $stmt = $conn->prepare($query);
 
         if($stmt->execute($params)){
-            header("Location: asus.php?mensaje=actualizado_exito");
+            header("Location: ../php/productos.php?mensaje=actualizado_exito");
             exit();
         }else{
             echo "No se ha podido cambiar los datos";

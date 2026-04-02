@@ -24,7 +24,225 @@ $adminName = isset($_SESSION['admin_name']) ? htmlspecialchars($_SESSION['admin_
 <body>
     <nav class="navbar navbar-dark bg-warning fixed-top">
         <div class="container-fluid">
+            <?php 
+            //Verificamos si el usuario actual es parte del personal para que nos muestre el carrito de compras
+            $rolesStf = ['admin', 'tecnico', 'encargado', 'pasante'];
+            $esStf = isset($_SESSION['rol']) && in_array(strtolower($_SESSION['rol']), $rolesStf);
+            if(!$esStf):
+            ?>
+            <div class="submenu me-3">
+                <img src="../img/canasta.webp" id="img-libro" alt="Canasta">
 
+                <div id="libro">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Nombre</th>
+                                <th>Serie</th>
+                                <th>Fecha</th>
+                                <th>Unidades</th>
+                                <th>Precio</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-libro"></tbody>
+                    </table>
+
+                    <div id="carrito-acciones" class="carrito-acciones disabled">
+                        <div class="carrito-acciones-izquierda">
+                            <button class="carrito-acciones-vaciar" id="carrito-acciones-vaciar">
+                                Vaciar Carrito
+                            </button>
+                        </div>
+
+                        <div class="carrito-acciones-derecha">
+                            <div class="carrito-acciones-total">
+                                <p>Compras Totales:</p>
+                                <p id="total">$0</p>
+                            </div>
+                            <button class="carrito-acciones-comprar" id="carrito-acciones-comprar">
+                                Comprar ahora
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <?php
+            $rolesStf = ['admin', 'tecnico', 'encargado', 'pasante'];
+            $esStf = isset($_SESSION['rol'])  && in_array(strtolower($_SESSION['rol']), $rolesStf);
+            if(!$esStf):
+            ?>
+            <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
+                href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <form class="d-none d-lg-flex m-0" role="search" onsubmit="event.preventDefault();">
+                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search"
+                        id="search-input" />
+                    <button class="btn btn-success" type="button">Buscar</button>
+                </form>
+
+                <button class="navbar-toggler m-0" type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+
+            <div class="offcanvas offcanvas-end text-bg-warning" tabindex="-1" id="offcanvasDarkNavbar">
+
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title">Menu</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+                </div>
+
+                <div class="offcanvas-body">
+                    <form class="d-flex d-lg-none mb-4" role="search" onsubmit="event.preventDefault();">
+                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search"
+                            id="search-input-mobile" />
+                        <button class="btn btn-success" type="button">Buscar</button>
+                    </form>
+
+                    <ul class="navbar-nav flex-grow-1 pe-3">
+
+                        <li class="nav-item">
+                            <a class="nav-link categoria-link active" href="../php/dashboard.php"
+                                data-categoria="todos">
+                                Home
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                Pc de Escritorio
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li>
+                                    <a class="dropdown-item categoria-link" href="../php/pc.php"
+                                        data-categoria="estructura">
+                                        Pc Dell
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item categoria-link" href="../php/hpdell.php"
+                                        data-categoria="techos">
+                                        Hp Dell
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                Laptops
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li><a class="dropdown-item categoria-link" href="../php/asus.php"
+                                        data-categoria="madera">ASUS</a>
+                                </li>
+                                <li><a class="dropdown-item categoria-link" href="../php/lenovo.php"
+                                        data-categoria="pisos">LENOVO</a>
+                                </li>
+                                <li><a class="dropdown-item categoria-link" href="../php/omnibook.php"
+                                        data-categoria="armarios">HP
+                                        OMNIBOOK </a></li>
+                                <li><a class="dropdown-item categoria-link" href="../php/msi.php"
+                                        data-categoria="armarios">MSI</a>
+                                </li>
+                                <li><a class="dropdown-item categoria-link" href="../php/dell.php"
+                                        data-categoria="armarios">DELL</a>
+                                </li>
+
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                Duplicadora
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li><a class="dropdown-item categoria-link" href="../php/duplicadoracd.php"
+                                        data-categoria="electricidad">CD</a></li>
+                                <li><a class="dropdown-item categoria-link" href="../php/duplicadoradvd.php"
+                                        data-categoria="iluminacion">DVD</a></li>
+                                <li><a class="dropdown-item categoria-link" href="../php/duplicadorablu.php"
+                                        data-categoria="domotica">BLU-RAY</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                Tablets
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="herramientas"></a>
+                                </li>
+                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="maquinaria"></a>
+                                </li>
+                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="seguridad"></a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                Servicio Tecnico
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li><a class="dropdown-item categoria-link" href="../php/horario.php"
+                                        data-categoria="bano">Horarios</a>
+                                </li>
+                                <li><a class="dropdown-item categoria-link" href="../php/contacto.php"
+                                        data-categoria="bano">Contacto</a>
+                                </li>
+                                <li><a class="dropdown-item categoria-link" href="../php/gestion_citas.php"
+                                        data-categoria="bano">Citas</a></li>
+                                <li><a class="dropdown-item categoria-link" href="../php/ubicacion.php"
+                                        data-categoria="bano">Ubicacion</a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                Impresoras con Tinta Continua
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li><a class="dropdown-item categoria-link" href="../php/epson.php"
+                                        data-categoria="pintura">EPSON</a>
+                                </li>
+                                <li><a class="dropdown-item categoria-link" href="../php/canon.php"
+                                        data-categoria="pintura">CANON</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                Tintas
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta100.php"
+                                        data-categoria="pintura">Tinta de
+                                        100 ML</a></li>
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta1000.php"
+                                        data-categoria="pintura">Tinta de
+                                        1000 ML</a></li>
+                            </ul>
+                        </li>
+                        <div class="d-flex align-items-center mt-3">
+
+                            <?php if (isset($_SESSION['usuario'])): ?>
+                            <span class="text-white me-3">Buen dia, <b><?php echo $_SESSION['usuario']; ?></b></span>
+                            <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
+                            <?php else: ?>
+                            <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
+                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <?php endif; ?>
+
+                        </div>
+                    </ul>
+                </div>
+            </div>
+            <?php elseif($esStf): ?>
             <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
                 href="../php/dashboardadmin.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
             <div class="d-flex align-items-center gap-2 ms-auto">
@@ -84,6 +302,8 @@ $adminName = isset($_SESSION['admin_name']) ? htmlspecialchars($_SESSION['admin_
                     </ul>
                 </div>
             </div>
+            <?php endif; ?>
+
         </div>
     </nav>
 

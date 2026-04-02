@@ -66,13 +66,70 @@ if (isset($_POST['enviar'])) {
 <body>
     <nav class="navbar navbar-dark bg-warning fixed-top">
         <div class="container-fluid">
+            <?php 
+            //Verificamos si el usuario actual es parte del personal para que nos muestre el carrito de compras
+            $rolesStf = ['admin', 'tecnico', 'encargado', 'pasante'];
+            $esStf = isset($_SESSION['rol']) && in_array(strtolower($_SESSION['rol']), $rolesStf);
+            if(!$esStf):
+            ?>
+            <div class="submenu me-3">
+                <img src="../img/canasta.webp" id="img-libro" alt="Canasta">
 
-            <a class="navbar-brand" href="../php/dashboard.php">L&M PC Computadoras</a>
+                <div id="libro">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Nombre</th>
+                                <th>Serie</th>
+                                <th>Fecha</th>
+                                <th>Unidades</th>
+                                <th>Precio</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-libro"></tbody>
+                    </table>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
-                data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+                    <div id="carrito-acciones" class="carrito-acciones disabled">
+                        <div class="carrito-acciones-izquierda">
+                            <button class="carrito-acciones-vaciar" id="carrito-acciones-vaciar">
+                                Vaciar Carrito
+                            </button>
+                        </div>
+
+                        <div class="carrito-acciones-derecha">
+                            <div class="carrito-acciones-total">
+                                <p>Compras Totales:</p>
+                                <p id="total">$0</p>
+                            </div>
+                            <button class="carrito-acciones-comprar" id="carrito-acciones-comprar">
+                                Comprar ahora
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <?php
+            $rolesStf = ['admin', 'tecnico', 'encargado', 'pasante'];
+            $esStf = isset($_SESSION['rol'])  && in_array(strtolower($_SESSION['rol']), $rolesStf);
+            if(!$esStf):
+            ?>
+            <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
+                href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <form class="d-none d-lg-flex m-0" role="search" onsubmit="event.preventDefault();">
+                    <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search"
+                        id="search-input" />
+                    <button class="btn btn-success" type="button">Buscar</button>
+                </form>
+
+                <button class="navbar-toggler m-0" type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
 
             <div class="offcanvas offcanvas-end text-bg-warning" tabindex="-1" id="offcanvasDarkNavbar">
 
@@ -82,6 +139,12 @@ if (isset($_POST['enviar'])) {
                 </div>
 
                 <div class="offcanvas-body">
+                    <form class="d-flex d-lg-none mb-4" role="search" onsubmit="event.preventDefault();">
+                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search"
+                            id="search-input-mobile" />
+                        <button class="btn btn-success" type="button">Buscar</button>
+                    </form>
+
                     <ul class="navbar-nav flex-grow-1 pe-3">
 
                         <li class="nav-item">
@@ -175,7 +238,8 @@ if (isset($_POST['enviar'])) {
                                 </li>
                                 <li><a class="dropdown-item categoria-link" href="../php/gestion_citas.php"
                                         data-categoria="bano">Citas</a></li>
-                                <li><a class="dropdown-item categoria-link" href="../php/ubicacion.php" data-categoria="bano">Ubicacion</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/ubicacion.php"
+                                        data-categoria="bano">Ubicacion</a>
                                 </li>
                             </ul>
                         </li>
@@ -185,9 +249,11 @@ if (isset($_POST['enviar'])) {
                                 Impresoras con Tinta Continua
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="../php/epson.php" data-categoria="pintura">EPSON</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/epson.php"
+                                        data-categoria="pintura">EPSON</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="../php/canon.php" data-categoria="pintura">CANON</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/canon.php"
+                                        data-categoria="pintura">CANON</a>
                                 </li>
                             </ul>
                         </li>
@@ -196,16 +262,77 @@ if (isset($_POST['enviar'])) {
                                 Tintas
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="../php/tinta100.php" data-categoria="pintura">Tinta de
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta100.php"
+                                        data-categoria="pintura">Tinta de
                                         100 ML</a></li>
-                                <li><a class="dropdown-item categoria-link" href="../php/tinta1000.php" data-categoria="pintura">Tinta de
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta1000.php"
+                                        data-categoria="pintura">Tinta de
                                         1000 ML</a></li>
                             </ul>
                         </li>
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center mt-3">
 
                             <?php if (isset($_SESSION['usuario'])): ?>
                             <span class="text-white me-3">Buen dia, <b><?php echo $_SESSION['usuario']; ?></b></span>
+                            <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
+                            <?php else: ?>
+                            <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
+                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <?php endif; ?>
+
+                        </div>
+                    </ul>
+                </div>
+            </div>
+            <?php elseif($esStf): ?>
+            <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
+                href="../php/dashboardadmin.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+
+            <div class="offcanvas offcanvas-end text-bg-warning" tabindex="-1" id="offcanvasDarkNavbar">
+
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title">Menu</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+                </div>
+
+                <div class="offcanvas-body">
+                    <ul class="navbar-nav flex-grow-1 pe-3">
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                Cuenta y Configuración
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li>
+                                    <a class="dropdown-item categoria-link" href="../php/perfiladmin.php"
+                                        data-categoria="estructura">
+                                        Perfil
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item categoria-link" href="#" data-categoria="techos">
+                                        Configuracion
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item categoria-link" href="#" data-categoria="techos">
+                                        Termino y Condiciones
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <div class="d-flex align-items-center">
+
+                            <?php if (isset($_SESSION['admin_name'])): ?>
+                            <span class="text-white me-3">Buen dia,
+                                <b><?php echo $_SESSION['admin_name']; ?></b></span>
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
@@ -217,6 +344,8 @@ if (isset($_POST['enviar'])) {
                     </ul>
                 </div>
             </div>
+            <?php endif; ?>
+
         </div>
     </nav>
     <div class="main-content" style="margin-top: 100px;">

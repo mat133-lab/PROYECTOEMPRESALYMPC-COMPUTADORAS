@@ -16,7 +16,7 @@ if(isset($_GET['id'])){
         $stmt->bindParam(':id', $id_producto);
         //Ejecucion
         if ($stmt->execute()){
-            header("Location: ../php/asus.php?mensaje=borrado_exito");
+            header("Location: ../php/productos.php?mensaje=borrado_exito");
         }else{
             echo "No se pudo borrar el producto";
         }
