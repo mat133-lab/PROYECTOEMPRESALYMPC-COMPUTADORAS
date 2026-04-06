@@ -2,32 +2,18 @@
 session_start();
 require_once '../includes/db.php';
 
-$error = '';
-$success = '';
-$token_valido = false;
-$email_usuario = '';
-
-// 1. Verificar si viene un token en la URL
-if(isset($_GET['token'])){
-    $token = $_GET['token'];
-    
-    // Buscar si el token existe y si NO ha expirado
-    $stmt = $conn->prepare("SELECT correo FROM usuarios WHERE reset_token = ? AND reset_expiration > NOW()");
-    $stmt->execute([$token]);
-    
-    if($stmt->rowCount() > 0){
-        $token_valido = true;
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        $email_usuario = $row['correo'];
-    } else {
-        $error = "El enlace de recuperación es inválido o ha expirado. Por favor, solicita uno nuevo.";
-    }
-} else {
-    $error = "No se proporcionó ningún token de seguridad.";
+// 1. Verificar que el administrador tenga la sesión iniciada
+if (!isset($_SESSION['admin_logged_in'])) {
+    header("Location: ../php/login_admin.php");
+    exit();
 }
 
+$error = '';
+$success = '';
+$email_admin = $_SESSION['correo'] ?? ''; 
+
 // 2. Procesar el formulario cuando se envía la nueva contraseña
-if($_SERVER['REQUEST_METHOD'] === 'POST' && $token_valido){
+if($_SERVER['REQUEST_METHOD'] === 'POST'){
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
     
@@ -42,12 +28,11 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && $token_valido){
             // Encriptar la nueva contraseña
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
             
-            // Actualizar la contraseña en la base de datos y limpiar los tokens
-            $stmt = $conn->prepare("UPDATE usuarios SET contraseña = ?, reset_token = NULL, reset_expiration = NULL WHERE correo = ?");
-            $stmt->execute([$hashed_password, $email_usuario]);
+            // Actualizar la contraseña en la base de datos guiándonos por el correo de la sesión
+            $stmt = $conn->prepare("UPDATE usuarios SET contraseña = ? WHERE correo = ?");
+            $stmt->execute([$hashed_password, $email_admin]);
             
             $success = "¡Tu contraseña ha sido actualizada con éxito!";
-            $token_valido = false; // Ocultamos el formulario para que inicie sesión
         } catch(PDOException $e) {
             $error = "Error al actualizar la contraseña: " . $e->getMessage();
         }
@@ -63,7 +48,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && $token_valido){
     <link rel="shortcut icon" href="../img/logo.webp">
     <link rel="stylesheet" href="../css/auth.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet">
-    <title>Restablecer Contraseña - L&M PC Computadoras</title>
+    <title>Cambiar Contraseña - L&M PC Computadoras</title>
 </head>
 <body>
     <div class="login-background">
@@ -91,11 +76,10 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && $token_valido){
                 <i class="fas fa-check-circle"></i>
                 <?= htmlspecialchars($success) ?>
                 <br><br>
-                <a href="../php/login.php" style="color: #155724; font-weight: bold; text-decoration: underline;">Haz clic aquí para iniciar sesión</a>
+                <a href="../php/dashboardadmin.php" style="color: #155724; font-weight: bold; text-decoration: underline;">Volver al Dashboard</a>
             </div>
-            <?php endif; ?>
-
-            <?php if($token_valido && !$success): ?>
+            <?php else: ?>
+            
             <form id="resetForm" class="login-form" method="POST">
                 <div class="input-group">
                     <label for="password">Nueva Contraseña:</label>
@@ -120,12 +104,10 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && $token_valido){
                     </button>
                 </div>
             </form>
-            <?php endif; ?>
-
-            <?php if(!$token_valido && !$success): ?>
+            
             <div class="register-footer" style="margin-top: 20px; text-align: center;">
-                <a href="../php/olvidar_contrasena.php" style="color:var(--primary-color); text-decoration:none; font-weight: bold;">
-                    <i class="fas fa-arrow-left"></i> Volver a intentar
+                <a href="../php/perfiladmin.php" style="color:var(--primary-color); text-decoration:none; font-weight: bold;">
+                    <i class="fas fa-arrow-left"></i> Cancelar y volver
                 </a>
             </div>
             <?php endif; ?>

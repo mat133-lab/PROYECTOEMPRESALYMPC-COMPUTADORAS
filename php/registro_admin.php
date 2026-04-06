@@ -105,13 +105,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registro_admin'])) {
             </div>
             <?php endif; ?>
 
-            <form method="POST" class="login-form" enctype="multipart/form-data">
+            <form method="POST" class="login-form" id="form-registro" enctype="multipart/form-data">
 
                 <div class="input-group">
                     <label>Nombre de Usuario</label>
                     <div class="input-container">
                         <i class="fas fa-user input-icon"></i>
-                        <input type="text" name="usuario" required value="<?php echo $_POST['usuario'] ?? ''; ?>">
+                        <input type="text" id="usuario" name="usuario" required value="<?php echo $_POST['usuario'] ?? ''; ?>">
                     </div>
                 </div>
 
@@ -119,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registro_admin'])) {
                     <label>Correo Electrónico</label>
                     <div class="input-container">
                         <i class="fas fa-envelope input-icon"></i>
-                        <input type="email" name="correo" required value="<?php echo $_POST['correo'] ?? ''; ?>">
+                        <input type="email" id="correo" name="correo" required value="<?php echo $_POST['correo'] ?? ''; ?>">
                     </div>
                 </div>
 
@@ -143,7 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registro_admin'])) {
                     <label>Contraseña</label>
                     <div class="input-container">
                         <i class="fas fa-lock input-icon"></i>
-                        <input type="password" name="contrasena" required>
+                        <input type="password" id="contrasena" name="contrasena" required>
                     </div>
                 </div>
 
@@ -151,7 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registro_admin'])) {
                     <label>Confirmar Contraseña</label>
                     <div class="input-container">
                         <i class="fas fa-check-circle input-icon"></i>
-                        <input type="password" name="confirm_contrasena" required>
+                        <input type="password" id="confirm_contrasena" name="confirm_contrasena" required>
                     </div>
                 </div>
 
@@ -159,7 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registro_admin'])) {
                     <label>Código de Administrador</label>
                     <div class="input-container">
                         <i class="fas fa-key input-icon"></i>
-                        <input type="password" name="codigo_admin" required>
+                        <input type="password" id="codigo_admin" name="codigo_admin" required>
                     </div>
                 </div>
 
@@ -184,5 +184,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registro_admin'])) {
         </div>
     </div>
 
+    <script src="../js/admin.js"></script>
 </body>
 </html>

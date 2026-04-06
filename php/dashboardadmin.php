@@ -310,7 +310,7 @@ $adminName = isset($_SESSION['admin_name']) ? htmlspecialchars($_SESSION['admin_
     <main class="container header">
         <div class="header-content">
             <div class="header-txt">
-                <h1>Bienvenido, <span><?php echo $adminName; ?></span></h1>
+                <h1>Hola, <span><?php echo $adminName; ?></span></h1>
                 <p>Panel de administración — gestion de citas, usuarios, mensajes y contenido del sitio.</p>
             </div>
         </div>

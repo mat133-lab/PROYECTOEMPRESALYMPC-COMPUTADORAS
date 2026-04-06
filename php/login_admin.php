@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_admin'])) {
         </div>
         <?php endif; ?>
 
-        <form method="POST" class="login-form">
+        <form method="POST" class="login-form" id="form-login">
 
             <div class="input-group">
                 <label for="correo">Correo Electrónico</label>
@@ -103,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_admin'])) {
                 <label for="codigo_admin">Código de Administrador</label>
                 <div class="input-container">
                     <i class="fas fa-key input-icon"></i>
-                    <input type="password" id="codigo_admin" name="codigo_admin" placeholder="Código secreto" required>
+                    <input type="password" id="codigo_admin" name="codigo_admin" placeholder="Código" required>
                 </div>
             </div>
 
