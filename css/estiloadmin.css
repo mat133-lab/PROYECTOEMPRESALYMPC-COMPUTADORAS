@@ -58,6 +58,11 @@ body {
     margin-bottom: 14px;
 }
 
+.fa-address-card {
+    color: #64748b;
+    font-size: 18px;
+}
+
 .input-group label {
     display: block;
     margin-bottom: 6px;

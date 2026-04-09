@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_admin'])) {
     $correo = trim($_POST['correo']);
     $contrasena = $_POST['contrasena'];
     $codigo_admin = $_POST['codigo_admin'];
+    $cedula = trim($_POST['cedula']);
     
     // Verificar código de administrador
     $codigo_correcto = 'ADMIN2026';
@@ -17,23 +18,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_admin'])) {
     if ($codigo_admin !== $codigo_correcto) {
         $mensaje = 'Código de administrador incorrecto';
         $tipo_mensaje = 'error';
-    } elseif (empty($correo) || empty($contrasena)) {
+    } elseif (empty($correo) || empty($contrasena) || empty($cedula)) {
         $mensaje = 'Por favor completa todos los campos';
-        $tipo_mensaje = 'error';
+        $tipo_mensaje = 'error invalides';
     } else {
         // Verificar credenciales
         $stmt = $conn->prepare("SELECT * FROM usuarios WHERE correo = ?");
         $stmt->execute([$correo]);
         $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
         
-        if ($usuario && password_verify($contrasena, $usuario['contraseña'])) {
+       if ($usuario && password_verify($contrasena, $usuario['contraseña'])) {
             // Verificar que tenga rol de admin
             if ($usuario['rol'] === 'admin') {
                 $_SESSION['correo'] = $usuario['correo'];
-                $_SESSION['id'] = $usuario['id'];
+                $_SESSION['id_usuario'] = $usuario['id_usuario'];
+                $_SESSION['id'] = $usuario['id_usuario'];
                 $_SESSION['usuario'] = $usuario['usuario'];
                 $_SESSION['rol'] = 'admin';
-                // Marcar sesión como admin iniciada (coincide con dashboardadmin.php)
+                $_SESSION['cedula'] = $usuario['cedula'];
+                
+                // Nuevas variables para los documentos
+                $_SESSION['archivo_cedula'] = $usuario['archivo_cedula']; 
+                $_SESSION['archivo_ruc'] = $usuario['archivo_ruc'];
+                
+                // Marcar sesión como admin iniciada
                 $_SESSION['admin_logged_in'] = true;
                 $_SESSION['admin_name'] = $usuario['usuario'];
 
@@ -82,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_admin'])) {
         <form method="POST" class="login-form" id="form-login">
 
             <div class="input-group">
-                <label for="correo">Correo Electrónico</label>
+                <label for="correo">Correo Electrónico:</label>
                 <div class="input-container">
                     <i class="fas fa-envelope input-icon"></i>
                     <input type="email" id="correo" name="correo" placeholder="admin@ejemplo.com" required
@@ -91,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_admin'])) {
             </div>
 
             <div class="input-group">
-                <label for="contrasena">Contraseña</label>
+                <label for="contrasena">Contraseña:</label>
                 <div class="input-container">
                     <i class="fas fa-lock input-icon"></i>
                     <input type="password" id="contrasena" name="contrasena" placeholder="••••••••" required
@@ -100,7 +108,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_admin'])) {
             </div>
 
             <div class="input-group">
-                <label for="codigo_admin">Código de Administrador</label>
+                <label for="contrasena">Ingresa tu Numero de Cedula:</label>
+                <div class="input-container">
+                    <i class="fa-solid fa-address-card"></i>
+                    <input type="password" id="cedula" name="cedula" placeholder="1234567890" required
+                        autocomplete="current-password">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="codigo_admin">Código de Administrador:</label>
                 <div class="input-container">
                     <i class="fas fa-key input-icon"></i>
                     <input type="password" id="codigo_admin" name="codigo_admin" placeholder="Código" required>

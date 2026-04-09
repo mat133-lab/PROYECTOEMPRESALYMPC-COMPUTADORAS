@@ -11,6 +11,7 @@ if(isset($_SESSION['usuario'])){
 if($_SERVER['REQUEST_METHOD'] === 'POST'){
     $user = trim($_POST['correo']); // Limpiar espacios en blanco
     $pass = $_POST['contrasena'];
+    $cedula = trim($_POST['cedula']);
 
     // Consulta segura de las sentencias
     $stmt = $conn->prepare("SELECT * FROM usuarios WHERE correo = ?");
@@ -23,8 +24,10 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         // GUARDAMOS LOS DATOS CORRECTAMENTE EN LA SESIÓN
         $_SESSION['id_usuario'] = $row['id_usuario']; // Aseguramos que sea 'id_usuario'
         $_SESSION['correo'] = $row['correo'];
+
         $_SESSION['rol'] = $row['rol'];
-        
+        $_SESSION['cedula'] = $row['cedula'];
+
         // Guardar nombre de usuario si existe en la tabla
         $_SESSION['usuario'] = !empty($row['usuario']) ? $row['usuario'] : 'Usuario';
         
@@ -78,6 +81,14 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                     <div class="input-container">
                         <i class="fas fa-lock input-icon"></i>
                         <input type="password" id="contrasena" name="contrasena" placeholder="*****" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="correo">Ingresa tu Numero de Cedula: </label>
+                    <div class="input-container">
+                        <i class="fa-solid fa-address-card"></i>
+                        <input type="password" id="cedula" name="cedula" placeholder="1234567890" required>
                     </div>
                 </div>
 

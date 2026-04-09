@@ -1,11 +1,41 @@
 <?php
 session_start();
+//Requerimos la base de datos para buscar la ruta del archivo
+require_once '../includes/db.php'; 
+
 if (!isset($_SESSION['admin_logged_in'])) {
     header("Location: ../php/login_admin.php");
     exit();
 }
+
 $adminName = isset($_SESSION['admin_name']) ? htmlspecialchars($_SESSION['admin_name']) : 'Administrador';
-$adminEmail = $_SESSION['correo'];
+$adminEmail = $_SESSION['correo'] ?? 'Correo no proporcionado';
+$adminType = $_SESSION['rol'] ?? 'No especificado';
+$adminCedula = $_SESSION['cedula'] ?? 'No proporcionada';
+
+// Buscar los archivos en la base de datos usando el ID del usuario
+$adminId = null;
+
+if (!empty($_SESSION['id_usuario'])) {
+    $adminId = $_SESSION['id_usuario'];
+} elseif (!empty($_SESSION['id'])) {
+    $adminId = $_SESSION['id'];
+}
+
+$adminCopia = $_SESSION['archivo_cedula'] ?? '';
+$adminRuc = $_SESSION['archivo_ruc'] ?? '';
+
+if ($adminId) {
+    // Buscamos específicamente al usuario logueado en la base de datos por su id_usuario
+    $stmt = $conn->prepare("SELECT archivo_cedula, archivo_ruc FROM usuarios WHERE id_usuario = ?");
+    $stmt->execute([$adminId]);
+    $archivos = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($archivos) {
+        $adminCopia = $archivos['archivo_cedula'] ?? $adminCopia;
+        $adminRuc = $archivos['archivo_ruc'] ?? $adminRuc;
+    }
+}
 ?>
 <!doctype html>
 <html lang="es">
@@ -358,27 +388,66 @@ $adminEmail = $_SESSION['correo'];
 
                             <div class="row mt-3">
                                 <div class="col-12 field-group">
-                                    <div class="field-label">Usuario</div>
+                                    <div class="field-label">Nombre de Usuario:</div>
                                     <div class="field-value text-muted fw-normal" style="font-size: 0.95rem;">
                                         <?php echo $adminName; ?></div>
                                 </div>
 
                                 <div class="col-12 field-group position-relative">
-                                    <div class="field-label">Correo Electronico</div>
+                                    <div class="field-label">Correo Electronico:</div>
                                     <div class="field-value text-muted fw-normal" style="font-size: 0.95rem;">
                                         <?php echo $adminEmail; ?></div>
                                 </div>
 
                                 <div class="col-12 field-group">
-                                    <div class="field-label">Fecha de nacimiento</div>
-                                    <div class="field-value text-muted fw-normal" style="font-size: 0.95rem;">4 de
-                                        Octubre</div>
+                                    <div class="field-label">Numero de Cedula:</div>
+                                    <div class="field-value text-muted fw-normal" style="font-size: 0.95rem;">
+                                        <?php echo $adminCedula; ?></div>
                                 </div>
 
                                 <div class="col-12 field-group">
-                                    <div class="field-label">Número de extensión</div>
-                                    <div class="field-value text-muted fw-normal" style="font-size: 0.95rem;">777</div>
+                                    <div class="field-label">Copia de Cedula:</div>
+                                    <div class="field-value text-muted fw-normal" style="font-size: 0.95rem;">
+                                        <?php if(!empty($adminCopia) && $adminCopia !== 'NULL'): ?>
+                                            <div class="d-flex gap-2 mt-1">
+                                                <a href="<?php echo htmlspecialchars($adminCopia); ?>" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye me-1"></i> Ver
+                                                </a>
+                                                <a href="<?php echo htmlspecialchars($adminCopia); ?>" download class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-download me-1"></i> Descargar
+                                                </a>
+                                            </div>
+                                        <?php else: ?>
+                                            <span class="text-danger" style="font-size: 0.85rem;">Documento no Proporcionado</span>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
+
+                                <div class="col-12 field-group">
+                                    <div class="field-label">Copia de RUC:</div>
+                                    <div class="field-value text-muted fw-normal" style="font-size: 0.95rem;">
+                                        <?php if (!empty($adminRuc) && $adminRuc !== 'NULL'): ?>
+                                            <div class="d-flex gap-2 mt-1">
+                                                <a href="<?php echo htmlspecialchars($adminRuc); ?>" target="_blank" class="btn btn-sm btn-outline-success">
+                                                    <i class="fas fa-eye me-1"></i> Ver
+                                                </a>
+                                                <a href="<?php echo htmlspecialchars($adminRuc); ?>" download class="btn btn-sm btn-success">
+                                                    <i class="fas fa-download me-1"></i> Descargar
+                                                </a>
+                                            </div>
+                                        <?php else: ?>
+                                            <span class="text-danger" style="font-size: 0.85rem;">No se ha subido ningún archivo</span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 field-group">
+                                    <div class="field-label">Tipo de Usuario:</div>
+                                    <div class="field-value text-muted fw-normal" style="font-size: 0.95rem;">
+                                        <?php echo $adminType; ?></div>
+                                </div>
+
+
                             </div>
 
                             <div class="mt-4 dropdown">

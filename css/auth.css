@@ -86,6 +86,11 @@ body {
     font-size: 18px;
 }
 
+.fa-address-card {
+    color: #64748b;
+    font-size: 18px;
+}
+
 .login-btn {
     display: block;
     width: 100%;

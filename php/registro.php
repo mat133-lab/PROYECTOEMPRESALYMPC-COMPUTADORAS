@@ -11,9 +11,10 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     $password = $_POST['password'];
     $confirmPassword = $_POST['confirmPassword'];
     $role = $_POST['role'];
+    $cedula = trim($_POST['cedula']);
 
     // Validaciones
-    if(empty($username) || empty($email) || empty($password) || empty($confirmPassword) || empty($role)){
+    if(empty($username) || empty($email) || empty($password) || empty($confirmPassword) || empty($role) || empty($cedula)){
         $error = "Todos los campos obligatorios deben estar llenos.";
     }
     elseif(strlen($username) < 3){
@@ -27,6 +28,9 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     }
     elseif($password !== $confirmPassword){
         $error = "Las contraseñas no coinciden";
+    }
+    elseif(strlen($cedula) < 10){
+        $error = "El número de cédula debe tener al menos 10 caracteres";
     }
     else{
         // Verificar si el correo ya existe
@@ -62,8 +66,8 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 
             // Insertar nuevo usuario (Ahora con los campos de archivos)
             try{
-                $stmt = $conn->prepare("INSERT INTO usuarios (usuario, correo, contraseña, rol, archivo_ruc, archivo_cedula) VALUES (?, ?, ?, ?, ?, ?)");
-                $stmt->execute([$username, $email, $hashed_password, $role, $ruta_ruc, $ruta_cedula]);
+                $stmt = $conn->prepare("INSERT INTO usuarios (usuario, correo, contraseña, rol, archivo_ruc, archivo_cedula, cedula) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$username, $email, $hashed_password, $role, $ruta_ruc, $ruta_cedula, $cedula]);
                 
                 $success = "Registro exitoso. Redirigiendo al login...";
                 header("Refresh: 2; url=../php/login.php");
@@ -90,36 +94,39 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 <body>
     <div class="login-background">
         <div class="login-container">
-            
+
             <div class="login-header">
-                <i class="fa-solid fa-id-card" style="font-size: 4rem; color: var(--text-color, #ff7700); margin-bottom: 1rem;"></i>
+                <i class="fa-solid fa-id-card"
+                    style="font-size: 4rem; color: var(--text-color, #ff7700); margin-bottom: 1rem;"></i>
                 <h2>Crear Cuenta</h2>
                 <p style="font-size: 0.9rem; color: var(--text-muted);">Registrate para crear tu perfil</p>
             </div>
 
             <?php if($error): ?>
-                <div class="alert alert-error" style="background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 15px; border-radius: 5px; text-align: center; border: 1px solid #f5c6cb;">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <?= htmlspecialchars($error) ?>
-                </div>
+            <div class="alert alert-error"
+                style="background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 15px; border-radius: 5px; text-align: center; border: 1px solid #f5c6cb;">
+                <i class="fas fa-exclamation-circle"></i>
+                <?= htmlspecialchars($error) ?>
+            </div>
             <?php endif; ?>
 
             <?php if($success): ?>
-                <div class="alert alert-success" style="background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 15px; border-radius: 5px; text-align: center; border: 1px solid #c3e6cb;">
-                    <i class="fas fa-check-circle"></i>
-                    <?= htmlspecialchars($success) ?>
-                </div>
+            <div class="alert alert-success"
+                style="background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 15px; border-radius: 5px; text-align: center; border: 1px solid #c3e6cb;">
+                <i class="fas fa-check-circle"></i>
+                <?= htmlspecialchars($success) ?>
+            </div>
             <?php endif; ?>
 
             <form id="registerForm" class="login-form" method="POST" enctype="multipart/form-data">
-                
+
                 <div class="input-group">
                     <label for="regUsername">Nombre de Usuario: </label>
                     <div class="input-container">
                         <i class="fas fa-user input-icon"></i>
                         <input type="text" id="regUsername" name="username" placeholder="Nombre de usuario" required>
                     </div>
-                </div> 
+                </div>
 
                 <div class="input-group">
                     <label for="regEmail">Correo Electrónico: </label>
@@ -129,19 +136,32 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                     </div>
                 </div>
 
-                <div class="input-group" style="background: rgba(0,0,0,0.03); padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed #ccc;">
-                    <label style="color: var(--text-color, #ff7700); font-weight: bold; margin-bottom: 10px; display: block;">Documentos</label>
-                    
+                <div class="input-group"
+                    style="background: rgba(0,0,0,0.03); padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed #ccc;">
+                    <label
+                        style="color: var(--text-color, #ff7700); font-weight: bold; margin-bottom: 10px; display: block;">Documentos</label>
+
                     <label for="archivo_ruc" style="font-size: 0.85rem;">Subir RUC (Si eres empresa):</label>
                     <div class="input-container" style="margin-bottom: 10px;">
                         <i class="fas fa-file-pdf input-icon"></i>
-                        <input type="file" id="archivo_ruc" name="archivo_ruc" accept=".pdf, .jpg, .png" style="padding-left: 40px; font-size: 0.85rem;">
+                        <input type="file" id="archivo_ruc" name="archivo_ruc" accept=".pdf, .jpg, .png"
+                            style="padding-left: 40px; font-size: 0.85rem;">
                     </div>
 
                     <label for="archivo_cedula" style="font-size: 0.85rem;">Subir Copia de Cédula:</label>
                     <div class="input-container">
                         <i class="fas fa-id-card input-icon"></i>
-                        <input type="file" id="archivo_cedula" name="archivo_cedula" accept=".pdf, .jpg, .png" style="padding-left: 40px; font-size: 0.85rem;">
+                        <input type="file" id="archivo_cedula" name="archivo_cedula" accept=".pdf, .jpg, .png"
+                            style="padding-left: 40px; font-size: 0.85rem;">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="contrasena">Ingresa tu Numero de Cedula:</label>
+                    <div class="input-container">
+                        <i class="fa-solid fa-address-card"></i>
+                        <input type="password" id="cedula" name="cedula" placeholder="1234567890" required
+                            autocomplete="current-password">
                     </div>
                 </div>
 
@@ -157,7 +177,8 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                     <label for="regConfirm">Confirmar Contraseña: </label>
                     <div class="input-container">
                         <i class="fas fa-check-circle input-icon"></i>
-                        <input type="password" id="regConfirm" name="confirmPassword" placeholder="Repetir contraseña" required>
+                        <input type="password" id="regConfirm" name="confirmPassword" placeholder="Repetir contraseña"
+                            required>
                     </div>
                 </div>
 
@@ -165,7 +186,8 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                     <label for="regRole">Tipo de Usuario</label>
                     <div class="input-container">
                         <i class="fas fa-users-cog input-icon"></i>
-                        <select id="regRole" name="role" class="tech-select" required style="width: 100%; padding: 10px 10px 10px 40px; border: 1px solid #ccc; border-radius: 5px; outline: none;">
+                        <select id="regRole" name="role" class="tech-select" required
+                            style="width: 100%; padding: 10px 10px 10px 40px; border: 1px solid #ccc; border-radius: 5px; outline: none;">
                             <option value="" disabled selected>Seleccione un rol...</option>
                             <option value="usuario">Usuario Común</option>
                             <option value="tecnico">Técnico</option>
@@ -198,4 +220,5 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         </div>
     </div>
 </body>
+
 </html>

@@ -12,6 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registro_admin'])) {
     $contrasena = $_POST['contrasena'];
     $confirm_contrasena = $_POST['confirm_contrasena'];
     $codigo_admin = $_POST['codigo_admin'];
+    $cedula = $_POST['cedula'];
     
     // Verificar código de administrador
     $codigo_correcto = 'ADMIN2026';
@@ -19,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registro_admin'])) {
     if ($codigo_admin !== $codigo_correcto) {
         $mensaje = 'Código de administrador incorrecto';
         $tipo_mensaje = 'error';
-    } elseif (empty($usuario) || empty($correo) || empty($contrasena) || empty($confirm_contrasena)) {
+    } elseif (empty($usuario) || empty($correo) || empty($contrasena) || empty($confirm_contrasena) || empty($cedula)) {
         $mensaje = 'Por favor completa todos los campos';
         $tipo_mensaje = 'error';
     } elseif ($contrasena !== $confirm_contrasena) {
@@ -30,6 +31,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registro_admin'])) {
         $tipo_mensaje = 'error';
     } elseif (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
         $mensaje = 'El correo electrónico no es válido';
+        $tipo_mensaje = 'error';
+    }else if (strlen($cedula) < 10) {
+        $mensaje = 'El número de cédula debe tener al menos 10 caracteres';
         $tipo_mensaje = 'error';
     } else {
         // Verificar si el correo ya existe
@@ -62,9 +66,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registro_admin'])) {
 
             // Registrar nuevo admin (con campos de archivos)
             $contraseña_hash = password_hash($contrasena, PASSWORD_BCRYPT);
-            $stmt = $conn->prepare("INSERT INTO usuarios (usuario, correo, contraseña, rol, archivo_ruc, archivo_cedula) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt = $conn->prepare("INSERT INTO usuarios (usuario, correo, cedula, contraseña, rol, archivo_ruc, archivo_cedula) VALUES (?, ?, ?, ?, ?, ?, ?)");
             
-            if ($stmt->execute([$usuario, $correo, $contraseña_hash, 'admin', $ruta_ruc, $ruta_cedula])) {
+            if ($stmt->execute([$usuario, $correo, $cedula, $contraseña_hash, 'admin', $ruta_ruc, $ruta_cedula])) {
                 $mensaje = 'Administrador registrado exitosamente. Por favor, inicia sesión.';
                 $tipo_mensaje = 'success';
                 // Limpiar formulario
@@ -136,6 +140,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registro_admin'])) {
                     <div class="input-container">
                         <i class="fas fa-id-card input-icon"></i>
                         <input type="file" id="archivo_cedula" name="archivo_cedula" accept=".pdf, .jpg, .png" style="padding-left: 40px; font-size: 0.85rem;">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="contrasena">Ingresa tu Numero de Cedula:</label>
+                    <div class="input-container">
+                        <i class="fa-solid fa-address-card"></i>
+                        <input type="password" id="cedula" name="cedula" placeholder="1234567890" required
+                            autocomplete="current-password">
                     </div>
                 </div>
 
