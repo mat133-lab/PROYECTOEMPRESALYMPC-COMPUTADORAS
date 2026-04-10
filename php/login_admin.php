@@ -36,6 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_admin'])) {
                 $_SESSION['usuario'] = $usuario['usuario'];
                 $_SESSION['rol'] = 'admin';
                 $_SESSION['cedula'] = $usuario['cedula'];
+                $_SESSION['login_time'] = time();
                 
                 // Nuevas variables para los documentos
                 $_SESSION['archivo_cedula'] = $usuario['archivo_cedula']; 

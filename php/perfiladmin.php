@@ -8,6 +8,12 @@ if (!isset($_SESSION['admin_logged_in'])) {
     exit();
 }
 
+// Por si acaso entran sin pasar por el login durante las pruebas
+if (!isset($_SESSION['login_time'])) {
+    $_SESSION['login_time'] = time();
+}
+$login_timestamp = $_SESSION['login_time'];
+
 $adminName = isset($_SESSION['admin_name']) ? htmlspecialchars($_SESSION['admin_name']) : 'Administrador';
 $adminEmail = $_SESSION['correo'] ?? 'Correo no proporcionado';
 $adminType = $_SESSION['rol'] ?? 'No especificado';
@@ -152,12 +158,8 @@ if ($adminId) {
                                         Pc Dell
                                     </a>
                                 </li>
-                                <li>
-                                    <a class="dropdown-item categoria-link" href="../php/hpdell.php"
-                                        data-categoria="techos">
-                                        Hp Dell
-                                    </a>
-                                </li>
+                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="techos"></a></li>
+                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="techos"></a></li>
                             </ul>
                         </li>
 
@@ -166,47 +168,9 @@ if ($adminId) {
                                 Laptops
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="../php/asus.php"
-                                        data-categoria="madera">ASUS</a>
-                                </li>
-                                <li><a class="dropdown-item categoria-link" href="../php/lenovo.php"
-                                        data-categoria="pisos">LENOVO</a>
-                                </li>
-                                <li><a class="dropdown-item categoria-link" href="../php/omnibook.php"
-                                        data-categoria="armarios">HP
-                                        OMNIBOOK </a></li>
-                                <li><a class="dropdown-item categoria-link" href="../php/msi.php"
-                                        data-categoria="armarios">MSI</a>
-                                </li>
-                                <li><a class="dropdown-item categoria-link" href="../php/dell.php"
-                                        data-categoria="armarios">DELL</a>
-                                </li>
-
-                            </ul>
-                        </li>
-
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                                Duplicadora
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="../php/duplicadoracd.php"
-                                        data-categoria="electricidad">CD</a></li>
-                                <li><a class="dropdown-item categoria-link" href="../php/duplicadoradvd.php"
-                                        data-categoria="iluminacion">DVD</a></li>
-                                <li><a class="dropdown-item categoria-link" href="../php/duplicadorablu.php"
-                                        data-categoria="domotica">BLU-RAY</a></li>
-                            </ul>
-                        </li>
-
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                                Tablets
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="herramientas"></a>
-                                </li>
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="maquinaria"></a>
+                                <li><a class="dropdown-item categoria-link" href="../php/laptops.php"
+                                        data-categoria="bano">Laptops</a></li>
+                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="seguridad"></a>
                                 </li>
                                 <li><a class="dropdown-item categoria-link" href="#" data-categoria="seguridad"></a>
                                 </li>
@@ -366,104 +330,141 @@ if ($adminId) {
                 tabindex="0">
 
                 <div class="row g-4">
-                    <div class="col-12 col-lg-4">
-                        <div class="card card-custom position-relative text-center overflow-hidden h-100">
+
+                    <div class="col-12 col-lg-4 d-flex flex-column gap-4">
+
+                        <div class="card card-custom position-relative text-center overflow-hidden">
                             <div class="badge-admin">
                                 ADMINISTRADOR <i class="fas fa-chevron-down ms-1"></i>
                             </div>
-
                             <div class="foto-placeholder shadow-sm">
                                 <i class="fas fa-user"></i>
                             </div>
                         </div>
+
+                        <div class="card card-custom gauge-card p-4">
+                            <p class="gauge-title-label fw-bold mb-2 text-secondary text-center">Tiempo activo en sesión
+                            </p>
+                            <div class="gauge-svg-wrap mx-auto" style="width: 220px; height: 120px;">
+                                <svg class="gauge-svg" viewBox="0 0 180 100" style="width: 100%; height: 100%;">
+                                    <path class="gauge-bg" d="M 10 90 A 80 80 0 0 1 170 90" fill="none" stroke="#e9ecef"
+                                        stroke-width="12" stroke-linecap="round" />
+                                    <path id="gauge-arc" class="gauge-arc" d="M 10 90 A 80 80 0 0 1 170 90" fill="none"
+                                        stroke="#22c55e" stroke-width="12" stroke-linecap="round"
+                                        stroke-dasharray="251.2" stroke-dashoffset="251.2"
+                                        style="transition: stroke-dashoffset 1s ease-out, stroke 1s ease-out;" />
+                                    <line id="gauge-needle" class="gauge-needle" x1="90" y1="90" x2="25" y2="90"
+                                        stroke="#333" stroke-width="4" stroke-linecap="round"
+                                        style="transition: transform 1s ease-out; transform-origin: 90px 90px;" />
+                                    <circle id="gauge-pivot" cx="90" cy="90" r="8" fill="#333" />
+                                </svg>
+                            </div>
+                            <div id="gauge-time" class="gauge-time-display text-primary mt-2 text-center"
+                                style="font-size: 2rem;">00:00:00</div>
+                            <div class="d-flex align-items-center justify-content-center gap-2 mt-1">
+                                <span id="gauge-badge" class="badge bg-success rounded-pill px-3 py-2">Bajo</span>
+                                <span id="gauge-label" class="text-muted small">Calculando...</span>
+                            </div>
+                        </div>
+
                     </div>
 
                     <div class="col-12 col-lg-8">
                         <div class="card card-custom p-4 h-100">
-                            <div class="info-header">
+
+                            <div class="info-header mb-4 d-flex justify-content-between align-items-center">
                                 <h5 class="m-0 text-secondary">Información del Usuario</h5>
                                 <a href="#" class="text-muted text-decoration-none"
                                     style="font-size: 0.9rem;">editar</a>
                             </div>
 
-                            <div class="row mt-3">
-                                <div class="col-12 field-group">
-                                    <div class="field-label">Nombre de Usuario:</div>
-                                    <div class="field-value text-muted fw-normal" style="font-size: 0.95rem;">
-                                        <?php echo $adminName; ?></div>
-                                </div>
-
-                                <div class="col-12 field-group position-relative">
-                                    <div class="field-label">Correo Electronico:</div>
-                                    <div class="field-value text-muted fw-normal" style="font-size: 0.95rem;">
-                                        <?php echo $adminEmail; ?></div>
+                            <div class="row g-4">
+                                <div class="col-12 pb-2 border-bottom">
+                                    <h6 class="text-uppercase text-muted fw-bold mb-0"
+                                        style="font-size: 0.8rem; letter-spacing: 0.5px;">
+                                        Datos Personales
+                                    </h6>
                                 </div>
 
                                 <div class="col-12 field-group">
-                                    <div class="field-label">Numero de Cedula:</div>
-                                    <div class="field-value text-muted fw-normal" style="font-size: 0.95rem;">
-                                        <?php echo $adminCedula; ?></div>
+                                    <div class="field-label" style="font-weight: 600; font-size: 0.85rem; color: #888;">
+                                        Nombre Completo:</div>
+                                    <div class="field-value text-muted fw-normal mt-1" style="font-size: 0.95rem;">
+                                        <?php echo $adminName; ?>
+                                    </div>
                                 </div>
 
                                 <div class="col-12 field-group">
-                                    <div class="field-label">Copia de Cedula:</div>
-                                    <div class="field-value text-muted fw-normal" style="font-size: 0.95rem;">
-                                        <?php if(!empty($adminCopia) && $adminCopia !== 'NULL'): ?>
-                                            <div class="d-flex gap-2 mt-1">
-                                                <a href="<?php echo htmlspecialchars($adminCopia); ?>" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                    <i class="fas fa-eye me-1"></i> Ver
+                                    <div class="field-label" style="font-weight: 600; font-size: 0.85rem; color: #888;">
+                                        Correo Electrónico:</div>
+                                    <div class="field-value text-muted fw-normal mt-1" style="font-size: 0.95rem;">
+                                        <?php echo $adminEmail; ?>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 field-group">
+                                    <div class="field-label" style="font-weight: 600; font-size: 0.85rem; color: #888;">
+                                        Cédula de Identidad:</div>
+                                    <div class="field-value text-muted fw-normal mt-1" style="font-size: 0.95rem;">
+                                        <?php echo $adminCedula; ?>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-12 col-md-6 field-group">
+                                    <div class="field-label" style="font-weight: 600; font-size: 0.85rem; color: #888;">
+                                        Archivos Subidos:</div>
+                                    <div class="field-value text-muted fw-normal mt-2" style="font-size: 0.95rem;">
+                                        <?php if ($adminCopia || $adminRuc): ?>
+                                        <div class="d-flex flex-column gap-2">
+                                            <?php if ($adminCopia && $adminCopia !== 'NULL'): ?>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <a href="<?php echo htmlspecialchars($adminCopia); ?>" target="_blank"
+                                                    class="btn btn-sm btn-outline-primary"
+                                                    style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">
+                                                    <i class="fas fa-eye me-1"></i> Ver Cédula
                                                 </a>
-                                                <a href="<?php echo htmlspecialchars($adminCopia); ?>" download class="btn btn-sm btn-primary">
-                                                    <i class="fas fa-download me-1"></i> Descargar
+                                                <a href="<?php echo htmlspecialchars($adminCopia); ?>" download
+                                                    class="btn btn-sm btn-primary"
+                                                    style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">
+                                                    <i class="fas fa-download"></i>
                                                 </a>
                                             </div>
+                                            <?php endif; ?>
+                                            <?php if ($adminRuc && $adminRuc !== 'NULL'): ?>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <a href="<?php echo htmlspecialchars($adminRuc); ?>" target="_blank"
+                                                    class="btn btn-sm btn-outline-success"
+                                                    style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">
+                                                    <i class="fas fa-eye me-1"></i> Ver RUC
+                                                </a>
+                                                <a href="<?php echo htmlspecialchars($adminRuc); ?>" download
+                                                    class="btn btn-sm btn-success"
+                                                    style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">
+                                                    <i class="fas fa-download"></i>
+                                                </a>
+                                            </div>
+                                            <?php endif; ?>
+                                        </div>
                                         <?php else: ?>
-                                            <span class="text-danger" style="font-size: 0.85rem;">Documento no Proporcionado</span>
+                                        <span class="text-danger" style="font-size: 0.85rem;">No se ha subido ningún
+                                            archivo</span>
                                         <?php endif; ?>
                                     </div>
                                 </div>
 
                                 <div class="col-12 field-group">
-                                    <div class="field-label">Copia de RUC:</div>
-                                    <div class="field-value text-muted fw-normal" style="font-size: 0.95rem;">
-                                        <?php if (!empty($adminRuc) && $adminRuc !== 'NULL'): ?>
-                                            <div class="d-flex gap-2 mt-1">
-                                                <a href="<?php echo htmlspecialchars($adminRuc); ?>" target="_blank" class="btn btn-sm btn-outline-success">
-                                                    <i class="fas fa-eye me-1"></i> Ver
-                                                </a>
-                                                <a href="<?php echo htmlspecialchars($adminRuc); ?>" download class="btn btn-sm btn-success">
-                                                    <i class="fas fa-download me-1"></i> Descargar
-                                                </a>
-                                            </div>
-                                        <?php else: ?>
-                                            <span class="text-danger" style="font-size: 0.85rem;">No se ha subido ningún archivo</span>
-                                        <?php endif; ?>
+                                    <div class="field-label" style="font-weight: 600; font-size: 0.85rem; color: #888;">
+                                        Tipo de Usuario:</div>
+                                    <div class="field-value text-muted fw-normal mt-2" style="font-size: 0.95rem;">
+                                        <?php echo $adminType; ?>
                                     </div>
                                 </div>
-
-                                <div class="col-12 field-group">
-                                    <div class="field-label">Tipo de Usuario:</div>
-                                    <div class="field-value text-muted fw-normal" style="font-size: 0.95rem;">
-                                        <?php echo $adminType; ?></div>
-                                </div>
-
-
                             </div>
 
-                            <div class="mt-4 dropdown">
-                                <a href="#" class="link-action" data-bs-toggle="dropdown"
-                                    aria-expanded="false">Seleccionar campo</a>
-                                <a href="#" class="link-action ms-3">Crear campo</a>
-
-                                <ul class="dropdown-menu border-0 shadow py-2" style="border-radius: 8px;">
-                                    <li><a class="dropdown-item text-muted py-2" href="#">Correo electrónico de
-                                            contacto</a></li>
-                                    <li><a class="dropdown-item text-muted py-2" href="#">Departamento</a></li>
-                                    <li><a class="dropdown-item text-muted py-2" href="#">Registrado el</a></li>
-                                </ul>
-                            </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -479,6 +480,10 @@ if ($adminId) {
             </div>
         </div>
     </footer>
+
+    <script>
+    window.gaugeLoginTime = <?php echo $login_timestamp; ?> * 1000;
+    </script>
 
     <script src="../js/admin.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"

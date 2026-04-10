@@ -50,7 +50,6 @@ document.addEventListener("DOMContentLoaded", function () {
     
     if (formRegistro) {
         formRegistro.addEventListener('submit', function (e) {
-            // Asegúrate de que tus inputs en el HTML tengan estos IDs
             const usuario = document.getElementById('usuario').value.trim();
             const correo = document.getElementById('correo').value.trim();
             const contrasena = document.getElementById('contrasena').value;
@@ -94,8 +93,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-
-    //  LÓGICA DEL BOTÓN DE CAMBIO DE CONTRASEÑA
+    // LÓGICA DEL BOTÓN DE CAMBIO DE CONTRASEÑA
     const passBtn = document.getElementById('pass');
     
     if (passBtn) {
@@ -106,5 +104,101 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+
+    // MEDIDOR DE TIEMPO ACTIVO EN SESIÓN (GAUGE)
+ 
+    (function () {
+        // gaugeLoginTime es inyectado por PHP en perfiladmin.php
+        // antes de cargar este script
+        if (typeof window.gaugeLoginTime === 'undefined') return;
+
+        var loginTime = window.gaugeLoginTime;
+        var MAX_MS    = 8 * 60 * 60 * 1000; // Escala máxima: 8 horas
+        var ARC_LEN   = 251;                  // Longitud total del arco SVG
+
+        var arc    = document.getElementById('gauge-arc');
+        var needle = document.getElementById('gauge-needle');
+        var pivot  = document.getElementById('gauge-pivot');
+        var timeEl = document.getElementById('gauge-time');
+        var badge  = document.getElementById('gauge-badge');
+        var label  = document.getElementById('gauge-label');
+
+        // Si los elementos del gauge no existen en esta página, salir
+        if (!arc || !needle || !timeEl) return;
+
+        // Interpola entre dos valores
+        function lerp(a, b, t) {
+            return a + (b - a) * t;
+        }
+
+        // Devuelve un color RGB que va de verde, amarillo, rojo
+        function getColor(pct) {
+            var r, g, b;
+            if (pct < 0.5) {
+                var t = pct / 0.5;
+                r = Math.round(lerp(34,  234, t));
+                g = Math.round(lerp(197, 179, t));
+                b = Math.round(lerp(94,  8,   t));
+            } else {
+                var t = (pct - 0.5) / 0.5;
+                r = Math.round(lerp(234, 239, t));
+                g = Math.round(lerp(179, 68,  t));
+                b = Math.round(lerp(8,   68,  t));
+            }
+            return 'rgb(' + r + ',' + g + ',' + b + ')';
+        }
+
+        // Formatea milisegundos a HH:MM:SS
+        function formatTime(ms) {
+            var totalSeg = Math.floor(ms / 1000);
+            var h = Math.floor(totalSeg / 3600);
+            var m = Math.floor((totalSeg % 3600) / 60);
+            var s = totalSeg % 60;
+            return String(h).padStart(2, '0') + ':' +
+                   String(m).padStart(2, '0') + ':' +
+                   String(s).padStart(2, '0');
+        }
+
+        function updateGauge() {
+            var elapsed = Date.now() - loginTime;
+            var pct     = Math.min(elapsed / MAX_MS, 1);
+            var color   = getColor(pct);
+
+            // Animación del arco de progreso
+            arc.setAttribute('stroke-dashoffset', ARC_LEN - pct * ARC_LEN);
+            arc.setAttribute('stroke', color);
+
+            // Animación de la aguja: -90° y +90°
+            var angleDeg = -90 + pct * 180;
+            needle.setAttribute('transform', 'rotate(' + angleDeg + ',90,90)');
+            needle.setAttribute('stroke', color);
+            pivot.setAttribute('fill', color);
+
+            // Tiempo digital
+            timeEl.textContent = formatTime(elapsed);
+            timeEl.style.color = color;
+
+            // Badge de estado y etiqueta
+            badge.classList.remove('gauge-badge--bajo', 'gauge-badge--medio', 'gauge-badge--alto');
+
+            if (pct < 0.25) {
+                badge.textContent = 'Bajo';
+                badge.classList.add('gauge-badge--bajo');
+                label.textContent = 'Sesión reciente';
+            } else if (pct < 0.65) {
+                badge.textContent = 'Medio';
+                badge.classList.add('gauge-badge--medio');
+                label.textContent = 'Tiempo moderado';
+            } else {
+                badge.textContent = 'Alto';
+                badge.classList.add('gauge-badge--alto');
+                label.textContent = 'Sesión prolongada';
+            }
+        }
+
+        // Actualizar cada segundo
+        setInterval(updateGauge, 1000);
+        updateGauge();
+    })();
 
 });

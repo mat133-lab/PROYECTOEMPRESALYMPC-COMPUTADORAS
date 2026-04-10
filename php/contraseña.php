@@ -70,7 +70,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                 </div>
                 <h2>¿Olvidaste tu contraseña?</h2>
                 <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">
-                    Introduce tu correo y te enviaremos instrucciones para restablecerla.
+                    Introduce tu correo para restablecerla.
                 </p>
             </div>
 
@@ -99,7 +99,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 
                 <div class="register-footer">
                     <button type="submit" class="login-btn">
-                        <span class="btn-text">Enviar Instrucciones</span>
+                        <span class="btn-text">Enviar Correo</span>
                         <i class="fas fa-paper-plane btn-icon"></i>
                     </button>
 
