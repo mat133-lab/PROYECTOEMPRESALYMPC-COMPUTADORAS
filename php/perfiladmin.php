@@ -272,11 +272,6 @@ if ($adminId) {
                                         Configuracion
                                     </a>
                                 </li>
-                                <li>
-                                    <a class="dropdown-item categoria-link" href="#" data-categoria="techos">
-                                        Termino y Condiciones
-                                    </a>
-                                </li>
                             </ul>
                         </li>
 
@@ -303,8 +298,9 @@ if ($adminId) {
 
     <div class="main-content container mt-5 pt-4">
 
-        <div class="dashboard-header text-center">
-            <h1><?php echo $adminName ?></h1>
+        <div class="dashboard-header text-left">
+            <h1 style="color: #0caeff;">Hola, </h1>
+            <h1><?php echo $adminName ?>🧑‍💼</h1>
             <button type="button" id="pass">Contraseña</button>
         </div>
 
@@ -334,8 +330,8 @@ if ($adminId) {
                     <div class="col-12 col-lg-4 d-flex flex-column gap-4">
 
                         <div class="card card-custom position-relative text-center overflow-hidden">
-                            <div class="badge-admin">
-                                ADMINISTRADOR <i class="fas fa-chevron-down ms-1"></i>
+                            <div class="badge-admin" style="text-transform: uppercase;">
+                                <?php echo $adminType; ?></i>
                             </div>
                             <div class="foto-placeholder shadow-sm">
                                 <i class="fas fa-user"></i>
@@ -374,8 +370,6 @@ if ($adminId) {
 
                             <div class="info-header mb-4 d-flex justify-content-between align-items-center">
                                 <h5 class="m-0 text-secondary">Información del Usuario</h5>
-                                <a href="#" class="text-muted text-decoration-none"
-                                    style="font-size: 0.9rem;">editar</a>
                             </div>
 
                             <div class="row g-4">

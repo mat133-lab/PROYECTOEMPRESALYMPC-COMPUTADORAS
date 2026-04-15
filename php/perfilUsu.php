@@ -1,20 +1,50 @@
 <?php
 session_start();
-//comprobar si entro como usuario comun, tecnico, etc, pero especialmente para admin cuando 
-// vaya a citas podra ver todas las citas si es otro usuario no podra ver la tabla citas
-include_once '../includes/db.php';
+//Requerimos la base de datos para buscar la ruta del archivo
+require_once '../includes/db.php'; 
+
 if (!isset($_SESSION['usuario'])) {
-    header("Location: login.php");
+    header("Location: ../php/login.php");
     exit();
 }
-/*Si el administrador necesita volver al panel administrador le redirija al dashboard correspondiente dependiendo el usuario*/
-if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
-    header("Location: dashboardadmin.php");
-    exit();
+
+// Por si acaso entran sin pasar por el login durante las pruebas
+if (!isset($_SESSION['login_time'])) {
+    $_SESSION['login_time'] = time();
+}
+$login_timestamp = $_SESSION['login_time'];
+
+$UsuName = isset($_SESSION['usuario']) ? htmlspecialchars($_SESSION['usuario']) : 'Usuario';
+$UsuEmail = $_SESSION['correo'] ?? 'Correo no proporcionado';
+$UsuType = $_SESSION['rol'] ?? 'No especificado';
+$UsusCedula = $_SESSION['cedula'] ?? 'No proporcionada';
+
+// Buscar los archivos en la base de datos usando el ID del usuario
+$UsuId = null;
+
+if (!empty($_SESSION['id_usuario'])) {
+    $UsuId = $_SESSION['id_usuario'];
+} elseif (!empty($_SESSION['id'])) {
+    $UsuId = $_SESSION['id'];
+}
+
+$UsuCopia = $_SESSION['archivo_cedula'] ?? '';
+$UsuRuc = $_SESSION['archivo_ruc'] ?? '';
+
+if ($UsuId) {
+    // Buscamos específicamente al usuario logueado en la base de datos por su id_usuario
+    $stmt = $conn->prepare("SELECT archivo_cedula, archivo_ruc FROM usuarios WHERE id_usuario = ?");
+    $stmt->execute([$UsuId]);
+    $archivos = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($archivos) {
+        $UsuCopia = $archivos['archivo_cedula'] ?? $UsuCopia;
+        $UsuRuc = $archivos['archivo_ruc'] ?? $UsuRuc;
+    }
 }
 ?>
 <!doctype html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="utf-8">
@@ -99,7 +129,8 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
 
                 <div class="offcanvas-body">
                     <form class="d-flex d-lg-none mb-4" role="search" onsubmit="event.preventDefault();">
-                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search" id="search-input-mobile"/>
+                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search"
+                            id="search-input-mobile" />
                         <button class="btn btn-success" type="button">Buscar</button>
                     </form>
                     <ul class="navbar-nav flex-grow-1 pe-3">
@@ -195,7 +226,8 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
                                 </li>
                                 <li><a class="dropdown-item categoria-link" href="../php/gestion_citas.php"
                                         data-categoria="bano">Citas</a></li>
-                                <li><a class="dropdown-item categoria-link" href="../php/ubicacion.php" data-categoria="bano">Ubicacion</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/ubicacion.php"
+                                        data-categoria="bano">Ubicacion</a>
                                 </li>
                             </ul>
                         </li>
@@ -213,7 +245,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
                                 </li>
                             </ul>
                         </li>
-                        <li class="nav-item dropdown">
+                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                                 Tintas
                             </a>
@@ -268,121 +300,194 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true
             </div>
         </div>
     </nav>
-    <main id="product-container" class="grid-container">
 
+    <div class="main-content container mt-5 pt-4">
 
-        <header class="header">
-            <div class="header-content container">
-                <div class="header-txt">
-                    <h1><span>Bienvenido a L&M PC Computadoras -
-                        </span>Explora todo nuestro catalogo </h1>
-                    <p>
-                        Hola usuario aqui encontraras todo lo que necesitas
-                        relacionado a computacion, desde componentes hasta
-                        accesorios y mucho mas.
-                    </p>
-                    <a href="https://www.facebook.com/LyM010?locale=es_LA" class="btn-2" style="text-decoration:none; font-weight: 700;">Mas Informacion</a>
-                </div>
-            </div>
+        <div class="dashboard-header text-left">
+            <h1 style="color: #0caeff;">Hola, </h1>
+            <h1><?php echo $UsuName ?>🧑‍💼</h1>
+            <button type="button" id="pass">Contraseña</button>
+        </div>
 
-        </header>
-        <section class="info">
-            <div class="info-content container">
-                <div class="info-img">
-                    <img src="../img/promocion.jpg" alt>
-                </div>
-                <div class="info-txt">
-                    <h2>Los mejores en accesorios para el Usuario</h2>
-                    <p>
-                        En L&M PC Computadoras, nos enorgullece ofrecerte una amplia
-                        gama de productos y accesorios de alta calidad para satisfacer todas tus
-                        necesidades tecnológicas.
-                    </p>
-                    <a href="https://www.facebook.com/LyM010?locale=es_LA" class="btn-2" style="font-weight: 700; text-decoration:none;">Mas Informacion</a>
-                </div>
-            </div>
-        </section>
-        
-        <main class="products container">
-            <h2>Productos Destacados</h2>
-            <p>
-                Las mejores ofertas y descuentos en productos seleccionados
-            </p>
-            <div id="no-results" style="display: none; text-align: center; margin-bottom: 20px; width: 100%;">
-                <p>No se Encontro el producto</p>
-            </div>
+        <div class="dashboard-content">
 
-            <div class="box-container" id="lista-1">
-                <?php
-            $stmt = $conn->prepare("SELECT p.*, s.Nombre AS nombre_contacto, s.Compania 
-                                    FROM productos p 
-                                    LEFT JOIN soporte s ON p.id_soporte = s.id_soporte 
-                                    ORDER BY p.id_producto ASC");
-            $stmt->execute();
-            $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            // Por cada producto en tu base de datos, creamos un lugar para guardarlo
-            foreach ($productos as $row): 
-            ?>
-                <div class="box" data-id="<?= $row['id_producto'] ?>">
-                    <img src="../img/<?= htmlspecialchars($row['imagen']) ?>" alt="<?= htmlspecialchars($row['nombre']) ?>"
-                        style="width: 100%; max-height: 200px; object-fit: contain; padding-top: 10px;">
-                        
-                    <div class="product-txt d-flex flex-column h-100 w-100">
-                        <h3 class="product-name" style="font-size: 18px; font-weight: 600;"><?= htmlspecialchars($row['nombre']) ?></h3>
-                        
-                        <p style="margin-bottom: 5px;"><span class="product-units"
-                                data-id="<?= $row['id_producto'] ?>"><?= $row['unidades'] ?></span>
-                            Unidades</p>
-                        <p class="text-muted" style="font-size: 14px; margin-bottom: 5px;"><?= htmlspecialchars($row['serie']) ?></p>
+            <ul class="nav nav-underline" id="perfilTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active bg-transparent border-0" id="general-tab" data-bs-toggle="tab"
+                        data-bs-target="#general-pane" type="button" role="tab" aria-controls="general-pane"
+                        aria-selected="true" style="color: #0d6efd; font-weight: 500;">General</button>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://drive.google.com" target="_blank"
+                        rel="noopener noreferrer">Drive</a>
+                </li>
+            </ul>
+        </div>
 
-                        <?php if (!empty($row['nombre_contacto'])): ?>
-                            <p style="font-size: 13px; color: #198754; margin-bottom: 10px;">
-                                <i class="fas fa-headset"></i> Soporte: <b><?= htmlspecialchars($row['nombre_contacto']) ?></b> (<?= htmlspecialchars($row['Compania']) ?>)
+        <div class="tab-content p-4" id="perfilTabsContent"
+            style="background-color: #f8f9fa; border-radius: 0 0 12px 12px;">
+
+            <div class="tab-pane fade show active" id="general-pane" role="tabpanel" aria-labelledby="general-tab"
+                tabindex="0">
+
+                <div class="row g-4">
+
+                    <div class="col-12 col-lg-4 d-flex flex-column gap-4">
+
+                        <div class="card card-custom position-relative text-center overflow-hidden">
+                            <div class="badge-admin" style="text-transform: uppercase;">
+                                <?php echo $UsuType; ?></i>
+                            </div>
+                            <div class="foto-placeholder shadow-sm">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        </div>
+
+                        <div class="card card-custom gauge-card p-4">
+                            <p class="gauge-title-label fw-bold mb-2 text-secondary text-center">Tiempo activo en sesión
                             </p>
-                        <?php endif; ?>
+                            <div class="gauge-svg-wrap mx-auto" style="width: 220px; height: 120px;">
+                                <svg class="gauge-svg" viewBox="0 0 180 100" style="width: 100%; height: 100%;">
+                                    <path class="gauge-bg" d="M 10 90 A 80 80 0 0 1 170 90" fill="none" stroke="#e9ecef"
+                                        stroke-width="12" stroke-linecap="round" />
+                                    <path id="gauge-arc" class="gauge-arc" d="M 10 90 A 80 80 0 0 1 170 90" fill="none"
+                                        stroke="#22c55e" stroke-width="12" stroke-linecap="round"
+                                        stroke-dasharray="251.2" stroke-dashoffset="251.2"
+                                        style="transition: stroke-dashoffset 1s ease-out, stroke 1s ease-out;" />
+                                    <line id="gauge-needle" class="gauge-needle" x1="90" y1="90" x2="25" y2="90"
+                                        stroke="#333" stroke-width="4" stroke-linecap="round"
+                                        style="transition: transform 1s ease-out; transform-origin: 90px 90px;" />
+                                    <circle id="gauge-pivot" cx="90" cy="90" r="8" fill="#333" />
+                                </svg>
+                            </div>
+                            <div id="gauge-time" class="gauge-time-display text-primary mt-2 text-center"
+                                style="font-size: 2rem;">00:00:00</div>
+                            <div class="d-flex align-items-center justify-content-center gap-2 mt-1">
+                                <span id="gauge-badge" class="badge bg-success rounded-pill px-3 py-2">Bajo</span>
+                                <span id="gauge-label" class="text-muted small">Calculando...</span>
+                            </div>
+                        </div>
 
-                        <div class="mt-auto w-100">
-                            <p class="precio" style="font-size: 20px; font-weight: 700; color: #ff9100; margin: 10px 0;">$<?= number_format($row['precio'], 2) ?></p>
-                            <a href="#" class="agregar-libro btn-3 w-100 text-center" data-id="<?= $row['id_producto'] ?>" style="display:block; text-decoration:none;">Agregar al carrito</a>
+                    </div>
+
+                    <div class="col-12 col-lg-8">
+                        <div class="card card-custom p-4 h-100">
+
+                            <div class="info-header mb-4 d-flex justify-content-between align-items-center">
+                                <h5 class="m-0 text-secondary">Información del Usuario</h5>
+                            </div>
+
+                            <div class="row g-4">
+                                <div class="col-12 pb-2 border-bottom">
+                                    <h6 class="text-uppercase text-muted fw-bold mb-0"
+                                        style="font-size: 0.8rem; letter-spacing: 0.5px;">
+                                        Datos Personales
+                                    </h6>
+                                </div>
+
+                                <div class="col-12 field-group">
+                                    <div class="field-label" style="font-weight: 600; font-size: 0.85rem; color: #888;">
+                                        Nombre Completo:</div>
+                                    <div class="field-value text-muted fw-normal mt-1" style="font-size: 0.95rem;">
+                                        <?php echo $UsuName; ?>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 field-group">
+                                    <div class="field-label" style="font-weight: 600; font-size: 0.85rem; color: #888;">
+                                        Correo Electrónico:</div>
+                                    <div class="field-value text-muted fw-normal mt-1" style="font-size: 0.95rem;">
+                                        <?php echo $UsuEmail; ?>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 field-group">
+                                    <div class="field-label" style="font-weight: 600; font-size: 0.85rem; color: #888;">
+                                        Cédula de Identidad:</div>
+                                    <div class="field-value text-muted fw-normal mt-1" style="font-size: 0.95rem;">
+                                        <?php echo $UsusCedula; ?>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-12 col-md-6 field-group">
+                                    <div class="field-label" style="font-weight: 600; font-size: 0.85rem; color: #888;">
+                                        Archivos Subidos:</div>
+                                    <div class="field-value text-muted fw-normal mt-2" style="font-size: 0.95rem;">
+                                        <?php if ($UsuCopia || $UsuRuc): ?>
+                                        <div class="d-flex flex-column gap-2">
+                                            <?php if ($UsuCopia && $UsuCopia !== 'NULL'): ?>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <a href="<?php echo htmlspecialchars($UsuCopia); ?>" target="_blank"
+                                                    class="btn btn-sm btn-outline-primary"
+                                                    style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">
+                                                    <i class="fas fa-eye me-1"></i> Ver Cédula
+                                                </a>
+                                                <a href="<?php echo htmlspecialchars($UsuCopia); ?>" download
+                                                    class="btn btn-sm btn-primary"
+                                                    style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">
+                                                    <i class="fas fa-download"></i>
+                                                </a>
+                                            </div>
+                                            <?php endif; ?>
+                                            <?php if ($UsuRuc && $UsuRuc !== 'NULL'): ?>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <a href="<?php echo htmlspecialchars($UsuRuc); ?>" target="_blank"
+                                                    class="btn btn-sm btn-outline-success"
+                                                    style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">
+                                                    <i class="fas fa-eye me-1"></i> Ver RUC
+                                                </a>
+                                                <a href="<?php echo htmlspecialchars($UsuRuc); ?>" download
+                                                    class="btn btn-sm btn-success"
+                                                    style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">
+                                                    <i class="fas fa-download"></i>
+                                                </a>
+                                            </div>
+                                            <?php endif; ?>
+                                        </div>
+                                        <?php else: ?>
+                                        <span class="text-danger" style="font-size: 0.85rem;">No se ha subido ningún
+                                            archivo</span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 field-group">
+                                    <div class="field-label" style="font-weight: 600; font-size: 0.85rem; color: #888;">
+                                        Tipo de Usuario:</div>
+                                    <div class="field-value text-muted fw-normal mt-2" style="font-size: 0.95rem;">
+                                        <?php echo $UsuType; ?>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
-                </div>
-                <?php endforeach; ?>
-            </div>
 
-            <div class="btn-2" id="load-more" style="text-decoration:none; font-weight: 700; cursor: pointer;">Cargar mas Ofertas</div>
-        </main>
-
-        <footer class="footer">
-            <div class="footer-content container">
-                <div class="link">
-                    <h3>Pais - Ciudad</h3>
-                    <ul>
-                        <li><a href="https://maps.app.goo.gl/BwLzsdgsGr3jjrmu5"> Ecuador - Quito</a></li>
-                    </ul>
-                </div>
-                <div class="link">
-                    <h3>Ubicaciones</h3>
-                    <ul>
-                        <li><a href="https://maps.app.goo.gl/Hr7jt9W4ejWCdhmN7"> La Ecuatoriana - Las Orquídeas / Oe9
-                                Martha
-                                Bucaram / S37-49 / S37a</a></li>
-                    </ul>
-                </div>
-                <div class="link">
-                    <h3>Soporte</h3>
-                    <ul>
-                        <li><a href="https://www.facebook.com/LyM010/about?locale=es_LA"> +593 98 309 3667</a></li>
-                    </ul>
                 </div>
             </div>
-        </footer>
+        </div>
 
-        <script src="../js/dashboard.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
-        </script>
+    </div>
+
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <div>
+                <h3>L&M PC Computadoras</h3>
+                <p style="max-width:320px; color:#bbb;">Perfil administrativo - Derechos Reservados</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    window.gaugeLoginTime = <?php echo $login_timestamp; ?> * 1000;
+    </script>
+
+    <script src="../js/admin.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
+    </script>
 </body>
 
 </html>

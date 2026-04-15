@@ -850,8 +850,8 @@ p {
 
 
 .dashboard-header h1 {
-    margin-left: -1038px;
-    margin-bottom: 8px;
+    display: inline-block;
+    margin-right: 5px;
 }
 
 /* --- Estilos internos para las tarjetas (Grids de Bootstrap) --- */
