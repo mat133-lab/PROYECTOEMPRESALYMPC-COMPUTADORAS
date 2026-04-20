@@ -732,6 +732,13 @@ th {
     .form-section form>div {
         grid-template-columns: 1fr;
     }
+
+    #pass {
+        margin-left: 405px;
+        display: flex;
+        margin-bottom: 20px;
+        margin-top: -47px;
+    }
 }
 
 .calendar__day {
@@ -934,6 +941,7 @@ p {
     color: #333;
     text-decoration-color: #333;
 }
+
 /* ================= MEDIDOR DE TIEMPO ACTIVO (GAUGE) ================= */
 .gauge-card {
     padding: 1.5rem 1rem;

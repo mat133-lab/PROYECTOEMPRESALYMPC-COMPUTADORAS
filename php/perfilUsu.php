@@ -33,13 +33,14 @@ $UsuRuc = $_SESSION['archivo_ruc'] ?? '';
 
 if ($UsuId) {
     // Buscamos específicamente al usuario logueado en la base de datos por su id_usuario
-    $stmt = $conn->prepare("SELECT archivo_cedula, archivo_ruc FROM usuarios WHERE id_usuario = ?");
+    $stmt = $conn->prepare("SELECT archivo_ruc, archivo_cedula, foto_perfil FROM usuarios WHERE id_usuario = ?");
     $stmt->execute([$UsuId]);
     $archivos = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($archivos) {
         $UsuCopia = $archivos['archivo_cedula'] ?? $UsuCopia;
         $UsuRuc = $archivos['archivo_ruc'] ?? $UsuRuc;
+        $UsuFoto = $archivos['foto_perfil'] ?? '';
     }
 }
 ?>
@@ -245,7 +246,7 @@ if ($UsuId) {
                                 </li>
                             </ul>
                         </li>
-                         <li class="nav-item dropdown">
+                        <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                                 Tintas
                             </a>
@@ -260,23 +261,13 @@ if ($UsuId) {
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                Cuenta y Configuración
+                                Cuenta
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
                                 <li>
                                     <a class="dropdown-item categoria-link" href="../php/perfilUsu.php"
                                         data-categoria="estructura">
                                         Perfil
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item categoria-link" href="#" data-categoria="techos">
-                                        Configuracion
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item categoria-link" href="#" data-categoria="techos">
-                                        Termino y Condiciones
                                     </a>
                                 </li>
                             </ul>
@@ -338,9 +329,23 @@ if ($UsuId) {
                             <div class="badge-admin" style="text-transform: uppercase;">
                                 <?php echo $UsuType; ?></i>
                             </div>
-                            <div class="foto-placeholder shadow-sm">
-                                <i class="fas fa-user"></i>
+                            <div class="foto-placeholder shadow-sm" style="overflow: hidden; display: flex; justify-content: center; align-items: center; background-color: #e9ecef;">
+                                <?php if(!empty($UsuFoto)): ?>
+                                    <img src="../uploads/profile/<?php echo $UsuFoto; ?>" alt="Foto de Perfil" style="width: 100%; height: 100%; object-fit: cover;">
+                                <?php else: ?>
+                                    <i class="fas fa-user" style="font-size: 3rem; color: #adb5bd;"></i>
+                                <?php endif; ?>
                             </div>
+                            <form action="../php/subir_foto.php" method="POST" enctype="multipart/form-data"
+                                class="mt-3 mb-2">
+                                <div class="submit-photo">
+                                    <input type="file" id="foto-perfil" name="foto-perfil" accept="image/*"
+                                        class="d-none" onchange="this.form.submit()">
+                                    <label for="foto-perfil" class="for"
+                                        style="cursor: pointer; padding: 10px 20px; border: 2px solid none; border-radius: 5px; background-color: rgb(255, 144, 8); color: #ffff">Subir
+                                        Foto</label>
+                                </div>
+                            </form>
                         </div>
 
                         <div class="card card-custom gauge-card p-4">
