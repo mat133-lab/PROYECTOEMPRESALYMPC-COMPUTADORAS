@@ -296,8 +296,12 @@ if ($UsuId) {
 
         <div class="dashboard-header text-left">
             <h1 style="color: #0caeff;">Hola, </h1>
-            <h1><?php echo $UsuName ?>🧑‍💼</h1>
-            <button type="button" id="pass">Contraseña</button>
+            <h1 class="title"><?php echo $UsuName ?>🧑‍💼</h1>
+            <label class="switch">
+            <input type="checkbox" id="toggle">
+            <span class="slider"></span>
+        </label>
+            <button type="button" id="pass" style="margin-bottom: 20px;">Contraseña</button>
         </div>
 
         <div class="dashboard-content">
@@ -329,11 +333,13 @@ if ($UsuId) {
                             <div class="badge-admin" style="text-transform: uppercase;">
                                 <?php echo $UsuType; ?></i>
                             </div>
-                            <div class="foto-placeholder shadow-sm" style="overflow: hidden; display: flex; justify-content: center; align-items: center; background-color: #e9ecef;">
+                            <div class="foto-placeholder shadow-sm"
+                                style="overflow: hidden; display: flex; justify-content: center; align-items: center; background-color: #e9ecef;">
                                 <?php if(!empty($UsuFoto)): ?>
-                                    <img src="../uploads/profile/<?php echo $UsuFoto; ?>" alt="Foto de Perfil" style="width: 100%; height: 100%; object-fit: cover;">
+                                <img src="../uploads/profile/<?php echo $UsuFoto; ?>" alt="Foto de Perfil"
+                                    style="width: 100%; height: 100%; object-fit: cover;">
                                 <?php else: ?>
-                                    <i class="fas fa-user" style="font-size: 3rem; color: #adb5bd;"></i>
+                                <i class="fas fa-user" style="font-size: 3rem; color: #adb5bd;"></i>
                                 <?php endif; ?>
                             </div>
                             <form action="../php/subir_foto.php" method="POST" enctype="multipart/form-data"
@@ -477,10 +483,25 @@ if ($UsuId) {
 
 
     <footer class="footer">
-        <div class="container footer-content">
-            <div>
-                <h3>L&M PC Computadoras</h3>
-                <p style="max-width:320px; color:#bbb;">Perfil administrativo - Derechos Reservados</p>
+        <div class="footer-content container">
+            <div class="link">
+                <h3>Pais - Ciudad</h3>
+                <ul>
+                    <li><a href="https://maps.app.goo.gl/BwLzsdgsGr3jjrmu5"> Ecuador - Quito</a></li>
+                </ul>
+            </div>
+            <div class="link">
+                <h3>Ubicaciones</h3>
+                <ul>
+                    <li><a href="https://maps.app.goo.gl/Hr7jt9W4ejWCdhmN7"> La Ecuatoriana - Las Orquídeas / Oe9 Martha
+                            Bucaram / S37-49 / S37a</a></li>
+                </ul>
+            </div>
+            <div class="link">
+                <h3>Soporte</h3>
+                <ul>
+                    <li><a href="https://www.facebook.com/LyM010/about?locale=es_LA"> +593 98 309 3667</a></li>
+                </ul>
             </div>
         </div>
     </footer>

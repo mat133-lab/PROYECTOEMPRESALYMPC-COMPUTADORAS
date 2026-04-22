@@ -741,6 +741,75 @@ th {
     }
 }
 
+/* ================= DISEÑO DEL BOTÓN INTERRUPTOR ================= */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+  margin-bottom: 20px;
+  margin-left: 1109px;
+}
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+input:checked + .slider {
+  background-color: #ff9100;
+}
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+/* ================= COLORES DEL MODO OSCURO ================= */
+body.dark-mode {
+    background-color: #121212 !important;
+    color: #e0e0e0 !important;
+}
+
+body.dark-mode .card-custom, 
+body.dark-mode .tab-content,
+body.dark-mode .main-content {
+    background-color: #1e1e1e !important;
+    color: #e0e0e0 !important;
+    border-color: #333 !important;
+}
+
+body.dark-mode .text-muted,
+body.dark-mode .text-secondary,
+body.dark-mode .field-label,
+body.dark-mode .title{
+    color: #aaaaaa !important;
+}
+
+body.dark-mode .field-value {
+    color: #ffffff !important;
+}
+
+body.dark-mode .border-bottom {
+    border-color: #333 !important;
+}
+
 .calendar__day {
     position: relative;
     display: flex;
@@ -859,6 +928,8 @@ p {
 .dashboard-header h1 {
     display: inline-block;
     margin-right: 5px;
+    margin-bottom: -40px;
+    margin-top: 10px;
 }
 
 /* --- Estilos internos para las tarjetas (Grids de Bootstrap) --- */

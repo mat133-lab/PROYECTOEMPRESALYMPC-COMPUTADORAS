@@ -201,4 +201,33 @@ document.addEventListener("DOMContentLoaded", function () {
         updateGauge();
     })();
 
+    const toggleSwitch = document.getElementById('toggle');
+    
+    // 2. Buscamos en la memoria del navegador si el usuario ya tenía el modo oscuro
+    const currentTheme = localStorage.getItem('tema_LM');
+
+    // 3. Si la memoria dice "oscuro", pintamos la página de oscuro al cargar
+    if (currentTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        // Si el interruptor existe en esta página, lo marcamos como encendido
+        if (toggleSwitch) {
+            toggleSwitch.checked = true;
+        }
+    }
+
+    // 4. Escuchar cuando el usuario hace clic en el interruptor
+    if (toggleSwitch) {
+        toggleSwitch.addEventListener('change', function () {
+            if (this.checked) {
+                // Encendido: Aplicamos la clase y guardamos en memoria
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('tema_LM', 'dark');
+            } else {
+                // Apagado: Quitamos la clase y guardamos en memoria
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('tema_LM', 'light');
+            }
+        });
+    }
+
 });

@@ -33,13 +33,14 @@ $adminRuc = $_SESSION['archivo_ruc'] ?? '';
 
 if ($adminId) {
     // Buscamos específicamente al usuario logueado en la base de datos por su id_usuario
-    $stmt = $conn->prepare("SELECT archivo_cedula, archivo_ruc FROM usuarios WHERE id_usuario = ?");
+    $stmt = $conn->prepare("SELECT archivo_cedula, archivo_ruc, foto_perfil FROM usuarios WHERE id_usuario = ?");
     $stmt->execute([$adminId]);
     $archivos = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($archivos) {
         $adminCopia = $archivos['archivo_cedula'] ?? $adminCopia;
         $adminRuc = $archivos['archivo_ruc'] ?? $adminRuc;
+        $adminFoto = $archivos['foto_perfil'] ?? '';
     }
 }
 ?>
@@ -300,9 +301,14 @@ if ($adminId) {
 
         <div class="dashboard-header text-left">
             <h1 style="color: #0caeff;">Hola, </h1>
-            <h1><?php echo $adminName ?>🧑‍💼</h1>
-            <button type="button" id="pass">Contraseña</button>
+            <h1 class="title"><?php echo $adminName ?>🧑‍💼</h1>
+            <label class="switch">
+            <input type="checkbox" id="toggle">
+            <span class="slider"></span>
+        </label>
+            <button type="button" id="pass" style="margin-bottom: 20px;">Contraseña</button>
         </div>
+        
 
         <div class="dashboard-content">
 
@@ -333,9 +339,25 @@ if ($adminId) {
                             <div class="badge-admin" style="text-transform: uppercase;">
                                 <?php echo $adminType; ?></i>
                             </div>
-                            <div class="foto-placeholder shadow-sm">
-                                <i class="fas fa-user"></i>
+                            <div class="foto-placeholder shadow-sm"
+                                style="overflow: hidden; display: flex; justify-content: center; align-items: center; background-color: #e9ecef;">
+                                <?php if(!empty($adminFoto)): ?>
+                                <img src="../uploads/profile/<?php echo $adminFoto; ?>" alt="Foto de Perfil"
+                                    style="width: 100%; height: 100%; object-fit: cover;">
+                                <?php else: ?>
+                                <i class="fas fa-user" style="font-size: 3rem; color: #adb5bd;"></i>
+                                <?php endif; ?>
                             </div>
+                            <form action="../php/subir_foto.php" method="POST" enctype="multipart/form-data"
+                                class="mt-3 mb-2">
+                                <div class="submit-photo">
+                                    <input type="file" id="foto-perfil" name="foto-perfil" accept="image/*"
+                                        class="d-none" onchange="this.form.submit()">
+                                    <label for="foto-perfil" class="for"
+                                        style="cursor: pointer; padding: 10px 20px; border: 2px solid none; border-radius: 5px; background-color: rgb(255, 144, 8); color: #ffff">Subir
+                                        Foto</label>
+                                </div>
+                            </form>
                         </div>
 
                         <div class="card card-custom gauge-card p-4">
