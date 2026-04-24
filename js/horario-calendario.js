@@ -53,23 +53,15 @@ class UI {
         if (!list) {
             list = document.createElement('ul');
             list.className = 'calendar__appointments';
-            list.style.marginTop = '5px';
-            list.style.padding = '0';
-            list.style.listStyle = 'none';
             dayElement.appendChild(list);
             dayElement.classList.add('calendar__day--content');
         }
 
         // Crear elemento visual para la cita
         const item = document.createElement('li');
-        item.className = 'calendar__badge'; // Reutilizamos estilo badge
+        item.className = 'calendar__appointment';
         item.textContent = appointment.motivo || "Cita";
         item.title = `${appointment.nombre || ''} - ${appointment.motivo || ''}`;
-        item.style.display = 'block';
-        item.style.marginBottom = '2px';
-        item.style.whiteSpace = 'nowrap';
-        item.style.overflow = 'hidden';
-        item.style.textOverflow = 'ellipsis';
 
         list.appendChild(item);
     }

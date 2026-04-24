@@ -8,13 +8,6 @@ if (!isset($_SESSION['usuario'])) {
     exit();
 }
 
-// Verificar rol
-    $rolesConAcceso = ['admin', 'tecnico', 'encargado', 'pasante'];
-    if (!isset($_SESSION['usuario']) || !in_array($_SESSION['usuario'], $rolesConAcceso)) {
-        header('Location: ../php/dashboard.php');
-        exit();
-    }
-
 // Obtener datos del usuario
 $usuario = isset($_SESSION['usuario']) ? htmlspecialchars($_SESSION['usuario']) : 'Usuario';
 $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';

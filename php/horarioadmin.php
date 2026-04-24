@@ -4,8 +4,8 @@
 
     // Verificar rol
     $rolesConAcceso = ['admin', 'tecnico', 'encargado', 'pasante'];
-    if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $rolesConAcceso)) {
-        header('Location: ../php/login.php');
+    if (!isset($_SESSION['usuario']) || !in_array($_SESSION['usuario'], $rolesConAcceso)) {
+        header('Location: ../php/dashboard.php');
         exit();
     }
 ?>
