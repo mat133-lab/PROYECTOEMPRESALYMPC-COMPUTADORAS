@@ -67,7 +67,7 @@ if (isset($_POST['enviar'])) {
 </head>
 
 <body>
-   <nav class="navbar navbar-dark bg-warning fixed-top">
+    <nav class="navbar navbar-dark bg-warning fixed-top">
         <div class="container-fluid">
             <?php 
             //Verificamos si el usuario actual es parte del personal para que nos muestre el carrito de compras
@@ -368,7 +368,7 @@ if (isset($_POST['enviar'])) {
                     <p>Correo Electronico</p>
                     <input type="email" name="email" id="Correo" required>
                 </div>
-                
+
                 <div class="form-group mb-3">
                     <p>Número de Cédula</p>
                     <input type="text" class="form-control" name="cedula" id="cedula" maxlength="10" required>
@@ -382,12 +382,14 @@ if (isset($_POST['enviar'])) {
                 <div id="div_documentos" class="border p-3 mb-3 bg-light rounded">
                     <div class="mb-3">
                         <label for="archivo_ruc" class="form-label">Subir RUC (Opcional si no es una empresa)</label>
-                        <input class="form-control" type="file" name="archivo_ruc" id="archivo_ruc" accept=".pdf, .jpg, .png, .webp">
+                        <input class="form-control" type="file" name="archivo_ruc" id="archivo_ruc"
+                            accept=".pdf, .jpg, .png, .webp">
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="archivo_cedula" class="form-label">Subir Copia de Cédula</label>
-                        <input class="form-control" type="file" name="archivo_cedula" id="archivo_cedula" accept=".pdf, .jpg, .png, .webp">
+                        <input class="form-control" type="file" name="archivo_cedula" id="archivo_cedula"
+                            accept=".pdf, .jpg, .png, .webp">
                     </div>
                 </div>
 
@@ -395,12 +397,18 @@ if (isset($_POST['enviar'])) {
                     <p>Mensaje</p>
                     <textarea name="message" id="Mensaje" rows="5" required></textarea>
                 </div>
+                <div class="con">
+                    <button type="button" class="btn btn-primary" id="boton">
+                        Imprimir Comprobante
+                    </button>
+                </div>
                 <div class="form-group full">
                     <button type="submit" name="enviar" class="btn btn-primary">
                         Enviar
                     </button>
                 </div>
             </form>
+
         </div>
     </div>
     <footer class="footer">
@@ -426,6 +434,7 @@ if (isset($_POST['enviar'])) {
             </div>
         </div>
     </footer>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="../js/dashboard.js"></script>
     <script src="../js/contacto.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"

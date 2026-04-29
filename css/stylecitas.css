@@ -353,6 +353,21 @@ h1{
     background-color: #c5680a;
 }
 
+.con .btn-primary {
+    background-color: #ff8400;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+.con  .btn-primary:hover {
+    background-color: #c5680a;
+}
+
 /* ================= COMPACTO TABLAS ================= */
 .table-wrapper {
     max-height: 260px;
