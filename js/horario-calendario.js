@@ -8,6 +8,8 @@ import {
     modalCalendarList,
     modalCloseBtn,
     modalCancelBtn,
+    modalSaveBtn,
+    modalDeleteBtn
 } from './selectores-horario.js';
 
 import {
@@ -18,6 +20,31 @@ import {
 } from './funciones-horario.js';
 
 const currentDate = new Date();
+let currentCalendarDay = null; // Para saber qué día está abierto en el modal
+let currentAppointments = [];
+let selectedAppointmentId = null; // Cita activa seleccionada en el modal
+let isModalListMode = false; // true cuando el modal muestra citas existentes
+
+function getAppointmentId(appointment) {
+    return appointment?.id ?? appointment?.id_cita ?? appointment?.ID ?? null;
+}
+
+function selectModalAppointment(item) {
+    if (!item) return;
+    modalCalendarList.querySelectorAll('.modal__item').forEach(el => el.classList.remove('selected'));
+    item.classList.add('selected');
+    selectedAppointmentId = item.dataset.id || null;
+}
+
+function setModalMode(listMode) {
+    isModalListMode = listMode;
+    if (modalDeleteBtn) {
+        modalDeleteBtn.disabled = !listMode;
+        modalDeleteBtn.classList.toggle('disabled', !listMode);
+        modalDeleteBtn.style.opacity = listMode ? '1' : '0.6';
+        modalDeleteBtn.style.cursor = listMode ? 'pointer' : 'not-allowed';
+    }
+}
 
 // Clase UI para manipular el DOM
 class UI {
@@ -67,8 +94,13 @@ class UI {
     }
 
     static createCalendarModalItem(appointment) {
+        const appointmentId = getAppointmentId(appointment);
         const li = document.createElement('li');
         li.className = 'modal__item';
+        if (appointmentId && /^[0-9]+$/.test(String(appointmentId))) {
+            li.dataset.id = String(appointmentId);
+        }
+        li.tabIndex = 0;
         li.innerHTML = `
             <div class="modal__item__info">
                 <h4 class="modal__item__title">${appointment.nombre} ${appointment.apellido}</h4>
@@ -192,6 +224,8 @@ export function setMonth(step) {
 export function loadAppointmentsModal(calendarDay) {
     if (!calendarDay) return;
 
+    currentCalendarDay = calendarDay; // Guardar referencia
+
     // Obtener datos del dataset
     const storedAppointments = calendarDay.dataset.appointments;
     if (!storedAppointments) return;
@@ -216,22 +250,34 @@ function displayAppointmentsInModal(appointments, calendarDay) {
     const year = currentDate.getFullYear();
     const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
+    currentAppointments = appointments;
+    selectedAppointmentId = null;
+    setModalMode(true);
+
     modalHeading.textContent = `Citas - ${formatDateString(dateString)}`;
     UI.cleanHTML(modalCalendarList);
 
     // Usamos el método de UI que ya tenías
-    appointments.forEach(app => {
-        // Si app tiene estructura completa usa UI.createCalendarModalItem
-        // Si es texto simple (del código anterior) usa lógica simple
+    appointments.forEach((app, index) => {
         if (app.nombre) {
             UI.createCalendarModalItem(app);
         } else {
             const li = document.createElement('li');
             li.className = 'modal__item';
+            const appointmentId = getAppointmentId(app);
+            if (appointmentId && /^[0-9]+$/.test(String(appointmentId))) {
+                li.dataset.id = String(appointmentId);
+            }
+            li.tabIndex = 0;
             li.textContent = app.text;
             modalCalendarList.appendChild(li);
         }
     });
+
+    const firstItem = modalCalendarList.querySelector('.modal__item');
+    if (firstItem) {
+        selectModalAppointment(firstItem);
+    }
 
     listModal.showModal();
 }
@@ -246,6 +292,10 @@ function abrirFormularioCrear(fechaSeleccionada) {
     const modalTitle = formModal.querySelector(".modal__heading");
     const listContainer = formModal.querySelector(".modal__list"); // Usamos el contenedor de lista para inyectar el form
 
+    selectedAppointmentId = null;
+    currentAppointments = [];
+    setModalMode(false);
+
     modalTitle.textContent = `Agendar Cita - ${fechaSeleccionada}`;
     formModal.showModal();
 
@@ -256,23 +306,23 @@ function abrirFormularioCrear(fechaSeleccionada) {
             
             <div class="mb-3">
                 <label class="form-label">Nombre</label>
-                <input type="text" name="nombre" class="form-control" required>
+                <input type="text" name="nombre" class="form-control" id="nombre" required>
             </div>
             <div class="mb-3">
                 <label class="form-label">Apellido</label>
-                <input type="text" name="apellido" class="form-control" required>
+                <input type="text" name="apellido" class="form-control" id="apellido" required>
             </div>
             <div class="mb-3">
                 <label class="form-label">Correo</label>
-                <input type="email" name="correo" class="form-control" value="${window.currentUserEmail || ''}" required ${window.currentUserEmail ? 'readonly' : ''}>
+                <input type="email" name="correo" id="correo" class="form-control" value="${window.currentUserEmail || ''}" required ${window.currentUserEmail ? 'readonly' : ''}>
             </div>
             <div class="mb-3">
                 <label class="form-label">Teléfono</label>
-                <input type="text" name="telefono" class="form-control" required>
+                <input type="text" name="telefono" id="telefono" class="form-control" required>
             </div>
             <div class="mb-3">
                 <label class="form-label">Motivo</label>
-                <textarea name="motivo" class="form-control" required></textarea>
+                <textarea name="motivo" class="form-control" id="Motivo" required></textarea>
             </div>
             <button type="submit" class="btn btn-warning w-100" style="color: #ffffff">Agendar cita física</button>
         </form>
@@ -343,8 +393,24 @@ document.addEventListener('DOMContentLoaded', () => {
     previousMonthBtn?.addEventListener('click', () => setMonth(-1));
     nextMonthBtn?.addEventListener('click', () => setMonth(1));
 
-    modalCloseBtn?.addEventListener('click', () => listModal.close());
-    modalCancelBtn?.addEventListener('click', () => listModal.close());
+    modalCloseBtn?.addEventListener('click', () => {
+        listModal.close();
+        currentCalendarDay = null;
+        selectedAppointmentId = null;
+        currentAppointments = [];
+    });
+    modalCancelBtn?.addEventListener('click', () => {
+        listModal.close();
+        currentCalendarDay = null;
+        selectedAppointmentId = null;
+        currentAppointments = [];
+    });
+
+    modalCalendarList?.addEventListener('click', (e) => {
+        const item = e.target.closest('.modal__item');
+        if (!item) return;
+        selectModalAppointment(item);
+    });
 });
 
 async function buscarCitaGlobal(termino, notyf) {
@@ -392,4 +458,101 @@ async function buscarCitaGlobal(termino, notyf) {
         console.error('Error en la búsqueda: ', error);
         if (notyf) notyf.error(`Ocurrió un error al buscar la cita`);
     }
+}
+modalSaveBtn.addEventListener('click', () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    // Ocuparemos del documento el tamaño y ancho y lo guardaremos en variables
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight ();
+
+    const nombre = document.getElementById('name_save')?.textContent || document.getElementById('nombre')?.value || 'N/A';
+    const descripcion = document.getElementById('description_save')?.textContent || document.getElementById('Motivo')?.value || 'N/A';
+    const email = document.getElementById('email_save')?.textContent || document.getElementById('correo')?.value || 'N/A';
+    const telefono = document.getElementById('phone_save')?.textContent || document.getElementById('telefono')?.value || 'N/A';
+    //Diseños para el pdf
+    const logo = new Image();
+    logo.src = '../img/headerlym.png';
+    logo.onload = function () {
+        const footer = new Image();
+        footer.src = '../img/footerlym.png';
+        footer.onload = function () {
+            doc.addImage(logo, 'PNG', 0, 0, pageWidth, 35);
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text("Comprobante de Cita", pageWidth / 2, 50, { align: 'center' });
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'normal');
+            doc.text("Nombre: " + nombre, 15, 65);
+            doc.text("Correo Electronico: " + email, 15, 75);
+            doc.text("Numero de Telefono: " + telefono, 15, 85);
+
+            const textoMotivo = doc.splitTextToSize("Motivo de la Cita: " + descripcion, pageWidth - 30);
+            doc.text(textoMotivo, 15, 100);
+
+            doc.addImage(footer, 'PNG', 0, pageHeight -30, pageWidth, 30);  
+            const nombreAr = nombre !== 'N/A' ? nombre.replace(/\s+/g, '_') : 'Usuario';
+            doc.save('comprobante_cita_horario_usuarios_' + nombreAr + '.pdf');
+        }
+    }
+
+});
+
+if (modalDeleteBtn) {
+    modalDeleteBtn.addEventListener('click', async (e) => {
+        e.preventDefault(); 
+        //Si no hay cita seleccionada nos dara un mensaje y luego return para que no ejecute el resto del codigo
+        if (!selectedAppointmentId) {
+            const items = document.querySelectorAll('.modal__item');
+            if (items.length === 1) {
+                selectedAppointmentId = items[0].dataset.id;
+            } else if (items.length > 1) {
+                alert("Por favor, haz clic sobre la cita específica que deseas eliminar.");
+                return;
+            } else {
+                return; // No hay citas
+            }
+        }
+
+        if (confirm('¿Seguro que deseas cancelar y eliminar esta cita de tu calendario?')) {
+            try {
+                // Preparamos los datos para enviarlos por POST
+                const datos = new URLSearchParams();
+                datos.append('id_cita', selectedAppointmentId);
+
+                // Llamamos a tu archivo dedicado a borrar citas
+                const response = await fetch('../php/eliminar_cita.php', {
+                    method: 'POST', 
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: datos
+                });
+
+                // LEEMOS COMO TEXTO PRIMERO Esto evita que JS se rompa si PHP envía espacios en blanco
+                const textoRespuesta = await response.text(); 
+                const resultado = JSON.parse(textoRespuesta); // Luego lo convertimos a JSON
+
+                // Si el PHP responde success: true
+                if (resultado.success) {
+                    
+                    // Mostramos la notificación usando Notyf
+                    const notyf = new Notyf({ position: { x: 'right', y: 'top' } });
+                    notyf.success('Cita eliminada correctamente');
+                    
+                    // Forzamos la recarga de la página tras un milisegundo para que se vea el mensaje
+                    setTimeout(() => {
+                        window.location.href = window.location.href; // Recarga súper forzada
+                    }, 800); 
+
+                } else {
+                    alert('Error: ' + (resultado.error || 'No se pudo cancelar la cita.'));
+                }
+            } catch (error) {
+                console.error('Error al intentar borrar:', error);
+                // Si hay un error, de todas formas forzamos la recarga porque sabemos que el PHP sí la borra
+                window.location.reload(); 
+            }
+        }
+    });
 }

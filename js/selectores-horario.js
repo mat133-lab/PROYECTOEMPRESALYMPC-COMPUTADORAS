@@ -10,3 +10,5 @@ export const modalHeading = document.querySelector(".modal__heading");
 export const modalCalendarList = document.querySelector(".modal__list");
 export const modalCloseBtn = document.querySelector(".modal__close");
 export const modalCancelBtn = document.querySelector(".modal__button--close");
+export const modalSaveBtn = document.getElementById("save-comprobante");
+export const modalDeleteBtn = document.getElementById("delete-cita");

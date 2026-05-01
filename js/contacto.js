@@ -15,7 +15,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     // Funcion para imprimir el comprobante de contacto
 function imprimirComprobante() {
+
     const { jsPDF } = window.jspdf;
+    //Aqui estamos con el doc que tenga el valor y caracteristicas del jsPDF, en otras palabras es el objeto relacionado con la libreria jsPDF
     const doc = new jsPDF();
     doc.text("Comprobante de Contacto", 10, 10);
     doc.text("Nombre: " + (document.getElementById('Nombre').value || 'N/A'), 10, 20);

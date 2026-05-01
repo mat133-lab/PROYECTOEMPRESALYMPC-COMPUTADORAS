@@ -531,12 +531,20 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
                 <div class="modal__list__container">
                     <ul class="modal__list"></ul>
                 </div>
+                    
                 <footer class="modal__footer">
                     <button type="button" class="modal__button modal__button--close"
                         aria-label="Cancelar y Cerrar Modal">Cancelar</button>
+                        <button type="button" class="save_comprobante modal__button--save" id="save-comprobante">
+                            Guardar Comprobante
+                    </button>
+                    <button type="button" class="delete_comprobante modal__button--delete" id="delete-cita">
+                            Eliminar Cita
+                    </button>
                 </footer>
             </section>
         </div>
+
     </dialog>
 
     <footer class="footer">
@@ -569,6 +577,7 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <script>
     // Pasar correo de sesión a JS para el formulario
