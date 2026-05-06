@@ -71,7 +71,6 @@ class UI {
         const item = document.createElement('li');
 
         // --- CORRECCIÓN AQUÍ ---
-        // Antes tenías 'calendar__badge', ahora usamos tu clase CSS correcta:
         item.className = 'cita-estilo';
 
         // Contenido del texto
@@ -87,28 +86,30 @@ class UI {
 
     // Crear item en la lista del modal (con opción de click para editar)
     static createAdminModalItem(appointment) {
-        const li = document.createElement('li');
-        li.className = 'modal__item';
-        li.style.cursor = 'pointer'; // Indicar que es clickeable
-        li.innerHTML = `
-            <div class="modal__item__info">
-                <h4 class="modal__item__title">${appointment.nombre} ${appointment.apellido} 
-                <button style="font-size:0.8em; 
-                color:#ffffff; background:#FFC107; border-radius: 5px; 
-                border-style: outset; border: none; padding: 5px 5px;">Editar</button></h4>
-                <p class="modal__item__description">${appointment.motivo}</p>
-                <p class="modal__item__time">${appointment.telefono} | ${appointment.correo}</p>
-            </div>
-        `;
+    const li = document.createElement('li');
+    li.className = 'modal__item';
+    li.style.cursor = 'pointer';
+    li.innerHTML = `
+        <div class="modal__item__info">
+            <h4 class="modal__item__title" style="margin-left: 115px; margin-bottom:15px;">${appointment.nombre} ${appointment.apellido}</h4>
+            <p class="modal__item__description">${appointment.motivo}</p>
+            <p class="modal__item__time" style="margin-top: -20px;">${appointment.telefono} | ${appointment.correo}</p>
+            <button style="font-size:1.1em; 
+                color:#ffffff; background: #FFC107; border-radius: 5px; 
+                border-style: outset; border: none; padding: 5px 5px;">Editar</button>
+            <button style="font-size:1.1em; 
+                color:#ffffff; background: #355cdc; border-radius: 5px; 
+                border-style: outset; border: none; padding: 5px 5px;" id="btn-generar-appointment-modal">Generar Cita</button>
+        </div>
+    `;
 
-        // Al hacer clic en el item de la lista, abrimos el formulario de edición
-        li.addEventListener('click', () => {
-            listModal.close(); // Cerramos lista
-            openAdminForm(appointment); // Abrimos formulario lleno
-        });
+    li.addEventListener('click', () => {
+        listModal.close();
+        openAdminForm(appointment);
+    });
 
-        modalCalendarList.appendChild(li);
-    }
+    modalCalendarList.appendChild(li);
+}
 }
 
 // --- RENDERIZAR CALENDARIO ---
@@ -276,6 +277,7 @@ function openAdminForm(cita = null, fechaPreseleccionada = null) {
         adminFieldNombre.value = cita.nombre || '';
         adminFieldApellido.value = cita.apellido || '';
         adminFieldCorreo.value = cita.correo || '';
+        adminFieldFecha.value = cita.fecha || '';
         adminFieldTelefono.value = cita.telefono || '';
         adminFieldMotivo.value = cita.motivo || '';
 
@@ -456,5 +458,57 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    const modalSaveBtn = document.getElementById('btn-generar-appointment');
+    modalSaveBtn.addEventListener('click', () => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        // Ocuparemos del documento el tamaño y ancho y lo guardaremos en variables
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+    
+        const nombre = document.getElementById('appointment-nombre')?.value || 'N/A';
+        const apellido = document.getElementById('appointment-apellido')?.value || 'N/A' || '';
+        const descripcion = document.getElementById('appointment-motivo')?.value || 'N/A';
+        const email = document.getElementById('appointment-correo')?.value || 'N/A';
+        const telefono = document.getElementById('appointment-telefono')?.value || 'N/A';
+        const fecha = document.getElementById('appointment-fecha')?.value || 'N/A';
+        //Diseños para el pdf
+        const logo = new Image();
+        logo.src = '../img/headerlym.png';
+        logo.onload = function () {
+            const footer = new Image();
+            footer.src = '../img/footerlym.png';
+            footer.onload = function () {
+                doc.addImage(logo, 'PNG', 0, 0, pageWidth, 35);
+                doc.setFontSize(14);
+                doc.setFont(undefined, 'bold');
+                doc.text("Comprobante de Cita", pageWidth / 2, 50, { align: 'center' });
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'normal');
+                if (nombre !== 'N/A' && apellido !== 'N/A') {
+                    doc.text("Nombre: " + nombre, 15, 65);
+                    doc.text("Apellido: " + apellido, 15, 75);
+                    doc.text("Email: " + email, 15, 85);
+                    doc.text("Numero de Telefono: " + telefono, 15, 95);
+                    doc.text("Fecha y Hora: " + fecha, 15, 105);
+
+                    const textoMotivo = doc.splitTextToSize("Motivo de la Cita: " + descripcion, pageWidth - 30);
+                    doc.text(textoMotivo, 15, 115);
+
+                } else {
+                    doc.text("Nombre: " + nombre, 15, 65);
+                    doc.text("Correo Electronico: " + email, 15, 75);
+                    doc.text("Numero de Telefono: " + telefono, 15, 85);
+                    doc.text("Fecha y Hora: " + fecha, 15, 95);
+                    const textoMotivo = doc.splitTextToSize("Motivo de la Cita: " + descripcion, pageWidth - 30);
+                    doc.text(textoMotivo, 15, 105);
+                }
+                doc.addImage(footer, 'PNG', 0, pageHeight - 30, pageWidth, 30);
+                const nombreAr = nombre !== 'N/A' ? nombre.replace(/\s+/g, '_') : 'Usuario';
+                doc.save('comprobante_cita_horario_usuarios_' + nombreAr + '.pdf');
+            }
+        };
+    });
     
 });

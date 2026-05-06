@@ -363,15 +363,15 @@ if(isset($_POST['enviar'])){
         </div>
         <div class="form-section">
             <form method="POST" enctype="multipart/form-data">
-                
+
                 <div class="form-group">
                     <label>Nombre</label>
-                    <input type="text" name="name" required>
+                    <input type="text" name="name" id="Nombre" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label>Apellido</label>
-                    <input type="text" name="lastname" required>
+                    <input type="text" name="lastname" id="Apellido" required>
                 </div>
 
                 <div class="form-group mb-3">
@@ -382,35 +382,42 @@ if(isset($_POST['enviar'])){
                 <div id="div_documentos" class="border p-3 mb-3 bg-white">
                     <div class="mb-3">
                         <label for="archivo_ruc" class="form-label">Subir RUC (Opcional si no es empresa)</label>
-                        <input class="form-control" type="file" name="archivo_ruc" id="archivo_ruc" accept=".pdf, .jpg, .png .webp">
+                        <input class="form-control" type="file" name="archivo_ruc" id="archivo_ruc"
+                            accept=".pdf, .jpg, .png .webp">
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="archivo_cedula" class="form-label">Subir Copia de Cédula</label>
-                        <input class="form-control" type="file" name="archivo_cedula" id="archivo_cedula" accept=".pdf, .jpg, .png .webp">
+                        <input class="form-control" type="file" name="archivo_cedula" id="archivo_cedula"
+                            accept=".pdf, .jpg, .png .webp">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label>Correo</label>
-                    <input type="email" name="email" required>
+                    <input type="email" name="email" id="Correo" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label>Fecha</label>
-                    <input type="date" name="date" required>
+                    <input type="date" name="date" id="Fecha" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label>Teléfono / Celular</label>
-                    <input type="text" name="cell" required>
+                    <input type="text" name="cell" id="Telefono" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label>Motivo</label>
                     <textarea name="reason" id="reason" rows="5" required></textarea>
                 </div>
-                
+
+                <div class="con">
+                    <button type="button" class="btn btn-primary" id="boton">
+                        Generar Comprobante
+                    </button>
+                </div>
                 <div class="form-group full">
                     <button type="submit" name="enviar" class="btn btn-primary">
                         Enviar
@@ -443,6 +450,7 @@ if(isset($_POST['enviar'])){
         </div>
     </footer>
     <script src="../js/citas.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
     </script>

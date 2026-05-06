@@ -103,10 +103,10 @@ class UI {
         li.tabIndex = 0;
         li.innerHTML = `
             <div class="modal__item__info">
-                <h4 class="modal__item__title">${appointment.nombre} ${appointment.apellido}</h4>
-                <p class="modal__item__description">${appointment.motivo}</p>
-                <p class="modal__item__time">${appointment.correo}</p>
-                <p class="modal__item__time">${appointment.telefono}</p>
+                <h4 class="modal__item__title" id="name_save">${appointment.nombre} ${appointment.apellido}</h4>
+                <p class="modal__item__description" id="description_save">${appointment.motivo}</p>
+                <p class="modal__item__time" id="email_save">${appointment.correo}</p>
+                <p class="modal__item__time" id="phone_save">${appointment.telefono}</p>
             </div>
         `;
         modalCalendarList.appendChild(li);
@@ -464,9 +464,10 @@ modalSaveBtn.addEventListener('click', () => {
     const doc = new jsPDF();
     // Ocuparemos del documento el tamaño y ancho y lo guardaremos en variables
     const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight ();
+    const pageHeight = doc.internal.pageSize.getHeight();
 
     const nombre = document.getElementById('name_save')?.textContent || document.getElementById('nombre')?.value || 'N/A';
+    const apellido = document.getElementById('apellido')?.value || 'N/A' || '';
     const descripcion = document.getElementById('description_save')?.textContent || document.getElementById('Motivo')?.value || 'N/A';
     const email = document.getElementById('email_save')?.textContent || document.getElementById('correo')?.value || 'N/A';
     const telefono = document.getElementById('phone_save')?.textContent || document.getElementById('telefono')?.value || 'N/A';
@@ -483,24 +484,33 @@ modalSaveBtn.addEventListener('click', () => {
             doc.text("Comprobante de Cita", pageWidth / 2, 50, { align: 'center' });
             doc.setFontSize(12);
             doc.setFont(undefined, 'normal');
-            doc.text("Nombre: " + nombre, 15, 65);
-            doc.text("Correo Electronico: " + email, 15, 75);
-            doc.text("Numero de Telefono: " + telefono, 15, 85);
+            if (nombre !== 'N/A' && apellido !== 'N/A') {
+                doc.text("Nombre: " + nombre, 15, 65);
+                doc.text("Apellido: " + apellido, 15, 75);
+                doc.text("Correo Electronico: " + email, 15, 85);
+                doc.text("Numero de Telefono: " + telefono, 15, 95);
 
-            const textoMotivo = doc.splitTextToSize("Motivo de la Cita: " + descripcion, pageWidth - 30);
-            doc.text(textoMotivo, 15, 100);
+                const textoMotivo = doc.splitTextToSize("Motivo de la Cita: " + descripcion, pageWidth - 30);
+                doc.text(textoMotivo, 15, 105);
 
-            doc.addImage(footer, 'PNG', 0, pageHeight -30, pageWidth, 30);  
+            } else {
+                doc.text("Nombre: " + nombre, 15, 65);
+                doc.text("Correo Electronico: " + email, 15, 75);
+                doc.text("Numero de Telefono: " + telefono, 15, 85);
+
+                const textoMotivo = doc.splitTextToSize("Motivo de la Cita: " + descripcion, pageWidth - 30);
+                doc.text(textoMotivo, 15, 95);
+            }
+            doc.addImage(footer, 'PNG', 0, pageHeight - 30, pageWidth, 30);
             const nombreAr = nombre !== 'N/A' ? nombre.replace(/\s+/g, '_') : 'Usuario';
             doc.save('comprobante_cita_horario_usuarios_' + nombreAr + '.pdf');
         }
-    }
-
+    };
 });
 
 if (modalDeleteBtn) {
     modalDeleteBtn.addEventListener('click', async (e) => {
-        e.preventDefault(); 
+        e.preventDefault();
         //Si no hay cita seleccionada nos dara un mensaje y luego return para que no ejecute el resto del codigo
         if (!selectedAppointmentId) {
             const items = document.querySelectorAll('.modal__item');
@@ -522,7 +532,7 @@ if (modalDeleteBtn) {
 
                 // Llamamos a tu archivo dedicado a borrar citas
                 const response = await fetch('../php/eliminar_cita.php', {
-                    method: 'POST', 
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
                     },
@@ -530,20 +540,20 @@ if (modalDeleteBtn) {
                 });
 
                 // LEEMOS COMO TEXTO PRIMERO Esto evita que JS se rompa si PHP envía espacios en blanco
-                const textoRespuesta = await response.text(); 
+                const textoRespuesta = await response.text();
                 const resultado = JSON.parse(textoRespuesta); // Luego lo convertimos a JSON
 
                 // Si el PHP responde success: true
                 if (resultado.success) {
-                    
+
                     // Mostramos la notificación usando Notyf
                     const notyf = new Notyf({ position: { x: 'right', y: 'top' } });
                     notyf.success('Cita eliminada correctamente');
-                    
+
                     // Forzamos la recarga de la página tras un milisegundo para que se vea el mensaje
                     setTimeout(() => {
                         window.location.href = window.location.href; // Recarga súper forzada
-                    }, 800); 
+                    }, 800);
 
                 } else {
                     alert('Error: ' + (resultado.error || 'No se pudo cancelar la cita.'));
@@ -551,7 +561,7 @@ if (modalDeleteBtn) {
             } catch (error) {
                 console.error('Error al intentar borrar:', error);
                 // Si hay un error, de todas formas forzamos la recarga porque sabemos que el PHP sí la borra
-                window.location.reload(); 
+                window.location.reload();
             }
         }
     });

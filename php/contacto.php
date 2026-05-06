@@ -399,7 +399,7 @@ if (isset($_POST['enviar'])) {
                 </div>
                 <div class="con">
                     <button type="button" class="btn btn-primary" id="boton">
-                        Imprimir Comprobante
+                        Generar Comprobante
                     </button>
                 </div>
                 <div class="form-group full">

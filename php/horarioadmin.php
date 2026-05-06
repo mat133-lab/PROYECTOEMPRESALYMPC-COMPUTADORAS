@@ -4,8 +4,8 @@
 
     // Verificar rol
     $rolesConAcceso = ['admin', 'tecnico', 'encargado', 'pasante'];
-    if (!isset($_SESSION['usuario']) || !in_array($_SESSION['usuario'], $rolesConAcceso)) {
-        header('Location: ../php/dashboard.php');
+    if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $rolesConAcceso)) {
+        header('Location: ../php/login.php');
         exit();
     }
 ?>
@@ -94,7 +94,7 @@
 
                 <div class="offcanvas-header">
                     <h5 class="offcanvas-title">Menu</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
                 </div>
 
                 <div class="offcanvas-body">
@@ -257,7 +257,7 @@
 
                 <div class="offcanvas-header">
                     <h5 class="offcanvas-title">Menu</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
                 </div>
 
                 <div class="offcanvas-body">
@@ -392,42 +392,42 @@
         <div class="modal__card p-4 rounded-3 shadow bg-white" style="max-width: 500px; width: 100%; margin: auto; ">
             <header class="modal__header d-flex justify-content-between align-items-center mb-3">
                 <h3 class="modal__heading m-0 fw-bold text-white">Gestionar Cita</h3>
-                <button type="button" class="btn-close" id="admin-modal-close-icon"></button>
+                <button type="button" class="btn-close" id="admin-modal-close-icon" ></button>
             </header>
 
             <div class="modal__list__container">
                 <input type="hidden" id="appointment-id">
 
-                <div class="row g-2 mb-2">
+                <div class="row g-2 mb-2"> 
                     <div class="col-6">
                         <label class="form-label small fw-bold text-muted">Nombre</label>
-                        <input id="appointment-nombre" class="form-control form-control-sm">
+                        <input id="appointment-nombre" class="form-control form-control-sm" >
                     </div>
                     <div class="col-6">
                         <label class="form-label small fw-bold text-muted">Apellido</label>
-                        <input id="appointment-apellido" class="form-control form-control-sm">
+                        <input id="appointment-apellido" class="form-control form-control-sm" >
                     </div>
                 </div>
 
                 <div class="mb-2">
                     <label class="form-label small fw-bold text-muted">Correo</label>
-                    <input id="appointment-correo" class="form-control form-control-sm" type="email">
+                    <input id="appointment-correo" class="form-control form-control-sm" type="email" >
                 </div>
 
                 <div class="row g-2 mb-2">
                     <div class="col-7">
-                        <label class="form-label small fw-bold text-muted">Fecha y Hora</label>
-                        <input id="appointment-fecha" class="form-control form-control-sm" type="datetime-local">
+                        <label class="form-label small fw-bold text-muted">Fecha</label>
+                        <input id="appointment-fecha" class="form-control form-control-sm" type="date" >
                     </div>
                     <div class="col-5">
                         <label class="form-label small fw-bold text-muted">Teléfono</label>
-                        <input id="appointment-telefono" class="form-control form-control-sm">
+                        <input id="appointment-telefono" class="form-control form-control-sm" >
                     </div>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label small fw-bold text-muted">Motivo / Descripción</label>
-                    <textarea id="appointment-motivo" class="form-control form-control-sm" rows="3"></textarea>
+                    <textarea id="appointment-motivo" class="form-control form-control-sm" rows="3" ></textarea>
                 </div>
             </div>
 
@@ -435,27 +435,32 @@
                 <button type="button" id="admin-modal-cancel-btn" class="btn btn-light text-muted">Cancelar</button>
                 <button id="btn-delete-appointment" class="btn btn-outline-danger">Eliminar</button>
                 <button id="btn-save-appointment" class="btn btn-warning text-white fw-bold">Guardar Cambios</button>
+                <button id="btn-generar-appointment" class="btn btn-primary">Generar Cita</button>
             </footer>
         </div>
     </dialog>
 
 
-    <dialog class="dialog-nativo" id="modal-calendar">
-        <div class="modal__card rounded-3 shadow p-4"
-            style="max-width: 400px; width: 100%; margin: auto; background: white;">
-            <header class="modal__header d-flex justify-content-between align-items-center mb-3" style="background-color: #ffc107;">
-                <h5 class="modal__heading m-0 text-white fw-bold" id="modal-heading">Citas del día</h5>
-                <button type="button" class="btn-close btn-close-white" id="modal-close-btn"></button>
+    <dialog class="dialog-nativo" id="modal-calendar" style="border: none; border-radius: 12px; padding: 0; max-width: 450px; width: 90%; background: transparent;">
+        <div class="modal__card shadow" style="background: white; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; max-height: 80vh;">
+            
+            <header class="d-flex justify-content-between align-items-center p-3" style="background-color: #ffc107;">
+                <h5 class="m-0 text-white fw-bold" id="modal-heading">Citas del día</h5>
+                <button type="button" style="background: transparent; border: none; color: white; font-size: 1.5rem; font-weight: bold; cursor: pointer; outline: none;" onclick="document.getElementById('modal-calendar').close()">
+                    &#10006;
+                </button>
             </header>
 
-            <ul class="modal__list list-unstyled mb-3" id="modal-calendar-list"></ul>
+            <ul class="list-unstyled m-0 p-3" id="modal-calendar-list" style="overflow-y: auto; overflow-x: hidden; flex-grow: 1;"></ul>
 
-            <div class="text-end border-top pt-2">
-                <button class="btn btn-secondary btn-sm" style="background-color: #ffc107;"
-                    onclick="document.getElementById('modal-calendar').close()">Cerrar</button>
+            <div class="d-flex justify-content-end align-items-center p-3 border-top gap-2" style="background-color: #f8f9fa;">
+                <button type="button" class="btn btn-light text-muted border" onclick="document.getElementById('modal-calendar').close()">Cerrar</button>
+                <button type="button" class="btn btn-danger text-white fw-bold" id="btn-delete-calendar" style="display: none;">Eliminar</button>
+                <button type="button" class="btn btn-warning text-white fw-bold" id="btn-edit-calendar" style="display: none;">Editar</button>
             </div>
         </div>
     </dialog>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module" src="../js/horario-calendario-admin.js"></script>
 </body>
@@ -463,3 +468,4 @@
 </html>
 
 </html>
+
