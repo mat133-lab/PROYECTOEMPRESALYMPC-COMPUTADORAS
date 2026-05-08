@@ -30,8 +30,12 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 
         // Guardar nombre de usuario si existe en la tabla
         $_SESSION['usuario'] = !empty($row['usuario']) ? $row['usuario'] : 'Usuario';
-        
-        header("Location: ../php/dashboard.php");
+
+        if (strtolower($row['rol']) === 'tecnico') {
+            header("Location: ../php/dashboard_tecnico.php");
+        } else {
+            header("Location: ../php/dashboard.php");
+        }
         exit;
     } else {
         $error = "Credenciales Inválidas";

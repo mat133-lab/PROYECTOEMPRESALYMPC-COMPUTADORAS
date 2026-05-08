@@ -97,7 +97,7 @@ $result = $conn->query($query);*/
 
                 <div class="offcanvas-header">
                     <h5 class="offcanvas-title">Menu</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
                 </div>
 
                 <div class="offcanvas-body">
@@ -234,7 +234,7 @@ $result = $conn->query($query);*/
                         </li>
                         <div class="d-flex align-items-center mt-3">
 
-                            <?php if (isset($_SESSION['usuario'])): ?>
+                            <?php if (isset($_SESSION['rol'])): ?> 
                             <span class="text-white me-3">Buen dia, <b><?php echo $_SESSION['usuario']; ?></b></span>
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
@@ -247,8 +247,20 @@ $result = $conn->query($query);*/
                 </div>
             </div>
             <?php elseif($esStf): ?>
-            <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
+                <!-- Si el usuario es parte del personal lo redirigimo a su dashboard correspondiente si es tecnico, administrador, encargado o pasante lo redirigimos al dashboard correspondiente -->
+            <?php if(strtolower($_SESSION['rol']) === 'admin'): ?>
+                <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
                 href="../php/dashboardadmin.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+            <?php elseif(strtolower($_SESSION['rol']) === 'tecnico'): ?>
+                <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
+                href="../php/dashboard_tecnico.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+            <?php elseif(strtolower($_SESSION['rol']) === 'encargado'): ?>
+                <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
+                href="../php/dashboard_encargado.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+            <?php elseif(strtolower($_SESSION['rol']) === 'pasante'): ?>
+                <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
+                href="../php/dashboard_pasante.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+            <?php endif; ?>
             <div class="d-flex align-items-center gap-2 ms-auto">
                 <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
                     data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
@@ -260,7 +272,7 @@ $result = $conn->query($query);*/
 
                 <div class="offcanvas-header">
                     <h5 class="offcanvas-title">Menu</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
                 </div>
 
                 <div class="offcanvas-body">
@@ -292,9 +304,9 @@ $result = $conn->query($query);*/
 
                         <div class="d-flex align-items-center">
 
-                            <?php if (isset($_SESSION['admin_name'])): ?>
+                            <?php if (isset($_SESSION['rol'])): ?>
                             <span class="text-white me-3">Buen dia,
-                                <b><?php echo $_SESSION['admin_name']; ?></b></span>
+                                <b><?php echo $_SESSION['usuario']; ?></b></span>
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>

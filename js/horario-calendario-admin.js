@@ -151,6 +151,16 @@ export async function renderCalendar() {
         }
     }
 
+    // Marcar días con número para hover
+    document.querySelectorAll('.calendar__day').forEach(day => {
+        const numberSpan = day.querySelector('.day-number');
+        if (numberSpan && numberSpan.textContent.trim()) {
+            day.classList.add('has-number');
+        } else {
+            day.classList.remove('has-number');
+        }
+    });
+
     // Obtener citas (API ADMIN)
     const fechaInicio = `${year}-${String(month + 1).padStart(2, '0')}-01`;
     const fechaFin = `${year}-${String(month + 1).padStart(2, '0')}-${lastMonthDay}`;
@@ -400,6 +410,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const dayNumber = dayElement.dataset.day;
             if (!dayNumber) return;
+
+            const dayNumberLabel = dayElement.querySelector('.day-number');
+            if (!dayNumberLabel || !dayNumberLabel.textContent.trim()) return;
+            if (dayElement.classList.contains('calendar__day--hidden')) return;
 
             // Lógica Admin:
             // Si hay citas -> Abrir Lista.

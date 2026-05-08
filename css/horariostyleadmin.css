@@ -97,23 +97,53 @@ body {
     /* Ocupa el espacio restante */
 }
 
-.calendar__day {
+.calendar .calendar__day {
     background: #fff;
-    min-height: 100px;
-    /* Altura mínima de cada celda */
+    min-height: 140px;
+    max-height: 160px;
+    height: 160px;
+    /* Altura fija para evitar que la celda se estire con citas */
     padding: 8px;
     position: relative;
     cursor: pointer;
     transition: background-color 0.2s;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
-.calendar__day:hover {
+.calendar .calendar__day--hidden {
+    display: none !important;
+}
+
+.calendar .calendar__day.has-number:hover {
     background-color: #fff8e1;
     /* Naranja muy suave al pasar el mouse */
 }
 
+.calendar .calendar__day:not(.has-number):hover {
+    background-color: #fff !important;
+}
+
+.calendar .calendar__day--content {
+    background-color: #f9f9f9;
+}
+
+.calendar .calendar__appointments {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: calc(100% - 24px);
+    overflow-y: auto;
+}
+
 /* Estilo de la "Etiqueta" de Cita en el calendario */
-.cita-estilo {
+.calendar .cita-estilo {
     display: block;
     background-color: #4CAF50;
     /* Verde éxito */

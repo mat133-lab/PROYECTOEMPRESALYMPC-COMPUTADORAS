@@ -105,19 +105,21 @@ body {
     border: 1px solid #e9e9e9;
 }
 
-.calendar__day {
+.calendar__days .calendar__day {
     background-color: #fff;
     padding: 12px 8px;
-    min-height: 100px;
-    max-height: 140px;
+    min-height: 140px;
+    max-height: 160px;
+    height: 160px;
     display: flex;
     flex-direction: column;
     gap: 8px;
     border: none;
     cursor: default;
     transition: 0.3s ease-in-out;
-    overflow-y: auto;
+    overflow: hidden;
     overflow-x: hidden;
+    box-sizing: border-box;
 }
 
 .calendar__day--hidden {
@@ -140,20 +142,21 @@ body {
     min-width: 24px;
 }
 
-.calendar__appointments {
+.calendar__days .calendar__appointments {
     display: flex;
     flex-direction: column;
     gap: 4px;
     list-style: none;
     margin: 0;
     padding: 0 2px;
-    flex-shrink: 0;
-    max-height: 100px;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: calc(100% - 36px);
     overflow-y: auto;
     width: 100%;
 }
 
-.calendar__appointment {
+.calendar__days .calendar__appointment {
     padding: 5px 8px;
     font-size: 0.75em;
     background-color: #4caf50;
@@ -472,9 +475,11 @@ body {
         height: 28px;
     }
 
-    .calendar__day {
+    .calendar__days .calendar__day {
         padding: 8px 6px;
         min-height: 80px;
+        max-height: 120px;
+        height: 120px;
         gap: 4px;
     }
 
@@ -482,7 +487,7 @@ body {
         font-size: 0.95em;
     }
 
-    .calendar__appointment {
+    .calendar__days .calendar__appointment {
         font-size: 0.7em;
         padding: 3px 4px;
     }
@@ -490,6 +495,10 @@ body {
     .modal__card {
         width: 95%;
         max-height: 90vh;
+    }
+
+    .calendar__days .calendar__appointments {
+        max-height: calc(100% - 28px);
     }
 }
 

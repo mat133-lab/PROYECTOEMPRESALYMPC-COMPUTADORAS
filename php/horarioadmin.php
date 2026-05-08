@@ -231,7 +231,7 @@
                         </li>
                         <div class="d-flex align-items-center mt-3">
 
-                            <?php if (isset($_SESSION['usuario'])): ?>
+                            <?php if (isset($_SESSION['rol'])): ?> 
                             <span class="text-white me-3">Buen dia, <b><?php echo $_SESSION['usuario']; ?></b></span>
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
@@ -244,8 +244,20 @@
                 </div>
             </div>
             <?php elseif($esStf): ?>
-            <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
+                <!-- Si el usuario es parte del personal lo redirigimo a su dashboard correspondiente si es tecnico, administrador, encargado o pasante lo redirigimos al dashboard correspondiente -->
+            <?php if(strtolower($_SESSION['rol']) === 'admin'): ?>
+                <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
                 href="../php/dashboardadmin.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+            <?php elseif(strtolower($_SESSION['rol']) === 'tecnico'): ?>
+                <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
+                href="../php/dashboard_tecnico.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+            <?php elseif(strtolower($_SESSION['rol']) === 'encargado'): ?>
+                <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
+                href="../php/dashboard_encargado.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+            <?php elseif(strtolower($_SESSION['rol']) === 'pasante'): ?>
+                <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
+                href="../php/dashboard_pasante.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+            <?php endif; ?>
             <div class="d-flex align-items-center gap-2 ms-auto">
                 <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
                     data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
@@ -289,9 +301,9 @@
 
                         <div class="d-flex align-items-center">
 
-                            <?php if (isset($_SESSION['admin_name'])): ?>
+                            <?php if (isset($_SESSION['rol'])): ?>
                             <span class="text-white me-3">Buen dia,
-                                <b><?php echo $_SESSION['admin_name']; ?></b></span>
+                                <b><?php echo $_SESSION['usuario']; ?></b></span>
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
@@ -374,9 +386,8 @@
                                     // Formato de fecha limpio
                                     $fechaObj = new DateTime($row['fecha']);
                                     $fechaDia = $fechaObj->format('d M'); // dia y mes
-                                    $fechaHora = $fechaObj->format('H:i'); // hora y minutos
                                     
-                                    echo "<tr data-id=\"$id\">\n<td>\n<div class='cita-item-nombre'>$nombre</div>\n<div class='cita-item-fecha'>\n $fechaDia <span class='ms-2'> $fechaHora</span>\n                                                </div>\n                                            </td>\n                                            <td class='text-end'>\n                                                <button class='btn-icon btn-edit-custom btn-edit' data-id='$id' title='Editar'>✏️</button>\n                                                <button class='btn-icon btn-delete-custom btn-delete' data-id='$id' title='Borrar'>🗑️</button>\n                                            </td>\n                                          </tr>";
+                                    echo "<tr data-id=\"$id\">\n<td>\n<div class='cita-item-nombre'>$nombre</div>\n<div class='cita-item-fecha'>\n $fechaDia \n</div>\n</td>\n<td class='text-end'>\n<button class='btn-icon btn-edit-custom btn-edit' data-id='$id' title='Editar'>✏️</button>\n<button class='btn-icon btn-delete-custom btn-delete' data-id='$id' title='Borrar'>🗑️</button>\n</td>\n</tr>";
                                 }
                                 ?>
                             </tbody>
@@ -392,42 +403,42 @@
         <div class="modal__card p-4 rounded-3 shadow bg-white" style="max-width: 500px; width: 100%; margin: auto; ">
             <header class="modal__header d-flex justify-content-between align-items-center mb-3">
                 <h3 class="modal__heading m-0 fw-bold text-white">Gestionar Cita</h3>
-                <button type="button" class="btn-close" id="admin-modal-close-icon" ></button>
+                <button type="button" class="btn-close" id="admin-modal-close-icon"></button>
             </header>
 
             <div class="modal__list__container">
                 <input type="hidden" id="appointment-id">
 
-                <div class="row g-2 mb-2"> 
+                <div class="row g-2 mb-2">
                     <div class="col-6">
                         <label class="form-label small fw-bold text-muted">Nombre</label>
-                        <input id="appointment-nombre" class="form-control form-control-sm" >
+                        <input id="appointment-nombre" class="form-control form-control-sm">
                     </div>
                     <div class="col-6">
                         <label class="form-label small fw-bold text-muted">Apellido</label>
-                        <input id="appointment-apellido" class="form-control form-control-sm" >
+                        <input id="appointment-apellido" class="form-control form-control-sm">
                     </div>
                 </div>
 
                 <div class="mb-2">
                     <label class="form-label small fw-bold text-muted">Correo</label>
-                    <input id="appointment-correo" class="form-control form-control-sm" type="email" >
+                    <input id="appointment-correo" class="form-control form-control-sm" type="email">
                 </div>
 
                 <div class="row g-2 mb-2">
                     <div class="col-7">
                         <label class="form-label small fw-bold text-muted">Fecha</label>
-                        <input id="appointment-fecha" class="form-control form-control-sm" type="date" >
+                        <input id="appointment-fecha" class="form-control form-control-sm" type="date">
                     </div>
                     <div class="col-5">
                         <label class="form-label small fw-bold text-muted">Teléfono</label>
-                        <input id="appointment-telefono" class="form-control form-control-sm" >
+                        <input id="appointment-telefono" class="form-control form-control-sm">
                     </div>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label small fw-bold text-muted">Motivo / Descripción</label>
-                    <textarea id="appointment-motivo" class="form-control form-control-sm" rows="3" ></textarea>
+                    <textarea id="appointment-motivo" class="form-control form-control-sm" rows="3"></textarea>
                 </div>
             </div>
 
@@ -441,22 +452,31 @@
     </dialog>
 
 
-    <dialog class="dialog-nativo" id="modal-calendar" style="border: none; border-radius: 12px; padding: 0; max-width: 450px; width: 90%; background: transparent;">
-        <div class="modal__card shadow" style="background: white; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; max-height: 80vh;">
-            
+    <dialog class="dialog-nativo" id="modal-calendar"
+        style="border: none; border-radius: 12px; padding: 0; max-width: 450px; width: 90%; background: transparent;">
+        <div class="modal__card shadow"
+            style="background: white; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; max-height: 80vh;">
+
             <header class="d-flex justify-content-between align-items-center p-3" style="background-color: #ffc107;">
                 <h5 class="m-0 text-white fw-bold" id="modal-heading">Citas del día</h5>
-                <button type="button" style="background: transparent; border: none; color: white; font-size: 1.5rem; font-weight: bold; cursor: pointer; outline: none;" onclick="document.getElementById('modal-calendar').close()">
+                <button type="button"
+                    style="background: transparent; border: none; color: white; font-size: 1.5rem; font-weight: bold; cursor: pointer; outline: none;"
+                    onclick="document.getElementById('modal-calendar').close()">
                     &#10006;
                 </button>
             </header>
 
-            <ul class="list-unstyled m-0 p-3" id="modal-calendar-list" style="overflow-y: auto; overflow-x: hidden; flex-grow: 1;"></ul>
+            <ul class="list-unstyled m-0 p-3" id="modal-calendar-list"
+                style="overflow-y: auto; overflow-x: hidden; flex-grow: 1;"></ul>
 
-            <div class="d-flex justify-content-end align-items-center p-3 border-top gap-2" style="background-color: #f8f9fa;">
-                <button type="button" class="btn btn-light text-muted border" onclick="document.getElementById('modal-calendar').close()">Cerrar</button>
-                <button type="button" class="btn btn-danger text-white fw-bold" id="btn-delete-calendar" style="display: none;">Eliminar</button>
-                <button type="button" class="btn btn-warning text-white fw-bold" id="btn-edit-calendar" style="display: none;">Editar</button>
+            <div class="d-flex justify-content-end align-items-center p-3 border-top gap-2"
+                style="background-color: #f8f9fa;">
+                <button type="button" class="btn btn-light text-muted border"
+                    onclick="document.getElementById('modal-calendar').close()">Cerrar</button>
+                <button type="button" class="btn btn-danger text-white fw-bold" id="btn-delete-calendar"
+                    style="display: none;">Eliminar</button>
+                <button type="button" class="btn btn-warning text-white fw-bold" id="btn-edit-calendar"
+                    style="display: none;">Editar</button>
             </div>
         </div>
     </dialog>
@@ -468,4 +488,3 @@
 </html>
 
 </html>
-

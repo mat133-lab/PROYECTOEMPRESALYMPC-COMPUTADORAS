@@ -102,13 +102,16 @@ class UI {
         }
         li.tabIndex = 0;
         li.innerHTML = `
-            <div class="modal__item__info">
-                <h4 class="modal__item__title" id="name_save">${appointment.nombre} ${appointment.apellido}</h4>
-                <p class="modal__item__description" id="description_save">${appointment.motivo}</p>
-                <p class="modal__item__time" id="email_save">${appointment.correo}</p>
-                <p class="modal__item__time" id="phone_save">${appointment.telefono}</p>
-            </div>
-        `;
+        <div class="modal__item__info">
+            <h4 class="modal__item__title" id="name_save">${appointment.nombre} ${appointment.apellido}</h4>
+            <p class="modal__item__time" id="email_save">${appointment.correo}</p>
+            <p class="modal__item__time" id="cedula_save">${appointment.cedula}</p>
+            <p class="modal__item__time" id="ruc_save">${appointment.archivo_ruc ? 'Sí cuenta con Archivo RUC' : 'No proporcionado'}</p>
+            <p class="modal__item__time" id="cedula_file_save">${appointment.archivo_cedula ? 'Sí cuenta con Copia de Cédula' : 'No proporcionado'}</p>
+            <p class="modal__item__time" id="phone_save">${appointment.telefono}</p>
+            <p class="modal__item__description" id="description_save">${appointment.motivo}</p>
+        </div>
+    `;
         modalCalendarList.appendChild(li);
     }
 }
@@ -301,33 +304,50 @@ function abrirFormularioCrear(fechaSeleccionada) {
 
     // Inyectar HTML del formulario
     listContainer.innerHTML = `
-        <form method="POST" action="../php/guardar_cita.php" class="p-3">
-            <input type="hidden" name="fecha" value="${fechaSeleccionada}">
-            
-            <div class="mb-3">
-                <label class="form-label">Nombre</label>
-                <input type="text" name="nombre" class="form-control" id="nombre" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Apellido</label>
-                <input type="text" name="apellido" class="form-control" id="apellido" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Correo</label>
-                <input type="email" name="correo" id="correo" class="form-control" value="${window.currentUserEmail || ''}" required ${window.currentUserEmail ? 'readonly' : ''}>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Teléfono</label>
-                <input type="text" name="telefono" id="telefono" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Motivo</label>
-                <textarea name="motivo" class="form-control" id="Motivo" required></textarea>
-            </div>
-            <button type="submit" class="btn btn-warning w-100" style="color: #ffffff">Agendar cita física</button>
-        </form>
-    `;
-
+    <form method="POST" action="../php/guardar_cita.php" 
+          enctype="multipart/form-data" class="p-3">
+        
+        <input type="hidden" name="fecha" value="${fechaSeleccionada}">
+        
+        <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <input type="text" name="nombre" class="form-control" id="nombre" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Apellido</label>
+            <input type="text" name="apellido" class="form-control" id="apellido" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Correo</label>
+            <input type="email" name="correo" id="correo" class="form-control" 
+                   value="${window.currentUserEmail || ''}" required 
+                   ${window.currentUserEmail ? 'readonly' : ''}>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Cédula</label>
+            <input type="text" name="cedula" id="cedula" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">RUC</label>
+            <input type="file" name="archivo_ruc" id="archivo_ruc" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Archivo de Cédula</label>
+            <input type="file" name="archivo_cedula" id="archivo_cedula" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Teléfono</label>
+            <input type="text" name="telefono" id="telefono" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Motivo</label>
+            <textarea name="motivo" class="form-control" id="Motivo" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-warning w-100" style="color:#ffffff">
+            Agendar cita física
+        </button>
+    </form>
+`;
     // Manejar cierre de este modal específico
     const closeBtns = formModal.querySelectorAll(".modal__close, .modal__button--close");
     closeBtns.forEach(btn => {
@@ -469,6 +489,10 @@ modalSaveBtn.addEventListener('click', () => {
     const nombre = document.getElementById('name_save')?.textContent || document.getElementById('nombre')?.value || 'N/A';
     const apellido = document.getElementById('apellido')?.value || 'N/A' || '';
     const descripcion = document.getElementById('description_save')?.textContent || document.getElementById('Motivo')?.value || 'N/A';
+    const cedula = document.getElementById('cedula_save')?.textContent || document.getElementById('cedula')?.value || 'N/A';
+    const ruc = document.getElementById('ruc_save')?.textContent || document.getElementById('archivo_ruc')?.value || 'N/A';
+    const archivo_cedula = document.getElementById('cedula_file_save')?.textContent || document.getElementById('archivo_cedula')?.value || 'N/A';
+    const fecha = document.getElementById('fecha')?.value || 'N/A';
     const email = document.getElementById('email_save')?.textContent || document.getElementById('correo')?.value || 'N/A';
     const telefono = document.getElementById('phone_save')?.textContent || document.getElementById('telefono')?.value || 'N/A';
     //Diseños para el pdf
@@ -488,18 +512,32 @@ modalSaveBtn.addEventListener('click', () => {
                 doc.text("Nombre: " + nombre, 15, 65);
                 doc.text("Apellido: " + apellido, 15, 75);
                 doc.text("Correo Electronico: " + email, 15, 85);
-                doc.text("Numero de Telefono: " + telefono, 15, 95);
+                doc.text("Cédula: " + cedula, 15, 95);
+                if (ruc !== 'N/A') {
+                    doc.text("Ruc: Si cuenta con Copia de RUC ", 15, 105);
+                } if (archivo_cedula !== 'N/A') {
+                    doc.text("Copia Cedula: Si cuenta con Copia de Cedula ", 15, 115);
+                }
+                doc.text("Fecha: " + fecha, 15, 125);
+                doc.text("Numero de Telefono: " + telefono, 15, 135);
 
                 const textoMotivo = doc.splitTextToSize("Motivo de la Cita: " + descripcion, pageWidth - 30);
-                doc.text(textoMotivo, 15, 105);
+                doc.text(textoMotivo, 15, 145);
 
             } else {
                 doc.text("Nombre: " + nombre, 15, 65);
                 doc.text("Correo Electronico: " + email, 15, 75);
-                doc.text("Numero de Telefono: " + telefono, 15, 85);
+                doc.text("Cédula: " + cedula, 15, 85);
+                if (ruc !== 'N/A') {
+                    doc.text("Ruc: Si cuenta con Copia de RUC ", 15, 95);
+                } if (archivo_cedula !== 'N/A') {
+                    doc.text("Copia Cedula: Si cuenta con Copia de Cedula ", 15, 105);
+                }
+                doc.text("Fecha: " + fecha, 15, 115);
+                doc.text("Numero de Telefono: " + telefono, 15, 125);
 
                 const textoMotivo = doc.splitTextToSize("Motivo de la Cita: " + descripcion, pageWidth - 30);
-                doc.text(textoMotivo, 15, 95);
+                doc.text(textoMotivo, 15, 135);
             }
             doc.addImage(footer, 'PNG', 0, pageHeight - 30, pageWidth, 30);
             const nombreAr = nombre !== 'N/A' ? nombre.replace(/\s+/g, '_') : 'Usuario';

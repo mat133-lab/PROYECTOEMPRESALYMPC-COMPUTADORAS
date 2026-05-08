@@ -1,31 +1,22 @@
 <?php
 session_start();
-//comprobar si entro como usuario comun, tecnico, etc, pero especialmente para admin cuando 
-// vaya a citas podra ver todas las citas si es otro usuario no podra ver la tabla citas
-include_once '../includes/db.php';
-if (!isset($_SESSION['usuario'])) {
-    header("Location: login.php");
-    exit();
-}
-/*Si el administrador necesita volver al panel administrador le redirija al dashboard correspondiente dependiendo el usuario*/
-if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
-    header("Location: dashboardadmin.php");
+require_once '../includes/db.php';
+
+if (!isset($_SESSION['rol']) || strtolower($_SESSION['rol']) !== 'tecnico') {
+    header('Location: ../php/login.php');
     exit();
 }
 
-if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'tecnico') {
-    header("Location: dashboard_tecnico.php");
-    exit();
-}
+$usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Técnico');
 ?>
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="es">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="../img/logo.webp">
-    <title>Dashboard - L&M PC Computadoras</title>
+    <title>Dashboard Técnico - L&M PC Computadoras</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="../css/style.css">
@@ -34,7 +25,7 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'tecnico') {
 
 <body>
     <nav class="navbar navbar-dark bg-warning fixed-top">
-        <div class="container-fluid position-relative">
+        <div class="container-fluid">
             <?php 
             //Verificamos si el usuario actual es parte del personal para que nos muestre el carrito de compras
             $rolesStf = ['admin', 'tecnico', 'encargado', 'pasante'];
@@ -80,6 +71,11 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'tecnico') {
             </div>
             <?php endif; ?>
 
+            <?php
+            $rolesStf = ['admin', 'tecnico', 'encargado', 'pasante'];
+            $esStf = isset($_SESSION['rol'])  && in_array(strtolower($_SESSION['rol']), $rolesStf);
+            if(!$esStf):
+            ?>
             <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
                 href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
             <div class="d-flex align-items-center gap-2 ms-auto">
@@ -99,14 +95,16 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'tecnico') {
 
                 <div class="offcanvas-header">
                     <h5 class="offcanvas-title">Menu</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
                 </div>
 
                 <div class="offcanvas-body">
                     <form class="d-flex d-lg-none mb-4" role="search" onsubmit="event.preventDefault();">
-                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search" id="search-input-mobile"/>
+                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search"
+                            id="search-input-mobile" />
                         <button class="btn btn-success" type="button">Buscar</button>
                     </form>
+
                     <ul class="navbar-nav flex-grow-1 pe-3">
 
                         <li class="nav-item">
@@ -200,7 +198,8 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'tecnico') {
                                 </li>
                                 <li><a class="dropdown-item categoria-link" href="../php/gestion_citas.php"
                                         data-categoria="bano">Citas</a></li>
-                                <li><a class="dropdown-item categoria-link" href="../php/ubicacion.php" data-categoria="bano">Ubicacion</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/ubicacion.php"
+                                        data-categoria="bano">Ubicacion</a>
                                 </li>
                             </ul>
                         </li>
@@ -231,13 +230,59 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'tecnico') {
                                         1000 ML</a></li>
                             </ul>
                         </li>
+                        <div class="d-flex align-items-center mt-3">
+
+                            <?php if (isset($_SESSION['rol'])): ?> 
+                            <span class="text-white me-3">Buen dia, <b><?php echo $_SESSION['usuario']; ?></b></span>
+                            <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
+                            <?php else: ?>
+                            <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
+                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <?php endif; ?>
+
+                        </div>
+                    </ul>
+                </div>
+            </div>
+            <?php elseif($esStf): ?>
+                <!-- Si el usuario es parte del personal lo redirigimo a su dashboard correspondiente si es tecnico, administrador, encargado o pasante lo redirigimos al dashboard correspondiente -->
+            <?php if(strtolower($_SESSION['rol']) === 'admin'): ?>
+                <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
+                href="../php/dashboardadmin.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+            <?php elseif(strtolower($_SESSION['rol']) === 'tecnico'): ?>
+                <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
+                href="../php/dashboard_tecnico.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+            <?php elseif(strtolower($_SESSION['rol']) === 'encargado'): ?>
+                <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
+                href="../php/dashboard_encargado.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+            <?php elseif(strtolower($_SESSION['rol']) === 'pasante'): ?>
+                <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
+                href="../php/dashboard_pasante.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+            <?php endif; ?>
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+
+            <div class="offcanvas offcanvas-end text-bg-warning" tabindex="-1" id="offcanvasDarkNavbar">
+
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title">Menu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+                </div>
+
+                <div class="offcanvas-body">
+                    <ul class="navbar-nav flex-grow-1 pe-3">
+
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                                 Cuenta y Configuración
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
                                 <li>
-                                    <a class="dropdown-item categoria-link" href="../php/perfilUsu.php"
+                                    <a class="dropdown-item categoria-link" href="../php/perfiladmin.php"
                                         data-categoria="estructura">
                                         Perfil
                                     </a>
@@ -255,9 +300,9 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'tecnico') {
                             </ul>
                         </li>
 
-                        <div class="d-flex align-items-center mt-3">
+                        <div class="d-flex align-items-center">
 
-                            <?php if (isset($_SESSION['usuario'])): ?>
+                            <?php if (isset($_SESSION['rol'])): ?>
                             <span class="text-white me-3">Buen dia,
                                 <b><?php echo $_SESSION['usuario']; ?></b></span>
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
@@ -271,123 +316,84 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'tecnico') {
                     </ul>
                 </div>
             </div>
+            <?php endif; ?>
+
         </div>
     </nav>
-    <main id="product-container" class="grid-container">
 
-
-        <header class="header">
-            <div class="header-content container">
-                <div class="header-txt">
-                    <h1><span>Bienvenido a L&M PC Computadoras -
-                        </span>Explora todo nuestro catalogo </h1>
-                    <p>
-                        Hola usuario aqui encontraras todo lo que necesitas
-                        relacionado a computacion, desde componentes hasta
-                        accesorios y mucho mas.
-                    </p>
-                    <a href="https://www.facebook.com/LyM010?locale=es_LA" class="btn-2" style="text-decoration:none; font-weight: 700;">Mas Informacion</a>
-                </div>
+    <main class="container header" style="padding-top: 100px;">
+        <div class="header-content">
+            <div class="header-txt">
+                <h1>Hola, <span><?php echo $usuario; ?></span></h1>
+                <p>Bienvenido al panel técnico. Aquí encontrarás acceso directo a tu horario, tus citas y herramientas de servicio.</p>
             </div>
+        </div>
 
-        </header>
-        <section class="info">
-            <div class="info-content container">
-                <div class="info-img">
-                    <img src="../img/promocion.jpg" alt>
-                </div>
-                <div class="info-txt">
-                    <h2>Los mejores en accesorios para el Usuario</h2>
-                    <p>
-                        En L&M PC Computadoras, nos enorgullece ofrecerte una amplia
-                        gama de productos y accesorios de alta calidad para satisfacer todas tus
-                        necesidades tecnológicas.
-                    </p>
-                    <a href="https://www.facebook.com/LyM010?locale=es_LA" class="btn-2" style="font-weight: 700; text-decoration:none;">Mas Informacion</a>
+        <section class="products" style="margin-top: 40px;">
+            <div class="container">
+                <h2 style="text-align:center; margin-bottom:24px;">Accesos rápidos</h2>
+                <div class="box-container">
+                    <a href="horarioadmin.php" class="box" style="text-decoration:none;">
+                        <img src="../img/calendar.webp" alt="Horario" onerror="this.style.display='none'">
+                        <div class="product-txt">
+                            <h3>Horario</h3>
+                            <p>Revisa el calendario de citas, abre tu agenda técnica y administra tus horarios.</p>
+                            <span class="precio">Ir a Horario</span>
+                        </div>
+                    </a>
+
+                    <a href="citas_tecnico.php" class="box" style="text-decoration:none;">
+                        <img src="../img/book.png" alt="Administrar Citas" onerror="this.style.display='none'">
+                        <div class="product-txt">
+                            <h3>Administrar Citas</h3>
+                            <p>Revisa y gestiona las citas de servicio programadas por los clientes.</p>
+                            <span class="precio">Ir a Citas</span>
+                        </div>
+                    </a>
+
+                    <a href="contacto_tecnico.php" class="box" style="text-decoration:none;">
+                        <img src="../img/contact.webp" alt="Administrar Contactos" onerror="this.style.display='none'">
+                        <div class="product-txt">
+                            <h3>Administrar Contactos</h3>
+                            <p>Revisa y gestiona los mensajes de contacto enviados por los clientes.</p>
+                            <span class="precio">Ir a Contactos</span>
+                        </div>
+                    </a>
+
+                    <a href="perfilUsu.php" class="box" style="text-decoration:none;">
+                        <img src="../img/users.png" alt="Perfil" onerror="this.style.display='none'">
+                        <div class="product-txt">
+                            <h3>Perfil</h3>
+                            <p>Actualiza tus datos, correo y credenciales como técnico.</p>
+                            <span class="precio">Ir a Perfil</span>
+                        </div>
+                    </a>
+
+                    <a href="ubicacion.php" class="box" style="text-decoration:none;">
+                        <img src="../img/ubicacion.webp" alt="Ubicación" onerror="this.style.display='none'">
+                        <div class="product-txt">
+                            <h3>Ubicación</h3>
+                            <p>Consulta la ubicación de la tienda y rutas para atenciones técnicas.</p>
+                            <span class="precio">Ir a Ubicación</span>
+                        </div>
+                    </a>
                 </div>
             </div>
         </section>
-        
-        <main class="products container">
-            <h2>Productos Destacados</h2>
-            <p>
-                Las mejores ofertas y descuentos en productos seleccionados
-            </p>
-            <div id="no-results" style="display: none; text-align: center; margin-bottom: 20px; width: 100%;">
-                <p>No se Encontro el producto</p>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <div>
+                <h3>L&M PC Computadoras</h3>
+                <p style="max-width:320px; color:#bbb;">Dashboard técnico dedicado para el personal de servicio.</p>
             </div>
+        </div>
+    </footer>
 
-            <div class="box-container" id="lista-1">
-                <?php
-            $stmt = $conn->prepare("SELECT p.*, s.Nombre AS nombre_contacto, s.Compania 
-                                    FROM productos p 
-                                    LEFT JOIN soporte s ON p.id_soporte = s.id_soporte 
-                                    ORDER BY p.id_producto ASC");
-            $stmt->execute();
-            $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            // Por cada producto en tu base de datos, creamos un lugar para guardarlo
-            foreach ($productos as $row): 
-            ?>
-                <div class="box" data-id="<?= $row['id_producto'] ?>">
-                    <img src="../img/<?= htmlspecialchars($row['imagen']) ?>" alt="<?= htmlspecialchars($row['nombre']) ?>"
-                        style="width: 100%; max-height: 200px; object-fit: contain; padding-top: 10px;">
-                        
-                    <div class="product-txt d-flex flex-column h-100 w-100">
-                        <h3 class="product-name" style="font-size: 18px; font-weight: 600;"><?= htmlspecialchars($row['nombre']) ?></h3>
-                        
-                        <p style="margin-bottom: 5px;"><span class="product-units"
-                                data-id="<?= $row['id_producto'] ?>"><?= $row['unidades'] ?></span>
-                            Unidades</p>
-                        <p class="text-muted" style="font-size: 14px; margin-bottom: 5px;"><?= htmlspecialchars($row['serie']) ?></p>
-
-                        <?php if (!empty($row['nombre_contacto'])): ?>
-                            <p style="font-size: 13px; color: #198754; margin-bottom: 10px;">
-                                <i class="fas fa-headset"></i> Soporte: <b><?= htmlspecialchars($row['nombre_contacto']) ?></b> (<?= htmlspecialchars($row['Compania']) ?>)
-                            </p>
-                        <?php endif; ?>
-
-                        <div class="mt-auto w-100">
-                            <p class="precio" style="font-size: 20px; font-weight: 700; color: #ff9100; margin: 10px 0;">$<?= number_format($row['precio'], 2) ?></p>
-                            <a href="#" class="agregar-libro btn-3 w-100 text-center" data-id="<?= $row['id_producto'] ?>" style="display:block; text-decoration:none;">Agregar al carrito</a>
-                        </div>
-                    </div>
-                </div>
-                <?php endforeach; ?>
-            </div>
-
-            <div class="btn-2" id="load-more" style="text-decoration:none; font-weight: 700; cursor: pointer;">Cargar mas Ofertas</div>
-        </main>
-
-        <footer class="footer">
-            <div class="footer-content container">
-                <div class="link">
-                    <h3>Pais - Ciudad</h3>
-                    <ul>
-                        <li><a href="https://maps.app.goo.gl/BwLzsdgsGr3jjrmu5"> Ecuador - Quito</a></li>
-                    </ul>
-                </div>
-                <div class="link">
-                    <h3>Ubicaciones</h3>
-                    <ul>
-                        <li><a href="https://maps.app.goo.gl/Hr7jt9W4ejWCdhmN7"> La Ecuatoriana - Las Orquídeas / Oe9
-                                Martha
-                                Bucaram / S37-49 / S37a</a></li>
-                    </ul>
-                </div>
-                <div class="link">
-                    <h3>Soporte</h3>
-                    <ul>
-                        <li><a href="https://www.facebook.com/LyM010/about?locale=es_LA"> +593 98 309 3667</a></li>
-                    </ul>
-                </div>
-            </div>
-        </footer>
-
-        <script src="../js/dashboard.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
-        </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
+    </script>
 </body>
 
 </html>
