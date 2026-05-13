@@ -17,6 +17,10 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'tecnico') {
     header("Location: dashboard_tecnico.php");
     exit();
 }
+if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'pasante') {
+    header("Location: dashboard_pasante.php");
+    exit();
+}
 ?>
 <!doctype html>
 <html lang="en">

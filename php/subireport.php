@@ -2,24 +2,48 @@
 session_start();
 require_once '../includes/db.php';
 
-if (!isset($_SESSION['rol']) || strtolower($_SESSION['rol']) !== 'tecnico') {
+if (!isset($_SESSION['rol']) || strtolower($_SESSION['rol']) !== 'pasante') {
     header('Location: ../php/login.php');
     exit();
 }
 
-$usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Técnico');
+$usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Pasante');
+$usuarioId = $_SESSION['id_usuario'] ?? $_SESSION['id'] ?? ''; 
+
+$metadataFile = __DIR__ . '/../uploads/pasante/metadata.json';
+$uploads = [];
+if (file_exists($metadataFile)) {
+    $rawData = file_get_contents($metadataFile);
+    $uploads = json_decode($rawData, true) ?: [];
+}
+
+$reportUploads = array_values(array_filter($uploads, function ($item) {
+    return isset($item['type']) && $item['type'] === 'report';
+}));
+
+$alertType = '';
+$alertMessage = '';
+if (isset($_GET['upload'])) {
+    if ($_GET['upload'] === 'success') {
+        $alertType = 'success';
+        $alertMessage = 'El archivo se cargó correctamente.';
+    } elseif ($_GET['upload'] === 'error') {
+        $alertType = 'danger';
+        $alertMessage = isset($_GET['message']) ? htmlspecialchars($_GET['message']) : 'Ocurrió un error al cargar el archivo.';
+    }
+}
 ?>
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="../img/logo.webp">
-    <title>Dashboard Técnico - L&M PC Computadoras</title>
+    <title>Upload para Arhivos del Pasante - L&M PC Computadoras</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard_pasante.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
@@ -282,7 +306,7 @@ $usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Técnico');
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
                                 <li>
-                                    <a class="dropdown-item categoria-link" href="../php/perfiltecnico.php"
+                                    <a class="dropdown-item categoria-link" href="../php/perfilpasante.php"
                                         data-categoria="estructura">
                                         Perfil
                                     </a>
@@ -320,77 +344,100 @@ $usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Técnico');
 
         </div>
     </nav>
-
-    <main class="container header" style="padding-top: 100px;">
-        <div class="header-content">
-            <div class="header-txt">
-                <h1>Hola, <span><?php echo $usuario; ?></span></h1>
-                <p>Bienvenido al panel técnico. Aquí encontrarás acceso directo a tu horario, tus citas y herramientas de servicio.</p>
-            </div>
-        </div>
-
-        <section class="products" style="margin-top: 40px;">
-            <div class="container">
-                <h2 style="text-align:center; margin-bottom:24px;">Accesos rápidos</h2>
-                <div class="box-container">
-                    <a href="horarioadmin.php" class="box" style="text-decoration:none;">
-                        <img src="../img/calendar.webp" alt="Horario" onerror="this.style.display='none'">
-                        <div class="product-txt">
-                            <h3>Horario</h3>
-                            <p>Revisa el calendario de citas, abre tu agenda técnica y administra tus horarios.</p>
-                            <span class="precio">Ir a Horario</span>
+    <div class="row g-4 mt-4 justify-content-center">
+        <div class="col-lg-6">
+            <div class="card pasante-card upload-card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Subir reporte en PDF</h5>
+                </div>
+                <div class="card-body">
+                    <p class="small-note">Carga reportes en formato PDF para mantener un historial ordenado y accesible.
+                    </p>
+                    <form action="../php/pasante_upload.php" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="upload_type" value="report">
+                        <div class="mb-3">
+                            <label class="form-label">Título del reporte</label>
+                            <input type="text" name="document_title" class="form-control"
+                                placeholder="Ej. Informe semanal" required>
                         </div>
-                    </a>
-
-                    <a href="citas_tecnico.php" class="box" style="text-decoration:none;">
-                        <img src="../img/book.png" alt="Administrar Citas" onerror="this.style.display='none'">
-                        <div class="product-txt">
-                            <h3>Administrar Citas</h3>
-                            <p>Revisa y gestiona las citas de servicio programadas por los clientes.</p>
-                            <span class="precio">Ir a Citas</span>
+                        <div class="mb-3">
+                            <label class="form-label">Descripción</label>
+                            <textarea name="description" class="form-control" rows="3"
+                                placeholder="Resumen del contenido del PDF"></textarea>
                         </div>
-                    </a>
-
-                    <a href="contacto_tecnico.php" class="box" style="text-decoration:none;">
-                        <img src="../img/contact.webp" alt="Administrar Contactos" onerror="this.style.display='none'">
-                        <div class="product-txt">
-                            <h3>Administrar Contactos</h3>
-                            <p>Revisa y gestiona los mensajes de contacto enviados por los clientes.</p>
-                            <span class="precio">Ir a Contactos</span>
+                        <div class="mb-3">
+                            <label class="form-label">Archivo PDF</label>
+                            <input type="file" name="documento" class="form-control" accept=".pdf" required>
                         </div>
-                    </a>
-
-                    <a href="perfiltecnico.php" class="box" style="text-decoration:none;">
-                        <img src="../img/users.png" alt="Perfil" onerror="this.style.display='none'">
-                        <div class="product-txt">
-                            <h3>Perfil</h3>
-                            <p>Actualiza tus datos, correo y credenciales como técnico.</p>
-                            <span class="precio">Ir a Perfil</span>
-                        </div>
-                    </a>
-
-                    <a href="ubicacion.php" class="box" style="text-decoration:none;">
-                        <img src="../img/ubicacion.webp" alt="Ubicación" onerror="this.style.display='none'">
-                        <div class="product-txt">
-                            <h3>Ubicación</h3>
-                            <p>Consulta la ubicación de la tienda y rutas para atenciones técnicas.</p>
-                            <span class="precio">Ir a Ubicación</span>
-                        </div>
-                    </a>
+                        <button type="submit" class="btn btn-primary w-100">Subir reporte</button>
+                    </form>
                 </div>
             </div>
-        </section>
-    </main>
+        </div>
+    </div>
+    <section class="mt-4 d-flex justify-content-center">
+        <div class="card pasante-card shadow-sm" style="max-width: 800px; width: 100%;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="card-title mb-1">Historial de subidas</h5>
+                        <p class="small-note mb-0">Verifica los reportes y proyectos subidos, con opción de vista
+                            rápida.</p>
+                    </div>
+                    <span class="badge bg-warning text-dark">Total: <?php echo count($uploads); ?></span>
+                </div>
 
-    <footer class="footer">
-        <div class="container footer-content">
-            <div>
-                <h3>L&M PC Computadoras</h3>
-                <p style="max-width:320px; color:#bbb;">Dashboard técnico dedicado para el personal de servicio.</p>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Título</th>
+                                <th>Usuario</th>
+                                <th>Fecha</th>
+                                <th>Repositorio</th>
+                                <th>Documento</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($uploads)): ?>
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">Aún no se han subido archivos.</td>
+                            </tr>
+                            <?php else: ?>
+                            <?php foreach ($uploads as $item): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars(ucfirst($item['type'] ?? '')); ?></td>
+                                <td><?php echo htmlspecialchars($item['title'] ?? 'Sin título'); ?></td>
+                                <td><?php echo htmlspecialchars($item['user_name'] ?? ''); ?></td>
+                                <td><?php echo htmlspecialchars($item['uploaded_at'] ?? ''); ?></td>
+                                <td>
+                                    <?php if (!empty($item['repo_url']) && $item['type'] === 'project'): ?>
+                                    <a href="<?php echo htmlspecialchars($item['repo_url']); ?>" target="_blank"
+                                        class="btn btn-sm btn-outline-info">GitHub</a>
+                                    <?php else: ?>
+                                    <span class="text-muted">-</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?php echo htmlspecialchars($item['original_name'] ?? ''); ?></td>
+                                <td>
+                                    <?php if (!empty($item['path'])): ?>
+                                    <a href="<?php echo htmlspecialchars($item['path']); ?>" target="_blank"
+                                        class="btn btn-sm btn-outline-primary">Ver</a>
+                                    <?php else: ?>
+                                    <span class="text-muted">No disponible</span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </footer>
-
+    </section>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
     </script>

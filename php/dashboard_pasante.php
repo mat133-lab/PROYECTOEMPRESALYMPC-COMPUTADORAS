@@ -1,13 +1,40 @@
-<?php
+﻿<?php
 session_start();
 require_once '../includes/db.php';
 
-if (!isset($_SESSION['rol']) || strtolower($_SESSION['rol']) !== 'tecnico') {
+if (!isset($_SESSION['rol']) || strtolower($_SESSION['rol']) !== 'pasante') {
     header('Location: ../php/login.php');
     exit();
 }
 
-$usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Técnico');
+$usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Pasante');
+$usuarioId = $_SESSION['id_usuario'] ?? $_SESSION['id'] ?? ''; 
+
+$metadataFile = __DIR__ . '/../uploads/pasante/metadata.json';
+$uploads = [];
+if (file_exists($metadataFile)) {
+    $rawData = file_get_contents($metadataFile);
+    $uploads = json_decode($rawData, true) ?: [];
+}
+
+$projectUploads = array_values(array_filter($uploads, function ($item) {
+    return isset($item['type']) && $item['type'] === 'project';
+}));
+$reportUploads = array_values(array_filter($uploads, function ($item) {
+    return isset($item['type']) && $item['type'] === 'report';
+}));
+
+$alertType = '';
+$alertMessage = '';
+if (isset($_GET['upload'])) {
+    if ($_GET['upload'] === 'success') {
+        $alertType = 'success';
+        $alertMessage = 'El archivo se cargó correctamente.';
+    } elseif ($_GET['upload'] === 'error') {
+        $alertType = 'danger';
+        $alertMessage = isset($_GET['message']) ? htmlspecialchars($_GET['message']) : 'Ocurrió un error al cargar el archivo.';
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -16,10 +43,11 @@ $usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Técnico');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="../img/logo.webp">
-    <title>Dashboard Técnico - L&M PC Computadoras</title>
+    <title>Dashboard Pasante - L&M PC Computadoras</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard_pasante.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
@@ -282,7 +310,7 @@ $usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Técnico');
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
                                 <li>
-                                    <a class="dropdown-item categoria-link" href="../php/perfiltecnico.php"
+                                    <a class="dropdown-item categoria-link" href="../php/perfilpasante.php"
                                         data-categoria="estructura">
                                         Perfil
                                     </a>
@@ -321,79 +349,87 @@ $usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Técnico');
         </div>
     </nav>
 
-    <main class="container header" style="padding-top: 100px;">
-        <div class="header-content">
-            <div class="header-txt">
-                <h1>Hola, <span><?php echo $usuario; ?></span></h1>
-                <p>Bienvenido al panel técnico. Aquí encontrarás acceso directo a tu horario, tus citas y herramientas de servicio.</p>
+    <main class="container pasante-hero main-content">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1>Panel de Pasante</h1>
+                <p>Gestiona con seguridad tus recursos, sube informes en PDF y registra proyectos con referencia a tu repositorio GitHub.</p>
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    <span class="summary-badge"><i class="fas fa-user-circle"></i> <?php echo $usuario; ?></span>
+                    <span class="summary-badge"><i class="fas fa-file-upload"></i> Archivos: <?php echo count($uploads); ?></span>
+                </div>
+            </div>
+
+            <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                <img src="../img/logo.webp" alt="Dashboard Pasante" class="hero-image">
             </div>
         </div>
 
-        <section class="products" style="margin-top: 40px;">
-            <div class="container">
-                <h2 style="text-align:center; margin-bottom:24px;">Accesos rápidos</h2>
-                <div class="box-container">
-                    <a href="horarioadmin.php" class="box" style="text-decoration:none;">
-                        <img src="../img/calendar.webp" alt="Horario" onerror="this.style.display='none'">
-                        <div class="product-txt">
-                            <h3>Horario</h3>
-                            <p>Revisa el calendario de citas, abre tu agenda técnica y administra tus horarios.</p>
-                            <span class="precio">Ir a Horario</span>
-                        </div>
-                    </a>
+        <?php if ($alertType): ?>
+            <div class="alert alert-<?php echo $alertType; ?> mt-4" role="alert"><?php echo $alertMessage; ?></div>
+        <?php endif; ?>
 
-                    <a href="citas_tecnico.php" class="box" style="text-decoration:none;">
-                        <img src="../img/book.png" alt="Administrar Citas" onerror="this.style.display='none'">
-                        <div class="product-txt">
-                            <h3>Administrar Citas</h3>
-                            <p>Revisa y gestiona las citas de servicio programadas por los clientes.</p>
-                            <span class="precio">Ir a Citas</span>
-                        </div>
-                    </a>
-
-                    <a href="contacto_tecnico.php" class="box" style="text-decoration:none;">
-                        <img src="../img/contact.webp" alt="Administrar Contactos" onerror="this.style.display='none'">
-                        <div class="product-txt">
-                            <h3>Administrar Contactos</h3>
-                            <p>Revisa y gestiona los mensajes de contacto enviados por los clientes.</p>
-                            <span class="precio">Ir a Contactos</span>
-                        </div>
-                    </a>
-
-                    <a href="perfiltecnico.php" class="box" style="text-decoration:none;">
-                        <img src="../img/users.png" alt="Perfil" onerror="this.style.display='none'">
-                        <div class="product-txt">
-                            <h3>Perfil</h3>
-                            <p>Actualiza tus datos, correo y credenciales como técnico.</p>
-                            <span class="precio">Ir a Perfil</span>
-                        </div>
-                    </a>
-
-                    <a href="ubicacion.php" class="box" style="text-decoration:none;">
-                        <img src="../img/ubicacion.webp" alt="Ubicación" onerror="this.style.display='none'">
-                        <div class="product-txt">
-                            <h3>Ubicación</h3>
-                            <p>Consulta la ubicación de la tienda y rutas para atenciones técnicas.</p>
-                            <span class="precio">Ir a Ubicación</span>
-                        </div>
-                    </a>
-                </div>
+        <section class="products">
+            <div class="box-container">
+                <a href="../php/ubicacion.php" class="box text-decoration-none text-dark">
+                    <img src="../img/ubicacion.webp" alt="Ubicación" onerror="this.style.display='none'">
+                    <div class="product-txt">
+                        <h3>Ubicación</h3>
+                        <p>Consulta la ubicación de la tienda, rutas y zonas de atención.</p>
+                        <span class="precio">Ver Ubicación</span>
+                    </div>
+                </a>
+                <a href="../php/horario.php" class="box text-decoration-none text-dark">
+                    <img src="../img/calendar.webp" alt="Calendario" onerror="this.style.display='none'">
+                    <div class="product-txt">
+                        <h3>Calendario</h3>
+                        <p>Revisa tu agenda, citas programadas y días disponibles.</p>
+                        <span class="precio">Ver Calendario</span>
+                    </div>
+                </a>
+                <a href="../php/perfilpasante.php" class="box text-decoration-none text-dark">
+                    <img src="../img/users.png" alt="Perfil" onerror="this.style.display='none'">
+                    <div class="product-txt">
+                        <h3>Perfil</h3>
+                        <p>Actualiza tus datos, credenciales y tu información personal.</p>
+                        <span class="precio">Ir al Perfil</span>
+                    </div>
+                </a>
+                <a href="../php/subirpasante.php" class="box text-decoration-none text-dark">
+                    <img src="../img/upload.webp" alt="Perfil" onerror="this.style.display='none'">
+                    <div class="product-txt">
+                        <h3>Upload para Proyectos</h3>
+                        <p>Sube y gestiona tus archivos de proyecto con referencia a tu repositorio GitHub.</p>
+                        <span class="precio">Subir Proyecto</span>
+                    </div>
+                </a>
+                <a href="../php/subireport.php" class="box text-decoration-none text-dark">
+                    <img src="../img/report.webp" alt="Perfil" onerror="this.style.display='none'">
+                    <div class="product-txt">
+                        <h3>Upload para Reportes</h3>
+                        <p>Sube y gestiona tus reportes con referencia a tu repositorio GitHub.</p>
+                        <span class="precio">Subir Reporte</span>
+                    </div>
+                </a>
             </div>
         </section>
+        
+
+        
     </main>
 
-    <footer class="footer">
-        <div class="container footer-content">
+    <footer class="footer mt-5">
+        <div class="footer-content container">
             <div>
                 <h3>L&M PC Computadoras</h3>
-                <p style="max-width:320px; color:#bbb;">Dashboard técnico dedicado para el personal de servicio.</p>
+                <p class="footer-note">Panel del pasante con herramientas enfocadas en proyectos, reportes y recursos rápidos.</p>
             </div>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
-    </script>
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="../js/dashboard_pasante.js"></script>
 </body>
 
 </html>

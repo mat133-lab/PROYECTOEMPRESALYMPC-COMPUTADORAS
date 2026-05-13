@@ -1,0 +1,82 @@
+.main-content {
+    padding-top: 110px;
+}
+
+.pasante-card {
+    border-radius: 18px;
+    box-shadow: 0 18px 35px rgba(0, 0, 0, 0.08);
+    border: none;
+}
+
+.pasante-hero {
+    padding: 60px 0 20px;
+}
+
+.pasante-hero h1 {
+    font-size: 2.8rem;
+    line-height: 1.1;
+}
+
+.pasante-hero p {
+    color: #555;
+    max-width: 680px;
+}
+
+.hero-image {
+    max-width: 280px;
+    width: 100%;
+    border-radius: 18px;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+}
+
+.upload-card .form-control,
+.upload-card .form-select,
+.upload-card .form-control-file {
+    border-radius: 12px;
+}
+
+.upload-card .card-header {
+    background: #ff9d00;
+    color: #fff;
+    border-radius: 18px 18px 0 0;
+    border: none;
+}
+
+.upload-card .btn-primary {
+    background: #0d6efd;
+    border: none;
+}
+
+.summary-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 159, 0, 0.12);
+    color: #ff9100;
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.table-responsive {
+    min-height: 120px;
+}
+
+.small-note {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.brand-centered {
+    max-width: 45%;
+    text-align: center;
+}
+
+.footer-note {
+    max-width: 320px;
+    color: #bbb;
+}
+
+.products {
+    margin-top: 30px;
+}

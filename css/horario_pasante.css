@@ -1,0 +1,67 @@
+.brand-centered {
+    max-width: 45%;
+    text-align: center;
+}
+
+.page-main {
+    margin-top: 80px;
+}
+
+.calendar__day .day-number {
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.modal-card-large {
+    max-width: 500px;
+    width: 100%;
+    margin: auto;
+}
+
+.dialog-modal-wrapper {
+    border: none;
+    border-radius: 12px;
+    padding: 0;
+    max-width: 450px;
+    width: 90%;
+    background: transparent;
+}
+
+.dialog-modal-content {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+}
+
+.dialog-modal-header {
+    background-color: #ffc107;
+}
+
+.dialog-modal-close {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    outline: none;
+}
+
+.dialog-modal-list {
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex-grow: 1;
+}
+
+.dialog-modal-actions {
+    background-color: #f8f9fa;
+}
+
+.dialog-modal-actions .btn-delete-calendar,
+.dialog-modal-actions .btn-edit-calendar {
+    display: none;
+}

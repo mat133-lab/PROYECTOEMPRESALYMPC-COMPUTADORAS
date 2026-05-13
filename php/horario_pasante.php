@@ -1,13 +1,13 @@
 <?php
-session_start();
-require_once '../includes/db.php';
+    session_start();
+    require_once '../includes/db.php';
 
-if (!isset($_SESSION['rol']) || strtolower($_SESSION['rol']) !== 'tecnico') {
-    header('Location: ../php/login.php');
-    exit();
-}
-
-$usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Técnico');
+    // Verificar rol
+    $rolesConAcceso = ['admin', 'tecnico', 'encargado', 'pasante'];
+    if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $rolesConAcceso)) {
+        header('Location: ../php/login.php');
+        exit();
+    }
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -15,15 +15,15 @@ $usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Técnico');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="../img/logo.webp">
-    <title>Dashboard Técnico - L&M PC Computadoras</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <title>Horario Pasante - L&M PC Computadoras</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/horariostyleadmin.css">
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/horario_pasante.css">
 </head>
 
 <body>
+
     <nav class="navbar navbar-dark bg-warning fixed-top">
         <div class="container-fluid">
             <?php 
@@ -76,8 +76,8 @@ $usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Técnico');
             $esStf = isset($_SESSION['rol'])  && in_array(strtolower($_SESSION['rol']), $rolesStf);
             if(!$esStf):
             ?>
-            <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
-                href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+            <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate brand-centered"
+                href="../php/dashboard.php"> L&M PC Computadoras</a>
             <div class="d-flex align-items-center gap-2 ms-auto">
                 <form class="d-none d-lg-flex m-0" role="search" onsubmit="event.preventDefault();">
                     <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search"
@@ -247,17 +247,17 @@ $usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Técnico');
             <?php elseif($esStf): ?>
                 <!-- Si el usuario es parte del personal lo redirigimo a su dashboard correspondiente si es tecnico, administrador, encargado o pasante lo redirigimos al dashboard correspondiente -->
             <?php if(strtolower($_SESSION['rol']) === 'admin'): ?>
-                <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
-                href="../php/dashboardadmin.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+                <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate brand-centered"
+                href="../php/dashboardadmin.php"> L&M PC Computadoras</a>
             <?php elseif(strtolower($_SESSION['rol']) === 'tecnico'): ?>
-                <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
-                href="../php/dashboard_tecnico.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+                <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate brand-centered"
+                href="../php/dashboard_tecnico.php"> L&M PC Computadoras</a>
             <?php elseif(strtolower($_SESSION['rol']) === 'encargado'): ?>
-                <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
-                href="../php/dashboard_encargado.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+                <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate brand-centered"
+                href="../php/dashboard_encargado.php"> L&M PC Computadoras</a>
             <?php elseif(strtolower($_SESSION['rol']) === 'pasante'): ?>
-                <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
-                href="../php/dashboard_pasante.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+                <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate brand-centered"
+                href="../php/dashboard_pasante.php"> L&M PC Computadoras</a>
             <?php endif; ?>
             <div class="d-flex align-items-center gap-2 ms-auto">
                 <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
@@ -282,7 +282,7 @@ $usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Técnico');
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
                                 <li>
-                                    <a class="dropdown-item categoria-link" href="../php/perfiltecnico.php"
+                                    <a class="dropdown-item categoria-link" href="../php/perfiladmin.php"
                                         data-categoria="estructura">
                                         Perfil
                                     </a>
@@ -321,79 +321,162 @@ $usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Técnico');
         </div>
     </nav>
 
-    <main class="container header" style="padding-top: 100px;">
-        <div class="header-content">
-            <div class="header-txt">
-                <h1>Hola, <span><?php echo $usuario; ?></span></h1>
-                <p>Bienvenido al panel técnico. Aquí encontrarás acceso directo a tu horario, tus citas y herramientas de servicio.</p>
-            </div>
-        </div>
+    <div class="container-fluid main px-4 page-main">
+        <div class="row g-4 h-100">
+            <div class="col-lg-9 mb-4">
+                <div class="calendar">
+                    <div class="calendar__header">
+                        <button class="calendar__button--previous-admin" aria-label="Anterior"> &lt; </button>
+                        <h2 id="calendar-date-admin">Cargando...</h2>
+                        <button class="calendar__button--next-admin" aria-label="Siguiente"> &gt; </button>
+                    </div>
 
-        <section class="products" style="margin-top: 40px;">
-            <div class="container">
-                <h2 style="text-align:center; margin-bottom:24px;">Accesos rápidos</h2>
-                <div class="box-container">
-                    <a href="horarioadmin.php" class="box" style="text-decoration:none;">
-                        <img src="../img/calendar.webp" alt="Horario" onerror="this.style.display='none'">
-                        <div class="product-txt">
-                            <h3>Horario</h3>
-                            <p>Revisa el calendario de citas, abre tu agenda técnica y administra tus horarios.</p>
-                            <span class="precio">Ir a Horario</span>
-                        </div>
-                    </a>
+                    <div class="calendar__weekdays">
+                        <div class="calendar__weekday">Lun</div>
+                        <div class="calendar__weekday">Mar</div>
+                        <div class="calendar__weekday">Mié</div>
+                        <div class="calendar__weekday">Jue</div>
+                        <div class="calendar__weekday">Vie</div>
+                        <div class="calendar__weekday">Sáb</div>
+                        <div class="calendar__weekday">Dom</div>
+                    </div>
 
-                    <a href="citas_tecnico.php" class="box" style="text-decoration:none;">
-                        <img src="../img/book.png" alt="Administrar Citas" onerror="this.style.display='none'">
-                        <div class="product-txt">
-                            <h3>Administrar Citas</h3>
-                            <p>Revisa y gestiona las citas de servicio programadas por los clientes.</p>
-                            <span class="precio">Ir a Citas</span>
-                        </div>
-                    </a>
+                    <ol class="calendar__days">
+                        <?php 
+                        // Generamos 35 espacios para asegurar una cuadrícula rectangular 5 filas x 7 cols
+                        for ($d = 1; $d <= 35; $d++): 
+                        ?>
+                        <li class="calendar__day" data-day="<?php echo $d; ?>">
+                            <span class="day-number text-muted fw-bold">
+                                <?php echo ($d <= 31) ? $d : ''; ?>
+                            </span>
 
-                    <a href="contacto_tecnico.php" class="box" style="text-decoration:none;">
-                        <img src="../img/contact.webp" alt="Administrar Contactos" onerror="this.style.display='none'">
-                        <div class="product-txt">
-                            <h3>Administrar Contactos</h3>
-                            <p>Revisa y gestiona los mensajes de contacto enviados por los clientes.</p>
-                            <span class="precio">Ir a Contactos</span>
-                        </div>
-                    </a>
-
-                    <a href="perfiltecnico.php" class="box" style="text-decoration:none;">
-                        <img src="../img/users.png" alt="Perfil" onerror="this.style.display='none'">
-                        <div class="product-txt">
-                            <h3>Perfil</h3>
-                            <p>Actualiza tus datos, correo y credenciales como técnico.</p>
-                            <span class="precio">Ir a Perfil</span>
-                        </div>
-                    </a>
-
-                    <a href="ubicacion.php" class="box" style="text-decoration:none;">
-                        <img src="../img/ubicacion.webp" alt="Ubicación" onerror="this.style.display='none'">
-                        <div class="product-txt">
-                            <h3>Ubicación</h3>
-                            <p>Consulta la ubicación de la tienda y rutas para atenciones técnicas.</p>
-                            <span class="precio">Ir a Ubicación</span>
-                        </div>
-                    </a>
+                        </li>
+                        <?php endfor; ?>
+                    </ol>
                 </div>
             </div>
-        </section>
-    </main>
 
-    <footer class="footer">
-        <div class="container footer-content">
-            <div>
-                <h3>L&M PC Computadoras</h3>
-                <p style="max-width:320px; color:#bbb;">Dashboard técnico dedicado para el personal de servicio.</p>
+            <div class="col-lg-3 mb-4">
+                <div class="citas-card">
+                    <div class="citas-header">
+                        <h5>Próximas Citas</h5>
+                        <button id="btn-new-appointment" class="btn-nueva-cita">
+                            + Nueva
+                        </button>
+                    </div>
+
+                    <div class="citas-body">
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Cliente / Fecha</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-appointments-table">
+                                <?php
+                                // Consulta segura a la base de datos
+                                $stmt = $conn->query("SELECT id_cita, nombre, apellido, fecha FROM citas ORDER BY fecha DESC LIMIT 15");
+                                
+                                foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                                    $id = htmlspecialchars($row['id_cita']);
+                                    $nombre = htmlspecialchars($row['nombre'] . ' ' . $row['apellido']);
+                                    
+                                    // Formato de fecha limpio
+                                    $fechaObj = new DateTime($row['fecha']);
+                                    $fechaDia = $fechaObj->format('d M'); // dia y mes
+                                    
+                                    echo "<tr data-id=\"$id\">\n<td>\n<div class='cita-item-nombre'>$nombre</div>\n<div class='cita-item-fecha'>\n $fechaDia \n</div>\n</td>\n<td class='text-end'>\n<button class='btn-icon btn-edit-custom btn-edit' data-id='$id' title='Editar'>✏️</button>\n<button class='btn-icon btn-delete-custom btn-delete' data-id='$id' title='Borrar'>🗑️</button>\n</td>\n</tr>";
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <dialog class="dialog-nativo" id="admin-appointment-modal">
+        <div class="modal__card p-4 rounded-3 shadow bg-white modal-card-large">
+            <header class="modal__header d-flex justify-content-between align-items-center mb-3">
+                <h3 class="modal__heading m-0 fw-bold text-white">Gestionar Cita</h3>
+                <button type="button" class="btn-close" id="admin-modal-close-icon"></button>
+            </header>
+
+            <div class="modal__list__container">
+                <input type="hidden" id="appointment-id">
+
+                <div class="row g-2 mb-2">
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-muted">Nombre</label>
+                        <input id="appointment-nombre" class="form-control form-control-sm">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-muted">Apellido</label>
+                        <input id="appointment-apellido" class="form-control form-control-sm">
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label small fw-bold text-muted">Correo</label>
+                    <input id="appointment-correo" class="form-control form-control-sm" type="email">
+                </div>
+
+                <div class="row g-2 mb-2">
+                    <div class="col-7">
+                        <label class="form-label small fw-bold text-muted">Fecha</label>
+                        <input id="appointment-fecha" class="form-control form-control-sm" type="date">
+                    </div>
+                    <div class="col-5">
+                        <label class="form-label small fw-bold text-muted">Teléfono</label>
+                        <input id="appointment-telefono" class="form-control form-control-sm">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">Motivo / Descripción</label>
+                    <textarea id="appointment-motivo" class="form-control form-control-sm" rows="3"></textarea>
+                </div>
+            </div>
+
+            <footer class="modal__footer d-flex justify-content-end gap-2 mt-3 pt-3 border-top">
+                <button type="button" id="admin-modal-cancel-btn" class="btn btn-light text-muted">Cancelar</button>
+                <button id="btn-delete-appointment" class="btn btn-outline-danger">Eliminar</button>
+                <button id="btn-save-appointment" class="btn btn-warning text-white fw-bold">Guardar Cambios</button>
+                <button id="btn-generar-appointment" class="btn btn-primary">Generar Cita</button>
+            </footer>
+        </div>
+    </dialog>
+
+
+    <dialog class="dialog-nativo dialog-modal-wrapper" id="modal-calendar">
+        <div class="modal__card shadow dialog-modal-content">
+
+            <header class="d-flex justify-content-between align-items-center p-3 dialog-modal-header">
+                <h5 class="m-0 text-white fw-bold" id="modal-heading">Citas del día</h5>
+                <button type="button" class="dialog-modal-close" data-dialog-close>
+                    &#10006;
+                </button>
+            </header>
+
+            <ul class="list-unstyled m-0 p-3 dialog-modal-list" id="modal-calendar-list"></ul>
+
+            <div class="d-flex justify-content-end align-items-center p-3 border-top gap-2 dialog-modal-actions">
+                <button type="button" class="btn btn-light text-muted border" data-dialog-close>Cerrar</button>
+                <button type="button" class="btn btn-danger text-white fw-bold d-none" id="btn-delete-calendar">Eliminar</button>
+                <button type="button" class="btn btn-warning text-white fw-bold d-none" id="btn-edit-calendar">Editar</button>
             </div>
         </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
-    </script>
+    </dialog>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="../js/horario-calendario-admin.js"></script>
+    <script src="../js/horario_pasante.js"></script>
 </body>
+
+</html>
 
 </html>
