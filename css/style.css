@@ -1077,3 +1077,9 @@ p {
     font-size: 0.8rem;
     color: #888;
 }
+.hero-image {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    margin-top: 20px;
+}

@@ -21,6 +21,10 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'pasante') {
     header("Location: dashboard_pasante.php");
     exit();
 }
+if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
+    header("Location: dashboard_asistente.php");
+    exit();
+}
 ?>
 <!doctype html>
 <html lang="en">
@@ -41,7 +45,7 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'pasante') {
         <div class="container-fluid position-relative">
             <?php 
             //Verificamos si el usuario actual es parte del personal para que nos muestre el carrito de compras
-            $rolesStf = ['admin', 'tecnico', 'encargado', 'pasante'];
+            $rolesStf = ['admin', 'tecnico', 'encargado', 'pasante', 'asistente'];
             $esStf = isset($_SESSION['rol']) && in_array(strtolower($_SESSION['rol']), $rolesStf);
             if(!$esStf):
             ?>

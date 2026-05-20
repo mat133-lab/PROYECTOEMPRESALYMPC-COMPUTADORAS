@@ -20,7 +20,7 @@ $alertMessage = '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="../img/logo.webp">
-    <title>Dashboard Asistente - L&M PC Computadoras</title>
+    <title>Grafica Asistente - L&M PC Computadoras</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="../css/style.css">
@@ -265,7 +265,8 @@ $alertMessage = '';
                 href="../php/dashboard_pasante.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
             <?php elseif(strtolower($_SESSION['rol']) === 'asistente'): ?>
             <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
-                href="../php/dashboard_asistente.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+                href="../php/dashboard_asistente.php" style="max-width: 45%; text-align: center;"> L&M PC
+                Computadoras</a>
             <?php endif; ?>
             <div class="d-flex align-items-center gap-2 ms-auto">
                 <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
@@ -328,58 +329,15 @@ $alertMessage = '';
 
         </div>
     </nav>
-    <main class="container asistente-hero main-content">
-        <div class="row align-items-center">
-            <div class="col-lg-8">
-                <h1>Panel de Asistente</h1>
-                <p>Gestiona las tareas y responsabilidades asignadas como asistente.</p>
-            </div>
-
-            <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
-                <img src="../img/logo.webp" alt="Dashboard Asistente" class="hero-image">
+    <main class="container asistente-hero main-content" style="margin-top: 100px">
+        <!--Espacio dedicado para crear la grafica de las ultimas compras de los usuarios, llegada de productos al local, iniciar sesion los usuarios, 
+        el incremento de envios tanto en la pagina contacto y citas de los usuarios asi como ver cuantos usuarios decidieron registrarse-->
+        <div class="grafica-container bg-white p-4 rounded shadow-sm">
+            <h2 class="mb-4 text-center">Grafica de Compras Recientes por los Usuarios</h2>
+            <div style="position: relative; height: 50vh; width: 100%;">
+                <canvas id="graficaAsistente"></canvas>
             </div>
         </div>
-
-        <?php if ($alertType): ?>
-        <div class="alert alert-<?php echo $alertType; ?> mt-4" role="alert"><?php echo $alertMessage; ?></div>
-        <?php endif; ?>
-
-        <section class="products">
-            <div class="box-container">
-                <a href="../php/grafica.php" class="box text-decoration-none text-dark">
-                    <img src="../img/grafica.webp" alt="Ubicación" onerror="this.style.display='none'">
-                    <div class="product-txt">
-                        <h3>Grafica de Compras</h3>
-                        <p>En esta seccion puede ver la informacion de sus ultimas compras en tablas Graficas.</p>
-                        <span class="precio">Ver Grafica</span>
-                    </div>
-                </a>
-                <a href="../php/lecturadoc.php" class="box text-decoration-none text-dark">
-                    <img src="../img/docPasante.webp" alt="Ubicación" onerror="this.style.display='none'">
-                    <div class="product-txt">
-                        <h3>Documentos de Pasante</h3>
-                        <p>En esta seccion puede ver los documentos relacionados con los reportes de su estadia.</p>
-                        <span class="precio">Ver Documentos</span>
-                    </div>
-                </a>
-                <a href="../php/notificaciones.php" class="box text-decoration-none text-dark">
-                    <img src="../img/notifiUsu.webp" alt="Ubicación" onerror="this.style.display='none'">
-                    <div class="product-txt">
-                        <h3>Crear Notificaciones</h3>
-                        <p>En esta seccion puede crear notificaciones para los usuarios registrados hacia su correo.</p>
-                        <span class="precio">Ver Notificaciones</span>
-                    </div>
-                </a>
-                <a href="../php/chat.php" class="box text-decoration-none text-dark">
-                    <img src="../img/chatCli.webp" alt="Ubicación" onerror="this.style.display='none'">
-                    <div class="product-txt">
-                        <h3>Chat con CLientes</h3>
-                        <p>En esta seccion puede comunicarse con los clientes registrados despues de que le pase la IA para que se conecte.</p>
-                        <span class="precio">Ver Chat</span>
-                    </div>
-                </a>
-            </div>
-        </section>
     </main>
 
 
@@ -396,6 +354,9 @@ $alertMessage = '';
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="../js/grafico_asistente.js"></script>
     <script src="../js/dashboard_asistente.js"></script>
 
 </body>
