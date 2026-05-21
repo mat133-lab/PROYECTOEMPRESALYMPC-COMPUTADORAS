@@ -330,12 +330,31 @@ $alertMessage = '';
         </div>
     </nav>
     <main class="container asistente-hero main-content" style="margin-top: 100px">
-        <!--Espacio dedicado para crear la grafica de las ultimas compras de los usuarios, llegada de productos al local, iniciar sesion los usuarios, 
+        <!--Espacio dedicado para crear la grafica de las ultimas compras de los usuarios, llegada de productos al local, 
         el incremento de envios tanto en la pagina contacto y citas de los usuarios asi como ver cuantos usuarios decidieron registrarse-->
         <div class="grafica-container bg-white p-4 rounded shadow-sm">
             <h2 class="mb-4 text-center">Grafica de Compras Recientes por los Usuarios</h2>
             <div style="position: relative; height: 50vh; width: 100%;">
                 <canvas id="graficaAsistente"></canvas>
+            </div>
+        </div>
+
+    </main>
+
+    <main class="container asistente-hero main-content" style="margin-top: 100px">
+        <div class="grafica-container bg-white p-4 rounded shadow-sm">
+            <h2 class="mb-4 text-center">Grafica de la Cantidad de Productos Llegados al Local</h2>
+            <div style="position: relative; height: 50vh; width: 100%;">
+                <canvas id="graficaAsistente1"></canvas>
+            </div>
+        </div>
+    </main>
+
+    <main class="container asistente-hero main-content" style="margin-top: 100px">
+        <div class="grafica-container bg-white p-4 rounded shadow-sm">
+            <h2 class="mb-4 text-center">Grafica de los Datos enviados por el Usuario a la Pagina Contacto</h2>
+            <div style="position: relative; height: 50vh; width: 100%;">
+                <canvas id="graficaAsistente2"></canvas>
             </div>
         </div>
     </main>
@@ -357,7 +376,6 @@ $alertMessage = '';
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="../js/grafico_asistente.js"></script>
-    <script src="../js/dashboard_asistente.js"></script>
 
 </body>
 

@@ -339,6 +339,7 @@ $alertMessage = '';
                 <img src="../img/logo.webp" alt="Dashboard Asistente" class="hero-image">
             </div>
         </div>
+        
 
         <?php if ($alertType): ?>
         <div class="alert alert-<?php echo $alertType; ?> mt-4" role="alert"><?php echo $alertMessage; ?></div>
