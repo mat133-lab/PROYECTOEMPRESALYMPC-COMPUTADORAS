@@ -1,6 +1,6 @@
 # Creador Cisneros Matt
 # Bienvenido a la Pagina para la Empresa L&M PC Computadoras, puedes explorar todo nuestro proyecto y su funcionamiento, si necesita mas informacion sobre la empresa
-# por favor comunicarse con el siguiente numero, redes sociales y ubicacion:
+# Asi que, por favor comunicarse con el siguiente numero, redes sociales y ubicacion:
 # Whatsapp
 # +593 98 309 3667
 # Facebook
