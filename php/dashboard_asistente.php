@@ -24,6 +24,8 @@ $alertMessage = '';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard_pasante.css">
+    <link rel="stylesheet" href="../css/asistente_tools.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
@@ -374,7 +376,7 @@ $alertMessage = '';
                 <a href="../php/chat.php" class="box text-decoration-none text-dark">
                     <img src="../img/chatCli.webp" alt="Ubicación" onerror="this.style.display='none'">
                     <div class="product-txt">
-                        <h3>Chat con CLientes</h3>
+                        <h3>Chat con Clientes</h3>
                         <p>En esta seccion puede comunicarse con los clientes registrados despues de que le pase la IA para que se conecte.</p>
                         <span class="precio">Ver Chat</span>
                     </div>

@@ -210,6 +210,8 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
                                         data-categoria="bano">Citas</a></li>
                                 <li><a class="dropdown-item categoria-link" href="../php/ubicacion.php" data-categoria="bano">Ubicacion</a>
                                 </li>
+                                <li><a class="dropdown-item categoria-link" href="../php/chat.php"
+                                        data-categoria="bano">Chat de Soporte</a></li>
                             </ul>
                         </li>
 
