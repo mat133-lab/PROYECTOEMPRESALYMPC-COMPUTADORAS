@@ -9,7 +9,7 @@ if(isset($_SESSION['usuario'])){
 }
 
 if($_SERVER['REQUEST_METHOD'] === 'POST'){
-    $user = trim($_POST['correo']); // Limpiar espacios en blanco
+    $user = trim($_POST['correo']); 
     $pass = $_POST['contrasena'];
     $cedula = trim($_POST['cedula']);
 
@@ -22,7 +22,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     if($row && password_verify($pass, $row['contraseña'])){
         
         // GUARDAMOS LOS DATOS CORRECTAMENTE EN LA SESIÓN
-        $_SESSION['id_usuario'] = $row['id_usuario']; // Aseguramos que sea 'id_usuario'
+        $_SESSION['id_usuario'] = $row['id_usuario']; 
         $_SESSION['correo'] = $row['correo'];
 
         $_SESSION['rol'] = $row['rol'];

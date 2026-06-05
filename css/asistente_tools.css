@@ -125,6 +125,39 @@
     font-weight: 600;
 }
 
+.rating-modal {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+}
+
+.rating-modal .modal-header {
+    background: #ff9100;
+    color: #fff;
+    border-radius: 15px 15px 0 0;
+}
+
+.rating-number {
+    width: 58px;
+    height: 58px;
+    display: grid;
+    place-items: center;
+    margin: 8px auto 0;
+    border-radius: 50%;
+    background: #fff4e2;
+    color: #ff9100;
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.form-range::-webkit-slider-thumb {
+    background: #ff9100;
+}
+
+.form-range::-moz-range-thumb {
+    background: #ff9100;
+}
+
 @media (max-width: 900px) {
     .chat-layout {
         grid-template-columns: 1fr;

@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../includes/db.php';
+require_once '../includes/chat_helpers.php';
 
 if (!isset($_SESSION['usuario'])) {
     header('Location: ../php/login.php');
@@ -12,89 +13,34 @@ $esAsistente = in_array($rol, ['asistente', 'admin', 'tecnico'], true);
 $idUsuario = $_SESSION['id_usuario'] ?? null;
 $nombreUsuario = $_SESSION['usuario'] ?? 'Usuario';
 
-$conn->exec("CREATE TABLE IF NOT EXISTS chat_conversaciones (
-    id_conversacion INT AUTO_INCREMENT PRIMARY KEY,
-    id_usuario INT NULL,
-    nombre_usuario VARCHAR(200) NOT NULL,
-    correo_usuario VARCHAR(255) NULL,
-    estado VARCHAR(40) NOT NULL DEFAULT 'ia',
-    tema VARCHAR(180) NULL,
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+chatEnsureTables($conn);
 
-$conn->exec("CREATE TABLE IF NOT EXISTS chat_mensajes (
-    id_mensaje INT AUTO_INCREMENT PRIMARY KEY,
-    id_conversacion INT NOT NULL,
-    remitente VARCHAR(40) NOT NULL,
-    nombre_remitente VARCHAR(200) NOT NULL,
-    mensaje TEXT NOT NULL,
-    fecha_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX (id_conversacion)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-
-function respuestaIA($mensaje) {
-    $texto = function_exists('mb_strtolower') ? mb_strtolower($mensaje, 'UTF-8') : strtolower($mensaje);
-    $necesitaHumano = false;
-
-    if (str_contains($texto, 'humano') || str_contains($texto, 'asistente') || str_contains($texto, 'personalizada') || str_contains($texto, 'especifica')) {
-        $necesitaHumano = true;
-        $respuesta = 'Te voy a pasar con asistencia para revisar tu caso con mas detalle. Un asistente continuara la conversacion aqui.';
-    } elseif (str_contains($texto, 'horario') || str_contains($texto, 'disponible') || str_contains($texto, 'dias')) {
-        $respuesta = 'Atendemos consultas sobre horarios y citas tecnicas. Puedes indicar el dia que prefieres y el tipo de equipo para revisar disponibilidad.';
-    } elseif (str_contains($texto, 'direccion') || str_contains($texto, 'ubicacion') || str_contains($texto, 'donde')) {
-        $respuesta = 'L&M PC Computadoras puede ayudarte con ubicacion, rutas y referencias. Si necesitas una direccion exacta o envio, te paso con asistencia.';
-    } elseif (str_contains($texto, 'soporte') || str_contains($texto, 'tecnico') || str_contains($texto, 'reparacion') || str_contains($texto, 'arreglo')) {
-        $respuesta = 'Para soporte tecnico indica marca, modelo, falla principal y si el equipo enciende. Con esos datos se puede orientar el diagnostico inicial.';
-    } elseif (str_contains($texto, 'empresa') || str_contains($texto, 'informacion') || str_contains($texto, 'lympc')) {
-        $respuesta = 'L&M PC Computadoras ofrece venta de equipos, accesorios, mantenimiento y reparacion. Si deseas informacion comercial concreta, asistencia puede darte mas detalles.';
-    } else {
-        $necesitaHumano = true;
-        $respuesta = 'Puedo ayudarte con horarios, direcciones, soporte tecnico e informacion de la empresa. Como tu consulta necesita mas contexto, te paso con asistencia.';
-    }
-
-    return [$respuesta, $necesitaHumano];
-}
-
-if (!$esAsistente) {
-    $stmt = $conn->prepare("SELECT * FROM chat_conversaciones WHERE id_usuario = ? ORDER BY fecha_actualizacion DESC LIMIT 1");
-    $stmt->execute([$idUsuario]);
-    $conversacion = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$conversacion) {
-        $stmt = $conn->prepare("INSERT INTO chat_conversaciones (id_usuario, nombre_usuario, correo_usuario, estado, tema) VALUES (?, ?, ?, 'ia', 'Consulta de cliente')");
-        $stmt->execute([$idUsuario, $nombreUsuario, $_SESSION['correo'] ?? null]);
-        $idConversacion = (int)$conn->lastInsertId();
-        $bienvenida = 'Hola, soy la asistencia virtual de L&M PC Computadoras. Puedo ayudarte con soporte tecnico, direcciones, horarios disponibles e informacion de la empresa. En que se le puede ayudar?';
-        $stmt = $conn->prepare("INSERT INTO chat_mensajes (id_conversacion, remitente, nombre_remitente, mensaje) VALUES (?, 'ia', 'Asistencia virtual', ?)");
-        $stmt->execute([$idConversacion, $bienvenida]);
-    } else {
-        $idConversacion = (int)$conversacion['id_conversacion'];
-    }
+if (!$esAsistente && isset($_GET['finalizado'])) {
+    $idConversacion = 0;
+} elseif (!$esAsistente) {
+    $idConversacion = chatGetOrCreateUserConversation($conn, $idUsuario, $nombreUsuario, $_SESSION['correo'] ?? null, isset($_GET['nuevo']));
 } else {
     $idConversacion = isset($_GET['conversacion']) ? (int)$_GET['conversacion'] : 0;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $accion = $_POST['accion'] ?? 'mensaje';
     $mensaje = trim($_POST['mensaje'] ?? '');
     $postConversacion = (int)($_POST['id_conversacion'] ?? $idConversacion);
 
-    if ($mensaje !== '' && $postConversacion > 0) {
-        $remitente = $esAsistente ? 'asistente' : 'user';
-        $stmt = $conn->prepare("INSERT INTO chat_mensajes (id_conversacion, remitente, nombre_remitente, mensaje) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$postConversacion, $remitente, $nombreUsuario, $mensaje]);
+    if ($accion === 'calificar' && !$esAsistente && $postConversacion > 0) {
+        chatRateConversation($conn, $postConversacion, $idUsuario, $_POST['calificacion'] ?? 0, $_POST['comentario_calificacion'] ?? '');
+        header('Location: ../php/chat.php?finalizado=1');
+        exit();
+    }
 
+    if ($accion === 'mensaje' && $mensaje !== '' && $postConversacion > 0) {
         if ($esAsistente) {
+            chatAddMessage($conn, $postConversacion, 'asistente', $nombreUsuario, $mensaje);
             $stmt = $conn->prepare("UPDATE chat_conversaciones SET estado = 'atendido' WHERE id_conversacion = ?");
             $stmt->execute([$postConversacion]);
         } else {
-            [$respuesta, $necesitaHumano] = respuestaIA($mensaje);
-            $stmt = $conn->prepare("INSERT INTO chat_mensajes (id_conversacion, remitente, nombre_remitente, mensaje) VALUES (?, 'ai', 'Asistencia virtual', ?)");
-            $stmt->execute([$postConversacion, $respuesta]);
-            if ($necesitaHumano) {
-                $stmt = $conn->prepare("UPDATE chat_conversaciones SET estado = 'pendiente_asistente' WHERE id_conversacion = ?");
-                $stmt->execute([$postConversacion]);
-            }
+            chatHandleUserMessage($conn, $postConversacion, $idUsuario, $nombreUsuario, $mensaje);
         }
     }
 
@@ -104,7 +50,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $conversaciones = [];
 if ($esAsistente) {
-    $stmt = $conn->query("SELECT * FROM chat_conversaciones ORDER BY FIELD(estado, 'pendiente_asistente', 'ia', 'atendido'), fecha_actualizacion DESC");
+    $stmt = $conn->query("SELECT * FROM chat_conversaciones ORDER BY CASE estado
+        WHEN 'pendiente_asistente' THEN 1
+        WHEN 'ia' THEN 2
+        WHEN 'atendido' THEN 3
+        WHEN 'finalizado' THEN 4
+        ELSE 5
+    END, fecha_actualizacion DESC");
     $conversaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
     if ($idConversacion === 0 && !empty($conversaciones)) {
         $idConversacion = (int)$conversaciones[0]['id_conversacion'];
@@ -183,6 +135,9 @@ if ($idConversacion > 0) {
                 <p><?php echo $esAsistente ? 'Atiende consultas que la asistencia virtual deriva para soporte personalizado.' : 'Consulta sobre soporte tecnico, direcciones, horarios disponibles o informacion de la empresa.'; ?></p>
                 <?php if ($conversacionActual): ?>
                 <span class="summary-badge"><i class="fas fa-comments"></i> Estado: <?php echo htmlspecialchars($conversacionActual['estado']); ?></span>
+                <?php if ($esAsistente && !empty($conversacionActual['calificacion'])): ?>
+                <span class="summary-badge"><i class="fas fa-star"></i> Calificacion: <?php echo (int)$conversacionActual['calificacion']; ?>/10</span>
+                <?php endif; ?>
                 <?php endif; ?>
             </div>
             <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
@@ -194,7 +149,10 @@ if ($idConversacion > 0) {
             <?php if ($esAsistente): ?>
             <aside class="conversation-list">
                 <?php if (empty($conversaciones)): ?>
-                <div class="tool-card">No hay conversaciones registradas.</div>
+                <div class="tool-card">
+                    <h2 class="tool-title h5">Sin conversaciones por ahora</h2>
+                    <p class="tool-muted mb-0">Cuando un cliente escriba desde el icono flotante del dashboard, aparecera aqui para atenderlo.</p>
+                </div>
                 <?php endif; ?>
                 <?php foreach ($conversaciones as $conv): ?>
                 <a class="conversation-link <?php echo (int)$conv['id_conversacion'] === $idConversacion ? 'active' : ''; ?>"
@@ -208,9 +166,23 @@ if ($idConversacion > 0) {
             <?php endif; ?>
 
             <div class="chat-window">
+                <?php if (!$esAsistente && isset($_GET['finalizado'])): ?>
+                <div class="tool-card text-center mb-0">
+                    <h2 class="tool-title h4">Conversacion finalizada</h2>
+                    <p class="tool-muted">Gracias por calificar tu experiencia. Puedes iniciar una nueva consulta cuando lo necesites.</p>
+                    <a class="btn tool-action px-4" href="../php/chat.php?nuevo=1">
+                        <i class="fas fa-plus"></i> Nueva conversacion
+                    </a>
+                </div>
+                <?php else: ?>
                 <div class="chat-messages">
                     <?php if (empty($mensajes)): ?>
-                    <p class="tool-muted text-center mt-5">Selecciona una conversacion para revisar los mensajes.</p>
+                    <div class="text-center mt-5">
+                        <p class="tool-muted mb-2">Selecciona una conversacion para revisar los mensajes.</p>
+                        <?php if ($esAsistente): ?>
+                        <a class="btn btn-sm tool-action" href="../php/chat.php"><i class="fas fa-rotate"></i> Actualizar</a>
+                        <?php endif; ?>
+                    </div>
                     <?php endif; ?>
                     <?php foreach ($mensajes as $msg): ?>
                     <div class="chat-bubble <?php echo htmlspecialchars($msg['remitente']); ?>">
@@ -221,20 +193,65 @@ if ($idConversacion > 0) {
                     <?php endforeach; ?>
                 </div>
 
-                <?php if ($idConversacion > 0): ?>
+                <?php if ($esAsistente && $conversacionActual && !empty($conversacionActual['comentario_calificacion'])): ?>
+                <div class="alert alert-warning mt-3 mb-0">
+                    <strong>Comentario del cliente:</strong>
+                    <?php echo htmlspecialchars($conversacionActual['comentario_calificacion']); ?>
+                </div>
+                <?php endif; ?>
+
+                <?php if ($idConversacion > 0 && (!$conversacionActual || $conversacionActual['estado'] !== 'finalizado')): ?>
                 <form method="POST" class="mt-3">
+                    <input type="hidden" name="accion" value="mensaje">
                     <input type="hidden" name="id_conversacion" value="<?php echo (int)$idConversacion; ?>">
                     <label class="form-label fw-semibold" for="mensaje">Mensaje</label>
                     <textarea class="form-control" id="mensaje" name="mensaje" rows="3" required
                         placeholder="Escribe tu mensaje..."></textarea>
-                    <div class="text-end mt-3">
+                    <div class="d-flex flex-wrap justify-content-end gap-2 mt-3">
+                        <?php if (!$esAsistente): ?>
+                        <button class="btn tool-secondary px-4" type="button" data-bs-toggle="modal" data-bs-target="#modalCalificacion">
+                            <i class="fas fa-check-circle"></i> Finalizar conversacion
+                        </button>
+                        <?php endif; ?>
                         <button class="btn tool-action px-4" type="submit"><i class="fas fa-paper-plane"></i> Enviar</button>
                     </div>
                 </form>
                 <?php endif; ?>
+                <?php endif; ?>
             </div>
         </section>
     </main>
+
+    <?php if (!$esAsistente && $idConversacion > 0): ?>
+    <div class="modal fade" id="modalCalificacion" tabindex="-1" aria-labelledby="modalCalificacionLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rating-modal">
+                <form method="POST">
+                    <input type="hidden" name="accion" value="calificar">
+                    <input type="hidden" name="id_conversacion" value="<?php echo (int)$idConversacion; ?>">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalCalificacionLabel">Califica tu experiencia</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label class="form-label fw-semibold" for="calificacion">Del 1 al 10, como fue tu experiencia?</label>
+                        <input class="form-range" type="range" min="1" max="10" value="10" id="calificacion" name="calificacion"
+                            oninput="document.getElementById('ratingValue').textContent = this.value">
+                        <div class="rating-number" id="ratingValue">10</div>
+
+                        <label class="form-label fw-semibold mt-3" for="comentario_calificacion">Comentario opcional</label>
+                        <textarea class="form-control" id="comentario_calificacion" name="comentario_calificacion" rows="3"
+                            placeholder="Cuéntanos que podemos mejorar..."></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn tool-secondary" data-bs-dismiss="modal">Volver al chat</button>
+                        <button type="submit" class="btn tool-action">Enviar calificacion</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <footer class="footer mt-5">
         <div class="footer-content container">
@@ -247,6 +264,17 @@ if ($idConversacion > 0) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <?php if ($esAsistente): ?>
+    <script>
+        setInterval(() => {
+            const active = document.activeElement;
+            const isTyping = active && (active.tagName === 'TEXTAREA' || active.tagName === 'INPUT');
+            if (!isTyping) {
+                window.location.reload();
+            }
+        }, 15000);
+    </script>
+    <?php endif; ?>
 </body>
 
 </html>
