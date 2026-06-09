@@ -198,9 +198,81 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // =======================================================
+    // GRÁFICA 4: DATOS ENVIADOS A CITAS
+    // =======================================================
+    const ctx3 = document.getElementById('graficaAsistente3').getContext('2d');
+    let chartCitas = null;
+
+    async function cargarDatosGraficoCitas() {
+        try {
+            const response3 = await fetch('../php/api_grafico_asistente.php');
+            const result3 = await response3.json();
+
+            if (result3.success) {
+                // Buscamos dentro de la nueva "caja" que creamos en PHP
+                const datosCitas = result3.Grafica_citas;
+
+                if (chartCitas) {
+                    chartCitas.data.labels = datosCitas.nombres;
+                    chartCitas.data.datasets[0].data = datosCitas.cantidades;
+                    chartCitas.data.datasets[1].data = datosCitas.cantidades;
+                    chartCitas.update(); 
+                } else {
+                    chartCitas = new Chart(ctx3, {
+                        type: 'bar', 
+                        data: {
+                            labels: datosCitas.nombres,
+                            datasets: [
+                                {
+                                    type: 'line', 
+                                    label: 'Tendencia de Mensajes',
+                                    data: datosCitas.cantidades,
+                                    borderColor: '#00adfd', // Color Rojo
+                                    backgroundColor: 'rgba(0, 162, 255, 0.37)', 
+                                    borderWidth: 3,
+                                    tension: 0.4, 
+                                    fill: true, 
+                                    order: 1 
+                                },
+                                {
+                                    type: 'bar',
+                                    label: 'Mensajes Enviados',
+                                    data: datosCitas.cantidades,
+                                    backgroundColor: 'rgba(71, 160, 224, 0.84)', // Color Rojo
+                                    borderColor: '#00aeff',
+                                    borderWidth: 2,
+                                    borderRadius: 6, 
+                                    hoverBackgroundColor: 'rgb(1, 161, 254)',
+                                    order: 2
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false, 
+                            animation: { duration: 1000, easing: 'easeOutQuart' },
+                            scales: {
+                                y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
+                                x: { grid: { display: false } }
+                            },
+                            plugins: { legend: { display: true } }
+                        }
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error al cargar la gráfica de citas:', error);
+        }
+    }
+
+
     cargarDatosGraficoContacto();
     setInterval(cargarDatosGraficoContacto, 15000);
-    
+
+    cargarDatosGraficoCitas();
+    setInterval(cargarDatosGraficoCitas, 15000);
+
     cargarDatosGraficoComp();
     setInterval(cargarDatosGraficoComp, 15000);
 

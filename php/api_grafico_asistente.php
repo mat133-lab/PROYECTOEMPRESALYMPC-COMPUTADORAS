@@ -30,6 +30,16 @@ try {
         ORDER BY total_enviado DESC
         LIMIT 20
     ";
+
+    $sql3 = "
+        SELECT 
+            CONCAT(nombre, ' (', correo, ')') as nombre, 
+            COUNT(*) as total_enviado
+        FROM citas
+        GROUP BY id_usuario, correo, nombre
+        ORDER BY total_enviado DESC
+        LIMIT 20
+    ";
     
     $stmt = $conn->prepare($sql);
     $stmt->execute();
@@ -42,6 +52,10 @@ try {
     $stmt2 = $conn->prepare($sql2);
     $stmt2->execute();
     $resultados2 = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+
+    $stmt3 = $conn->prepare($sql3);
+    $stmt3->execute();
+    $resultados3 = $stmt3->fetchAll(PDO::FETCH_ASSOC);
 
     $nombres = [];
     $cantidades = [];
@@ -66,6 +80,13 @@ try {
         $cantidades2[] = $fila['total_enviado'];
     }
 
+    $nombres3 = [];
+    $cantidades3 = [];
+    foreach ($resultados3 as $fila){
+        $nombres3[] = $fila['nombre'];
+        $cantidades3[] = $fila['total_enviado'];
+    }
+
     echo json_encode([
         'success' => true,
         'Grafica_venta_usu' => [
@@ -79,6 +100,10 @@ try {
         'Grafica_contacto' => [
             'nombres' => $nombres2,
             'cantidades' => $cantidades2
+        ],
+        'Grafica_citas' => [
+            'nombres' => $nombres3,
+            'cantidades' => $cantidades3
         ]
     ]);
 

@@ -124,7 +124,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && $token_valido){
 
             <?php if(!$token_valido && !$success): ?>
             <div class="register-footer" style="margin-top: 20px; text-align: center;">
-                <a href="../php/olvidar_contrasena.php" style="color:var(--primary-color); text-decoration:none; font-weight: bold;">
+                <a href="../php/contraseña.php" style="color:var(--primary-color); text-decoration:none; font-weight: bold;">
                     <i class="fas fa-arrow-left"></i> Volver a intentar
                 </a>
             </div>

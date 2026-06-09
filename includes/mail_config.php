@@ -7,12 +7,12 @@
 // 2) Genera una contraseña de aplicación en https://myaccount.google.com/security.
 // 3) Usa esa contraseña en SMTP_MAILER_PASSWORD.
 
-const SMTP_MAILER_HOST = 'smtp.gmail.com';
-const SMTP_MAILER_PORT = 587;
-const SMTP_MAILER_USERNAME = 'mateo014esteban@gmail.com';
-const SMTP_MAILER_PASSWORD = 'gmpatisvxvvpelam';
-const SMTP_MAILER_FROM = 'mateo014esteban@gmail.com';
-const SMTP_MAILER_FROM_NAME = 'L&M PC Computadoras';
-const SMTP_MAILER_SECURE = 'tls';
-const SMTP_MAILER_CHARSET = 'UTF-8';
-const SMTP_MAILER_IS_HTML = false;
+define('SMTP_MAILER_HOST', getenv('SMTP_MAILER_HOST') ?: 'smtp.gmail.com');
+define('SMTP_MAILER_PORT', (int) (getenv('SMTP_MAILER_PORT') ?: 587));
+define('SMTP_MAILER_USERNAME', getenv('SMTP_MAILER_USERNAME') ?: 'mateo.cisneros@istvidanueva.edu.ec');
+define('SMTP_MAILER_PASSWORD', getenv('SMTP_MAILER_PASSWORD') ?: 'iiwnnzzxcoybyiyq');
+define('SMTP_MAILER_FROM', getenv('SMTP_MAILER_FROM') ?: (getenv('SMTP_MAILER_USERNAME') ?: 'mateo.cisneros@istvidanueva.edu.ec'));
+define('SMTP_MAILER_FROM_NAME', getenv('SMTP_MAILER_FROM_NAME') ?: 'L&M PC Computadoras');
+define('SMTP_MAILER_SECURE', getenv('SMTP_MAILER_SECURE') ?: 'tls');
+define('SMTP_MAILER_CHARSET', getenv('SMTP_MAILER_CHARSET') ?: 'UTF-8');
+define('SMTP_MAILER_IS_HTML', filter_var(getenv('SMTP_MAILER_IS_HTML') ?: '0', FILTER_VALIDATE_BOOL));

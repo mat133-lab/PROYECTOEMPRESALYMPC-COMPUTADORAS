@@ -1,6 +1,8 @@
 <?php
 session_start();
 require_once '../includes/db.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../includes/mail_config.php';
 
 $error = '';
 $success = '';
@@ -25,20 +27,41 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             $token = bin2hex(random_bytes(32));
             $expiration = date('Y-m-d H:i:s', strtotime('+1 hour'));
             
-            try{
+            try {
                 // Guardar token en la base de datos
                 $stmt = $conn->prepare("UPDATE usuarios SET reset_token = ?, reset_expiration = ? WHERE correo = ?");
                 $stmt->execute([$token, $expiration, $email]);
-                
-                // Construir enlace de recuperación local
-                $reset_link = "../php/reset_password.php?token=" . $token;
-                
-                // REDIRECCIONAR DIRECTAMENTE PARA PRUEBAS LOCALES
-                header("Location: " . $reset_link);
-                exit(); // Detenemos la ejecución aquí para que el salto sea inmediato
-            }
-            catch(PDOException $e){
-                $error = "Error al procesar la solicitud: " . $e->getMessage();
+
+                // Construir enlace absoluto para que funcione al abrirlo desde Gmail
+                $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+                $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+                $basePath = rtrim(dirname($_SERVER['PHP_SELF']), '/');
+                $reset_link = $protocol . $host . $basePath . '/reset_password.php?token=' . $token;
+
+                $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+                $mail->isSMTP();
+                $mail->Host = SMTP_MAILER_HOST;
+                $mail->SMTPAuth = true;
+                $mail->Username = SMTP_MAILER_USERNAME;
+                $mail->Password = SMTP_MAILER_PASSWORD;
+                $mail->SMTPSecure = SMTP_MAILER_SECURE;
+                $mail->Port = SMTP_MAILER_PORT;
+                $mail->CharSet = SMTP_MAILER_CHARSET;
+                $mail->isHTML(SMTP_MAILER_IS_HTML);
+
+                $mail->setFrom(SMTP_MAILER_FROM, SMTP_MAILER_FROM_NAME);
+                $mail->addAddress($email);
+
+                $mail->Subject = 'Recupera tu contraseña - L&M PC Computadoras';
+                $mail->Body = "Hola,\n\nRecibimos una solicitud para restablecer tu contraseña.\n\nHaz clic en el siguiente enlace para continuar:\n" . $reset_link . "\n\nSi no solicitaste este cambio, puedes ignorar este mensaje.\n\nL&M PC Computadoras";
+                $mail->AltBody = "Hola, recibimos una solicitud para restablecer tu contraseña. Usa este enlace: " . $reset_link;
+
+                $mail->send();
+                $success = 'Te hemos enviado un correo con el enlace para restablecer tu contraseña.';
+            } catch (PHPMailer\PHPMailer\Exception $e) {
+                $error = 'No se pudo enviar el correo de recuperación. Revisa tu contraseña de aplicación de Gmail (verificación en dos pasos activa) y que el correo remitente sea válido. Detalle: ' . $e->getMessage();
+            } catch (PDOException $e) {
+                $error = 'Error al procesar la solicitud: ' . $e->getMessage();
             }
         }
         else{

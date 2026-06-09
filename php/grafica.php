@@ -359,6 +359,15 @@ $alertMessage = '';
         </div>
     </main>
 
+    <main class="container asistente-hero main-content" style="margin-top: 100px">
+        <div class="grafica-container bg-white p-4 rounded shadow-sm">
+            <h2 class="mb-4 text-center">Grafica de los Datos enviados por el Usuario a la Pagina Citas</h2>
+            <div style="position: relative; height: 50vh; width: 100%;">
+                <canvas id="graficaAsistente3"></canvas>
+            </div>
+        </div>
+    </main>
+
 
     <footer class="footer mt-5">
         <div class="footer-content container">
