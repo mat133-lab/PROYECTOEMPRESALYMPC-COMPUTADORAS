@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../includes/db.php';
+require_once '../includes/email_verification.php';
 
 $error = '';
 $success = '';
@@ -66,11 +67,16 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 
             // Insertar nuevo usuario (Ahora con los campos de archivos)
             try{
-                $stmt = $conn->prepare("INSERT INTO usuarios (usuario, correo, contraseña, rol, archivo_ruc, archivo_cedula, cedula) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                $stmt = $conn->prepare("INSERT INTO usuarios (usuario, correo, contraseña, rol, archivo_ruc, archivo_cedula, cedula, email_verified, email_verification_token, email_verification_expires) VALUES (?, ?, ?, ?, ?, ?, ?, 0, NULL, NULL)");
                 $stmt->execute([$username, $email, $hashed_password, $role, $ruta_ruc, $ruta_cedula, $cedula]);
-                
-                $success = "Registro exitoso. Redirigiendo al login...";
-                header("Refresh: 2; url=../php/login.php");
+
+                if (sendEmailVerification($conn, $email, $username)) {
+                    $success = "Registro recibido. Revisa tu correo para confirmar tu cuenta antes de iniciar sesión.";
+                } else {
+                    $success = "Registro creado correctamente, pero no pudimos enviar el correo de verificación. Revisa la configuración SMTP o contacta al administrador.";
+                }
+
+                header("Refresh: 4; url=../php/login.php");
             }
             catch(PDOException $e){
                 $error = "Error al registrar: " . $e->getMessage();

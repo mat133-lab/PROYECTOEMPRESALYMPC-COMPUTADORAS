@@ -1,0 +1,27 @@
+body {
+  background: #f5f7fb;
+  font-family: Arial, sans-serif;
+}
+
+.main-content {
+  padding: 110px 18px 40px;
+}
+
+.card-stat {
+  border-radius: 18px;
+  border: none;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.table-wrap {
+  overflow-x: auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.badge-pill {
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+}

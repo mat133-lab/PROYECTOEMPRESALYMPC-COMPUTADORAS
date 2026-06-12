@@ -116,6 +116,9 @@ document.addEventListener('click', function (e) {
         }).then(r => r.json()).then(data => {
             if (data.ok) {
                 alert(data.msg + '\nPedido #: ' + data.id_pedido + '\nTotal: $' + parseFloat(data.total).toFixed(2));
+                if (typeof window !== 'undefined') {
+                    window.open('../php/generar_pedido_pdf.php?id=' + data.id_pedido, '_blank', 'noopener,noreferrer');
+                }
 
                 const totalEl = document.getElementById('total');
                 if (totalEl) totalEl.textContent = '$0';

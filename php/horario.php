@@ -180,16 +180,12 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
                             </ul>
                         </li>
 
-                        <li class="nav-item dropdown">
+                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                                 Tablets
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="herramientas"></a>
-                                </li>
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="maquinaria"></a>
-                                </li>
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="seguridad"></a>
+                                <li><a class="dropdown-item categoria-link" href="../php/tablets.php" data-categoria="Tablets">Tablets IPad</a>
                                 </li>
                             </ul>
                         </li>

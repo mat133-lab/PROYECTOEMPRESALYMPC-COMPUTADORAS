@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../includes/db.php';
+require_once '../includes/email_verification.php';
 
 $mensaje = '';
 $tipo_mensaje = '';
@@ -66,10 +67,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registro_admin'])) {
 
             // Registrar nuevo admin (con campos de archivos)
             $contraseña_hash = password_hash($contrasena, PASSWORD_BCRYPT);
-            $stmt = $conn->prepare("INSERT INTO usuarios (usuario, correo, cedula, contraseña, rol, archivo_ruc, archivo_cedula) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt = $conn->prepare("INSERT INTO usuarios (usuario, correo, cedula, contraseña, rol, archivo_ruc, archivo_cedula, email_verified, email_verification_token, email_verification_expires) VALUES (?, ?, ?, ?, ?, ?, ?, 0, NULL, NULL)");
             
             if ($stmt->execute([$usuario, $correo, $cedula, $contraseña_hash, 'admin', $ruta_ruc, $ruta_cedula])) {
-                $mensaje = 'Administrador registrado exitosamente. Por favor, inicia sesión.';
+                sendEmailVerification($conn, $correo, $usuario);
+                $mensaje = 'Administrador registrado. Revisa tu correo para verificar tu cuenta antes de iniciar sesión.';
                 $tipo_mensaje = 'success';
                 // Limpiar formulario
                 $_POST = array();

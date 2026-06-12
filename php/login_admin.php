@@ -28,8 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_admin'])) {
         $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
         
        if ($usuario && password_verify($contrasena, $usuario['contraseña'])) {
-            // Verificar que tenga rol de admin
-            if ($usuario['rol'] === 'admin') {
+            if ((int)($usuario['email_verified'] ?? 0) !== 1) {
+                $mensaje = 'Debes verificar tu correo electrónico antes de iniciar sesión como administrador.';
+                $tipo_mensaje = 'error';
+            } elseif ($usuario['rol'] === 'admin') {
                 $_SESSION['correo'] = $usuario['correo'];
                 $_SESSION['id_usuario'] = $usuario['id_usuario'];
                 $_SESSION['id'] = $usuario['id_usuario'];

@@ -20,7 +20,9 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 
     // Verificar credenciales con hash seguro
     if($row && password_verify($pass, $row['contraseña'])){
-        
+        if ((int)($row['email_verified'] ?? 0) !== 1) {
+            $error = "Debes verificar tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada.";
+        } else {
         // GUARDAMOS LOS DATOS CORRECTAMENTE EN LA SESIÓN
         $_SESSION['id_usuario'] = $row['id_usuario']; 
         $_SESSION['correo'] = $row['correo'];
@@ -37,6 +39,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             header("Location: ../php/dashboard.php");
         }
         exit;
+        }
     } else {
         $error = "Credenciales Inválidas";
     }

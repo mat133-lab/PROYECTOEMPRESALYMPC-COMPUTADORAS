@@ -169,16 +169,12 @@ $adminName = isset($_SESSION['admin_name']) ? htmlspecialchars($_SESSION['admin_
                             </ul>
                         </li>
 
-                        <li class="nav-item dropdown">
+                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                                 Tablets
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="herramientas"></a>
-                                </li>
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="maquinaria"></a>
-                                </li>
-                                <li><a class="dropdown-item categoria-link" href="#" data-categoria="seguridad"></a>
+                                <li><a class="dropdown-item categoria-link" href="../php/tablets.php" data-categoria="Tablets">Tablets IPad</a>
                                 </li>
                             </ul>
                         </li>
@@ -370,6 +366,15 @@ $adminName = isset($_SESSION['admin_name']) ? htmlspecialchars($_SESSION['admin_
                             <h3>Productos</h3>
                             <p>Gestionar los productos de cada proveedor o incluso eliminar.</p>
                             <span class="precio">Ir a Productos</span>
+                        </div>
+                    </a>
+
+                    <a href="pedidos.php" class="box" style="text-decoration:none;">
+                        <img src="../img/pedidos.webp" alt="Soporte" onerror="this.style.display='none'">
+                        <div class="product-txt">
+                            <h3>Pedidos</h3>
+                            <p>Gestionar los pedidos de los clientes.</p>
+                            <span class="precio">Ir a Pedidos</span>
                         </div>
                     </a>
                 </div>

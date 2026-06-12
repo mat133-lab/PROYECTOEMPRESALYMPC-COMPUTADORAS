@@ -236,16 +236,19 @@ CREATE TABLE `usuarios` (
   `contraseña` varchar(150) NOT NULL,
   `rol` varchar(100) NOT NULL,
   `reset_token` varchar(255) DEFAULT NULL,
-  `reset_expiration` datetime DEFAULT NULL
+  `reset_expiration` datetime DEFAULT NULL,
+  `email_verified` tinyint(1) NOT NULL DEFAULT 0,
+  `email_verification_token` varchar(255) DEFAULT NULL,
+  `email_verification_expires` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `usuarios`
 --
 
-INSERT INTO `usuarios` (`id_usuario`, `usuario`, `correo`, `cedula`, `archivo_ruc`, `archivo_cedula`, `contraseña`, `rol`, `reset_token`, `reset_expiration`) VALUES
-(4, 'Admin', 'mateo.montoya@gmail.com', NULL, NULL, NULL, '$2y$10$zSEwmXwUVTvCyfL7jzhruOvVQkLNCKpp4Ah/DRUGp1Av4e.UG4yBa', 'admin', '123', '2026-02-04 15:48:28'),
-(5, 'mateo1', 'mateo.cisneros12@gmail.com', NULL, NULL, NULL, '$2y$10$1U/9.fNzisdGC7if/.NUuefRL6FdCfPVBRjHVFNw4d9SRctuzvqRy', 'usuario', NULL, '2026-02-24 15:48:40'),
+INSERT INTO `usuarios` (`id_usuario`, `usuario`, `correo`, `cedula`, `archivo_ruc`, `archivo_cedula`, `contraseña`, `rol`, `reset_token`, `reset_expiration`, `email_verified`, `email_verification_token`, `email_verification_expires`) VALUES
+(4, 'Admin', 'mateo.montoya@gmail.com', NULL, NULL, NULL, '$2y$10$zSEwmXwUVTvCyfL7jzhruOvVQkLNCKpp4Ah/DRUGp1Av4e.UG4yBa', 'admin', '123', '2026-02-04 15:48:28', 1, NULL, NULL),
+(5, 'mateo1', 'mateo.cisneros12@gmail.com', NULL, NULL, NULL, '$2y$10$1U/9.fNzisdGC7if/.NUuefRL6FdCfPVBRjHVFNw4d9SRctuzvqRy', 'usuario', NULL, '2026-02-24 15:48:40', 1, NULL, NULL),
 (6, 'ADMIN', 'mateo.guerrero@gmail.com', NULL, NULL, NULL, '$2y$10$s5SNJPsR.AX8xlxIzGsfW.JzkAA8mk4.lR1VXWTWGRI2hdJ5ySLtK', 'admin', NULL, NULL),
 (7, 'juan', 'mateo.cisneros@istvidanueva.edu.ec', NULL, NULL, NULL, '$2y$10$hIhRCE9/CRABqCPQCCdebeyY0hkMb4NwF6/P9WZU1KE2WkWKrt0VS', 'usuario', '123456', '2026-03-10 15:49:08'),
 (8, 'Aron', 'mateo.cisneros12@istvidanueva.edu.ec', NULL, NULL, NULL, '$2y$10$83eyW5/CyglqqVZwM9VnjeQFSCvNA.M.vAmQzGqLBJOR3aejOQtsS', 'usuario', '1234567', '2026-04-09 15:49:19'),
