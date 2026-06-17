@@ -7,7 +7,7 @@ if (!isset($_SESSION['rol']) || strtolower($_SESSION['rol']) !== 'asistente') {
     exit();
 }
 
-$usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Asistente');
+$usuario = htmlspecialchars($_SESSION['usuario'] ?? 'asistente');
 $usuarioId = $_SESSION['id_usuario'] ?? $_SESSION['id'] ?? ''; 
 
 $alertType = '';
@@ -21,9 +21,9 @@ $alertMessage = '';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="../img/logo.webp">
     <title>Grafica Asistente - L&M PC Computadoras</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/carrusell_graficas.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
@@ -175,12 +175,13 @@ $alertMessage = '';
                             </ul>
                         </li>
 
-                         <li class="nav-item dropdown">
+                        <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                                 Tablets
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="../php/tablets.php" data-categoria="Tablets">Tablets IPad</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/tablets.php"
+                                        data-categoria="Tablets">Tablets IPad</a>
                                 </li>
                             </ul>
                         </li>
@@ -325,44 +326,67 @@ $alertMessage = '';
 
         </div>
     </nav>
-    <main class="container asistente-hero main-content" style="margin-top: 100px">
-        <!--Espacio dedicado para crear la grafica de las ultimas compras de los usuarios, llegada de productos al local, 
+
+    <div id="carouselExampleFade" class="carousel slide carousel-fade" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <main class="container asistente-hero main-content" style="margin-top: 100px">
+                    <!--Espacio dedicado para crear la grafica de las ultimas compras de los usuarios, llegada de productos al local,
         el incremento de envios tanto en la pagina contacto y citas de los usuarios asi como ver cuantos usuarios decidieron registrarse-->
-        <div class="grafica-container bg-white p-4 rounded shadow-sm">
-            <h2 class="mb-4 text-center">Grafica de Compras Recientes por los Usuarios</h2>
-            <div style="position: relative; height: 50vh; width: 100%;">
-                <canvas id="graficaAsistente"></canvas>
+                    <div class="grafica-container bg-white p-4 rounded shadow-sm">
+                        <h2 class="mb-4 text-center">Grafica de Compras Recientes por los Usuarios</h2>
+                        <div style="position: relative; height: 50vh; width: 100%;">
+                            <canvas id="graficaAsistente"></canvas>
+                            <div id="iaAnalisisGrafica0" class="ia-analisis-grafica ia-analisis-vacio">Cargando análisis de IA...</div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+            <div class="carousel-item">
+                <main class="container asistente-hero main-content" style="margin-top: 100px">
+                    <div class="grafica-container bg-white p-4 rounded shadow-sm">
+                        <h2 class="mb-4 text-center">Grafica de la Cantidad de Productos Llegados al Local</h2>
+                        <div style="position: relative; height: 50vh; width: 100%;">
+                            <canvas id="graficaAsistente1"></canvas>
+                            <div id="iaAnalisisGrafica1" class="ia-analisis-grafica ia-analisis-vacio">Cargando análisis de IA...</div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+            <div class="carousel-item">
+                <main class="container asistente-hero main-content" style="margin-top: 100px">
+                    <div class="grafica-container bg-white p-4 rounded shadow-sm">
+                        <h2 class="mb-4 text-center">Grafica de los Datos enviados por el Usuario a la Pagina Contacto
+                        </h2>
+                        <div style="position: relative; height: 50vh; width: 100%;">
+                            <canvas id="graficaAsistente2"></canvas>
+                            <div id="iaAnalisisGrafica2" class="ia-analisis-grafica ia-analisis-vacio">Cargando análisis de IA...</div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+            <div class="carousel-item">
+                <main class="container asistente-hero main-content" style="margin-top: 100px">
+                    <div class="grafica-container bg-white p-4 rounded shadow-sm">
+                        <h2 class="mb-4 text-center">Grafica de los Datos enviados por el Usuario a la Pagina Citas</h2>
+                        <div style="position: relative; height: 50vh; width: 100%;">
+                            <canvas id="graficaAsistente3"></canvas>
+                            <div id="iaAnalisisGrafica3" class="ia-analisis-grafica ia-analisis-vacio">Cargando análisis de IA...</div>
+                        </div>
+                    </div>
+                </main>
             </div>
         </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
 
-    </main>
-
-    <main class="container asistente-hero main-content" style="margin-top: 100px">
-        <div class="grafica-container bg-white p-4 rounded shadow-sm">
-            <h2 class="mb-4 text-center">Grafica de la Cantidad de Productos Llegados al Local</h2>
-            <div style="position: relative; height: 50vh; width: 100%;">
-                <canvas id="graficaAsistente1"></canvas>
-            </div>
-        </div>
-    </main>
-
-    <main class="container asistente-hero main-content" style="margin-top: 100px">
-        <div class="grafica-container bg-white p-4 rounded shadow-sm">
-            <h2 class="mb-4 text-center">Grafica de los Datos enviados por el Usuario a la Pagina Contacto</h2>
-            <div style="position: relative; height: 50vh; width: 100%;">
-                <canvas id="graficaAsistente2"></canvas>
-            </div>
-        </div>
-    </main>
-
-    <main class="container asistente-hero main-content" style="margin-top: 100px">
-        <div class="grafica-container bg-white p-4 rounded shadow-sm">
-            <h2 class="mb-4 text-center">Grafica de los Datos enviados por el Usuario a la Pagina Citas</h2>
-            <div style="position: relative; height: 50vh; width: 100%;">
-                <canvas id="graficaAsistente3"></canvas>
-            </div>
-        </div>
-    </main>
+    </div>
 
 
     <footer class="footer mt-5">
@@ -375,9 +399,7 @@ $alertMessage = '';
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="../js/grafico_asistente.js"></script>
