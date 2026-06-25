@@ -1,0 +1,20 @@
+/* Convierte las flechas blancas nativas de Bootstrap en negras */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    filter: invert(1);
+}
+
+.ia-analisis-grafica {
+    margin-top: 1rem;
+    padding: 0.9rem 1rem;
+    border-radius: 0.75rem;
+    background: #f8f9fa;
+    border: 1px solid rgba(13, 110, 253, 0.18);
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.06);
+    font-size: 0.92rem;
+    line-height: 1.5;
+}
+
+.ia-analisis-vacio {
+    color: #6c757d;
+}

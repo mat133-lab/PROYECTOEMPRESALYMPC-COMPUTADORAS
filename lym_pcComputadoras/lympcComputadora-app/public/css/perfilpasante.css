@@ -1,0 +1,26 @@
+.brand-centered {
+    max-width: 45%;
+    text-align: center;
+}
+
+.perfil-heading {
+    color: #0caeff;
+}
+
+.password-button {
+    margin-bottom: 20px;
+}
+
+.perfil-tab {
+    color: #0d6efd;
+    font-weight: 500;
+}
+
+.perfil-tabs-content {
+    background-color: #f8f9fa;
+    border-radius: 0 0 12px 12px;
+}
+
+.footer-note {
+    color: #bbb;
+}

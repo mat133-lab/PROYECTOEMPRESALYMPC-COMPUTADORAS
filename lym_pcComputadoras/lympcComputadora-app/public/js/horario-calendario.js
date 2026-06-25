@@ -1,0 +1,606 @@
+import {
+    calendarHeading,
+    calendarDays,
+    previousMonthBtn,
+    nextMonthBtn,
+    modal as listModal, // Renombrado para evitar conflictos con el modal de formulario
+    modalHeading,
+    modalCalendarList,
+    modalCloseBtn,
+    modalCancelBtn,
+    modalSaveBtn,
+    modalDeleteBtn
+} from './selectores-horario.js';
+
+import {
+    formatTitle,
+    formatDateString,
+    formatDateRange,
+    formatTime
+} from './funciones-horario.js';
+
+const currentDate = new Date();
+let currentCalendarDay = null; // Para saber qué día está abierto en el modal
+let currentAppointments = [];
+let selectedAppointmentId = null; // Cita activa seleccionada en el modal
+let isModalListMode = false; // true cuando el modal muestra citas existentes
+
+function getAppointmentId(appointment) {
+    return appointment?.id ?? appointment?.id_cita ?? appointment?.ID ?? null;
+}
+
+function selectModalAppointment(item) {
+    if (!item) return;
+    modalCalendarList.querySelectorAll('.modal__item').forEach(el => el.classList.remove('selected'));
+    item.classList.add('selected');
+    selectedAppointmentId = item.dataset.id || null;
+}
+
+function setModalMode(listMode) {
+    isModalListMode = listMode;
+    if (modalDeleteBtn) {
+        modalDeleteBtn.disabled = !listMode;
+        modalDeleteBtn.classList.toggle('disabled', !listMode);
+        modalDeleteBtn.style.opacity = listMode ? '1' : '0.6';
+        modalDeleteBtn.style.cursor = listMode ? 'pointer' : 'not-allowed';
+    }
+}
+
+// Clase UI para manipular el DOM
+class UI {
+    static cleanHTML(element) {
+        element.innerHTML = '';
+    }
+
+    static cleanCalendarDayContent(dayElement) {
+        const list = dayElement.querySelector('.calendar__appointments');
+        if (list) list.remove();
+
+        dayElement.classList.remove('calendar__day--content');
+        delete dayElement.dataset.appointments; // Limpiar data
+    }
+
+
+    static updateCalendarDayContent(dayElement, appointment) {
+        // almacenamiento por cada día
+        let stored = [];
+        if (dayElement.dataset.appointments) {
+            stored = JSON.parse(dayElement.dataset.appointments);
+        }
+
+        // Evitar duplicados visuales si se llama varias veces
+        const exists = stored.some(app => app.id === appointment.id);
+        if (!exists) {
+            stored.push(appointment);
+            dayElement.dataset.appointments = JSON.stringify(stored);
+        }
+
+        // Contenedor visual de citas (lista)
+        let list = dayElement.querySelector('.calendar__appointments');
+        if (!list) {
+            list = document.createElement('ul');
+            list.className = 'calendar__appointments';
+            dayElement.appendChild(list);
+            dayElement.classList.add('calendar__day--content');
+        }
+
+        // Crear elemento visual para la cita
+        const item = document.createElement('li');
+        item.className = 'calendar__appointment';
+        item.textContent = appointment.motivo || "Cita";
+        item.title = `${appointment.nombre || ''} - ${appointment.motivo || ''}`;
+
+        list.appendChild(item);
+    }
+
+    static createCalendarModalItem(appointment) {
+        const appointmentId = getAppointmentId(appointment);
+        const li = document.createElement('li');
+        li.className = 'modal__item';
+        if (appointmentId && /^[0-9]+$/.test(String(appointmentId))) {
+            li.dataset.id = String(appointmentId);
+        }
+        li.tabIndex = 0;
+        li.innerHTML = `
+        <div class="modal__item__info">
+            <h4 class="modal__item__title" id="name_save">${appointment.nombre} ${appointment.apellido}</h4>
+            <p class="modal__item__time" id="email_save">${appointment.correo}</p>
+            <p class="modal__item__time" id="cedula_save">${appointment.cedula}</p>
+            <p class="modal__item__time" id="ruc_save">${appointment.archivo_ruc ? 'Sí cuenta con Archivo RUC' : 'No proporcionado'}</p>
+            <p class="modal__item__time" id="cedula_file_save">${appointment.archivo_cedula ? 'Sí cuenta con Copia de Cédula' : 'No proporcionado'}</p>
+            <p class="modal__item__time" id="phone_save">${appointment.telefono}</p>
+            <p class="modal__item__description" id="description_save">${appointment.motivo}</p>
+        </div>
+    `;
+        modalCalendarList.appendChild(li);
+    }
+}
+
+// Renderizar calendario
+export async function renderCalendar() {
+    const month = currentDate.getMonth();
+    const year = currentDate.getFullYear();
+
+    const firstMonthDate = new Date(year, month, 1);
+    const lastMonthDate = new Date(year, month + 1, 0);
+
+    const calendarTitle = currentDate.toLocaleDateString("es-CO", {
+        month: "long",
+        year: "numeric"
+    });
+
+    calendarHeading.textContent = formatTitle(calendarTitle);
+
+    const firstWeekDay = firstMonthDate.getDay();
+    const lastMonthDay = lastMonthDate.getDate();
+
+    // Ajustar grid al primer día de la semana
+    const firstDayElement = document.querySelector('.calendar__day[data-day="1"]');
+    if (firstDayElement && firstDayElement.parentElement) {
+        // Ajuste: en JS getDay() Domingo es 0, pero en CSS grid suele requerir ajuste
+        // Si tu semana empieza en Lunes (1), y Domingo es 7:
+        const gridColumn = firstWeekDay === 0 ? 7 : firstWeekDay;
+        firstDayElement.style.gridColumnStart = gridColumn;
+    }
+
+    // Ocultar/mostrar últimos días
+    for (let i = 28; i <= 31; i++) {
+        const calendarDay = document.querySelector(`.calendar__day[data-day="${i}"]`);
+        if (calendarDay) {
+            if (i > lastMonthDay) {
+                calendarDay.classList.add("calendar__day--hidden");
+                calendarDay.style.display = 'none'; // Asegurar ocultamiento
+            } else {
+                calendarDay.classList.remove("calendar__day--hidden");
+                calendarDay.style.display = '';
+            }
+        }
+    }
+
+    // Obtener citas del mes
+    // Formato YYYY-MM-DD para la API
+    const fechaInicio = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+    const fechaFin = `${year}-${String(month + 1).padStart(2, '0')}-${lastMonthDay}`;
+
+    await getMonthlyAppointments([fechaInicio, fechaFin]);
+}
+
+// Obtener citas del servidor
+async function getMonthlyAppointments(dateRange) {
+    try {
+        const [desde, hasta] = dateRange;
+        // Ajusta la ruta si es necesario
+        const response = await fetch(
+            `../php/api_horarios.php?desde=${desde}&hasta=${hasta}`
+        );
+
+        if (!response.ok) throw new Error('Error al obtener las citas');
+
+        const appointments = await response.json();
+        displayAppointmentsInCalendar(appointments);
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+// Mostrar citas en calendario (VERSIÓN CORREGIDA - SIN new Date)
+function displayAppointmentsInCalendar(appointments) {
+    // Limpiar citas previas
+    document.querySelectorAll('.calendar__day').forEach(day => {
+        UI.cleanCalendarDayContent(day);
+    });
+
+    const currentMonthIndex = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+
+    // Agregar citas
+    appointments.forEach(record => {
+        if (!record.fecha) return;
+
+        // CORRECCIÓN CLAVE: Split manual para evitar zona horaria
+        // Formato esperado: "YYYY-MM-DD"
+        const parts = record.fecha.split(' ')[0].split('-');
+        if (parts.length < 3) return;
+
+        const anio = parseInt(parts[0]);
+        const mes = parseInt(parts[1]) - 1; // 0-11
+        const dia = parseInt(parts[2]);
+
+        // Validar que la cita pertenezca al mes visible
+        if (anio === currentYear && mes === currentMonthIndex) {
+            const calendarDayContainer = document.querySelector(`.calendar__day[data-day="${dia}"]`);
+            if (calendarDayContainer) {
+                UI.updateCalendarDayContent(calendarDayContainer, record);
+            }
+        }
+    });
+}
+
+// Cambiar mes
+export function setMonth(step) {
+    const currentMonth = currentDate.getMonth();
+    currentDate.setMonth(currentMonth + step);
+    renderCalendar();
+}
+
+// Cargar modal de LISTA de citas (Ver citas existentes)
+export function loadAppointmentsModal(calendarDay) {
+    if (!calendarDay) return;
+
+    currentCalendarDay = calendarDay; // Guardar referencia
+
+    // Obtener datos del dataset
+    const storedAppointments = calendarDay.dataset.appointments;
+    if (!storedAppointments) return;
+
+    const appointments = JSON.parse(storedAppointments);
+
+    // Preparar datos para displayAppointmentsInModal
+    // Adaptamos el formato para que displayAppointmentsInModal lo entienda
+    const appointmentsFormatted = appointments.map(app => ({
+        id: app.id,
+        text: `${app.nombre} ${app.apellido} - ${app.motivo}`, // Texto simple
+        ...app // Pasamos todo el objeto por si acaso
+    }));
+
+    displayAppointmentsInModal(appointmentsFormatted, calendarDay);
+}
+
+// Mostrar citas en modal de LISTA
+function displayAppointmentsInModal(appointments, calendarDay) {
+    const day = calendarDay.dataset.day;
+    const month = currentDate.getMonth() + 1;
+    const year = currentDate.getFullYear();
+    const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+    currentAppointments = appointments;
+    selectedAppointmentId = null;
+    setModalMode(true);
+
+    modalHeading.textContent = `Citas - ${formatDateString(dateString)}`;
+    UI.cleanHTML(modalCalendarList);
+
+    // Usamos el método de UI que ya tenías
+    appointments.forEach((app, index) => {
+        if (app.nombre) {
+            UI.createCalendarModalItem(app);
+        } else {
+            const li = document.createElement('li');
+            li.className = 'modal__item';
+            const appointmentId = getAppointmentId(app);
+            if (appointmentId && /^[0-9]+$/.test(String(appointmentId))) {
+                li.dataset.id = String(appointmentId);
+            }
+            li.tabIndex = 0;
+            li.textContent = app.text;
+            modalCalendarList.appendChild(li);
+        }
+    });
+
+    const firstItem = modalCalendarList.querySelector('.modal__item');
+    if (firstItem) {
+        selectModalAppointment(firstItem);
+    }
+
+    listModal.showModal();
+}
+
+// --- LÓGICA DEL FORMULARIO DE CREACIÓN (Integrada) ---
+
+// Función para abrir el formulario de nueva cita
+function abrirFormularioCrear(fechaSeleccionada) {
+    const formModal = document.getElementById("appointments-modal");
+    if (!formModal) return;
+
+    const modalTitle = formModal.querySelector(".modal__heading");
+    const listContainer = formModal.querySelector(".modal__list"); // Usamos el contenedor de lista para inyectar el form
+
+    selectedAppointmentId = null;
+    currentAppointments = [];
+    setModalMode(false);
+
+    modalTitle.textContent = `Agendar Cita - ${fechaSeleccionada}`;
+    formModal.showModal();
+
+    // Inyectar HTML del formulario
+    listContainer.innerHTML = `
+    <form method="POST" action="../php/guardar_cita.php" 
+          enctype="multipart/form-data" class="p-3">
+        
+        <input type="hidden" name="fecha" value="${fechaSeleccionada}">
+        
+        <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <input type="text" name="nombre" class="form-control" id="nombre" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Apellido</label>
+            <input type="text" name="apellido" class="form-control" id="apellido" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Correo</label>
+            <input type="email" name="correo" id="correo" class="form-control" 
+                   value="${window.currentUserEmail || ''}" required 
+                   ${window.currentUserEmail ? 'readonly' : ''}>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Cédula</label>
+            <input type="text" name="cedula" id="cedula" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">RUC</label>
+            <input type="file" name="archivo_ruc" id="archivo_ruc" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Archivo de Cédula</label>
+            <input type="file" name="archivo_cedula" id="archivo_cedula" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Teléfono</label>
+            <input type="text" name="telefono" id="telefono" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Motivo</label>
+            <textarea name="motivo" class="form-control" id="Motivo" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-warning w-100" style="color:#ffffff">
+            Agendar cita física
+        </button>
+    </form>
+`;
+    // Manejar cierre de este modal específico
+    const closeBtns = formModal.querySelectorAll(".modal__close, .modal__button--close");
+    closeBtns.forEach(btn => {
+        btn.onclick = () => formModal.close();
+    });
+}
+
+
+function inicializarBusqueda() {
+    const notyf = typeof Notyf !== 'undefined' ? new Notyf({ position: { x: 'right', y: 'top' } }) : null;
+    const searchForms = document.querySelectorAll('form[role="search"]');
+
+    searchForms.forEach(form => {
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const input = this.querySelector('input[type="search"]');
+            const termino = input.value.trim().toLowerCase();
+            input.blur();
+            if (termino === '') {
+                if (notyf) notyf.error('Por favor Ingrese un dato para buscar');
+                return;
+            }
+            const offcanvasMenu = document.getElementById('offcanvasDarkNavbar');
+            if (offcanvasMenu && offcanvasMenu.classList.contains('show')) {
+                const bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvasMenu);
+                if (bsOffcanvas) bsOffcanvas.hide();
+            }
+            setTimeout(() => {
+                buscarCitaGlobal(termino, notyf);
+            }, 300);
+        });
+        const btnBuscar = form.querySelector('.btn-success');
+        if (btnBuscar) {
+            btnBuscar.addEventListener('click', () => {
+                form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            })
+        }
+    });
+}
+document.addEventListener('DOMContentLoaded', () => {
+    renderCalendar();
+    inicializarBusqueda();
+
+    if (calendarDays) {
+        calendarDays.addEventListener('click', (e) => {
+            const dayElement = e.target.closest('.calendar__day');
+            if (!dayElement) return;
+
+            const dayNumber = dayElement.dataset.day;
+            if (!dayNumber) return;
+
+            if (dayElement.classList.contains('calendar__day--content')) {
+                loadAppointmentsModal(dayElement);
+            } else {
+                const month = currentDate.getMonth() + 1;
+                const year = currentDate.getFullYear();
+                const selectedDate = `${year}-${String(month).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+                abrirFormularioCrear(selectedDate);
+            }
+        });
+    }
+
+    previousMonthBtn?.addEventListener('click', () => setMonth(-1));
+    nextMonthBtn?.addEventListener('click', () => setMonth(1));
+
+    modalCloseBtn?.addEventListener('click', () => {
+        listModal.close();
+        currentCalendarDay = null;
+        selectedAppointmentId = null;
+        currentAppointments = [];
+    });
+    modalCancelBtn?.addEventListener('click', () => {
+        listModal.close();
+        currentCalendarDay = null;
+        selectedAppointmentId = null;
+        currentAppointments = [];
+    });
+
+    modalCalendarList?.addEventListener('click', (e) => {
+        const item = e.target.closest('.modal__item');
+        if (!item) return;
+        selectModalAppointment(item);
+    });
+});
+
+async function buscarCitaGlobal(termino, notyf) {
+    try {
+        const response = await fetch(`../php/buscar_cita.php?q=${encodeURIComponent(termino)}`);
+        if (!response.ok) throw new Error('Error al conectar con el buscador');
+
+        const resultados = await response.json();
+
+        if (resultados && resultados.length > 0) {
+            const citaEncontrada = resultados[0];
+            const parts = citaEncontrada.fecha.split(' ')[0].split('-');
+            const anioCita = parseInt(parts[0]);
+            const mesCita = parseInt(parts[1]) - 1;
+            const diaCita = parseInt(parts[2]);
+
+            currentDate.setFullYear(anioCita);
+            currentDate.setMonth(mesCita);
+            await renderCalendar();
+
+            setTimeout(() => {
+                const diaElemento = document.querySelector(`.calendar__day[data-day="${diaCita}"]`);
+                if (diaElemento) {
+                    diaElemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    document.querySelectorAll('.resaltar-animacion').forEach(el => el.classList.remove('resaltar-animacion'));
+
+                    setTimeout(() => {
+                        diaElemento.classList.add('resaltar-animacion');
+                        if (notyf) notyf.success('Cita encontrada');
+
+                        if (diaElemento.classList.contains('calendar__day--content')) {
+                            loadAppointmentsModal(diaElemento);
+                        }
+
+                        setTimeout(() => {
+                            diaElemento.classList.remove('resaltar-animacion');
+                        }, 2000);
+                    }, 500);
+                }
+            }, 100);
+        } else {
+            if (notyf) notyf.error(`No se encontraron citas o días con: "${termino}".`);
+        }
+    } catch (error) {
+        console.error('Error en la búsqueda: ', error);
+        if (notyf) notyf.error(`Ocurrió un error al buscar la cita`);
+    }
+}
+modalSaveBtn.addEventListener('click', () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    // Ocuparemos del documento el tamaño y ancho y lo guardaremos en variables
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    const nombre = document.getElementById('name_save')?.textContent || document.getElementById('nombre')?.value || 'N/A';
+    const apellido = document.getElementById('apellido')?.value || 'N/A' || '';
+    const descripcion = document.getElementById('description_save')?.textContent || document.getElementById('Motivo')?.value || 'N/A';
+    const cedula = document.getElementById('cedula_save')?.textContent || document.getElementById('cedula')?.value || 'N/A';
+    const ruc = document.getElementById('ruc_save')?.textContent || document.getElementById('archivo_ruc')?.value || 'N/A';
+    const archivo_cedula = document.getElementById('cedula_file_save')?.textContent || document.getElementById('archivo_cedula')?.value || 'N/A';
+    const fecha = document.getElementById('fecha')?.value || 'N/A';
+    const email = document.getElementById('email_save')?.textContent || document.getElementById('correo')?.value || 'N/A';
+    const telefono = document.getElementById('phone_save')?.textContent || document.getElementById('telefono')?.value || 'N/A';
+    //Diseños para el pdf
+    const logo = new Image();
+    logo.src = '../img/headerlym.png';
+    logo.onload = function () {
+        const footer = new Image();
+        footer.src = '../img/footerlym.png';
+        footer.onload = function () {
+            doc.addImage(logo, 'PNG', 0, 0, pageWidth, 35);
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text("Comprobante de Cita", pageWidth / 2, 50, { align: 'center' });
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'normal');
+            if (nombre !== 'N/A' && apellido !== 'N/A') {
+                doc.text("Nombre: " + nombre, 15, 65);
+                doc.text("Apellido: " + apellido, 15, 75);
+                doc.text("Correo Electronico: " + email, 15, 85);
+                doc.text("Cédula: " + cedula, 15, 95);
+                if (ruc !== 'N/A') {
+                    doc.text("Ruc: Si cuenta con Copia de RUC ", 15, 105);
+                } if (archivo_cedula !== 'N/A') {
+                    doc.text("Copia Cedula: Si cuenta con Copia de Cedula ", 15, 115);
+                }
+                doc.text("Fecha: " + fecha, 15, 125);
+                doc.text("Numero de Telefono: " + telefono, 15, 135);
+
+                const textoMotivo = doc.splitTextToSize("Motivo de la Cita: " + descripcion, pageWidth - 30);
+                doc.text(textoMotivo, 15, 145);
+
+            } else {
+                doc.text("Nombre: " + nombre, 15, 65);
+                doc.text("Correo Electronico: " + email, 15, 75);
+                doc.text("Cédula: " + cedula, 15, 85);
+                if (ruc !== 'N/A') {
+                    doc.text("Ruc: Si cuenta con Copia de RUC ", 15, 95);
+                } if (archivo_cedula !== 'N/A') {
+                    doc.text("Copia Cedula: Si cuenta con Copia de Cedula ", 15, 105);
+                }
+                doc.text("Fecha: " + fecha, 15, 115);
+                doc.text("Numero de Telefono: " + telefono, 15, 125);
+
+                const textoMotivo = doc.splitTextToSize("Motivo de la Cita: " + descripcion, pageWidth - 30);
+                doc.text(textoMotivo, 15, 135);
+            }
+            doc.addImage(footer, 'PNG', 0, pageHeight - 30, pageWidth, 30);
+            const nombreAr = nombre !== 'N/A' ? nombre.replace(/\s+/g, '_') : 'Usuario';
+            doc.save('comprobante_cita_horario_usuarios_' + nombreAr + '.pdf');
+        }
+    };
+});
+
+if (modalDeleteBtn) {
+    modalDeleteBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        //Si no hay cita seleccionada nos dara un mensaje y luego return para que no ejecute el resto del codigo
+        if (!selectedAppointmentId) {
+            const items = document.querySelectorAll('.modal__item');
+            if (items.length === 1) {
+                selectedAppointmentId = items[0].dataset.id;
+            } else if (items.length > 1) {
+                alert("Por favor, haz clic sobre la cita específica que deseas eliminar.");
+                return;
+            } else {
+                return; // No hay citas
+            }
+        }
+
+        if (confirm('¿Seguro que deseas cancelar y eliminar esta cita de tu calendario?')) {
+            try {
+                // Preparamos los datos para enviarlos por POST
+                const datos = new URLSearchParams();
+                datos.append('id_cita', selectedAppointmentId);
+
+                // Llamamos a tu archivo dedicado a borrar citas
+                const response = await fetch('../php/eliminar_cita.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: datos
+                });
+
+                // LEEMOS COMO TEXTO PRIMERO Esto evita que JS se rompa si PHP envía espacios en blanco
+                const textoRespuesta = await response.text();
+                const resultado = JSON.parse(textoRespuesta); // Luego lo convertimos a JSON
+
+                // Si el PHP responde success: true
+                if (resultado.success) {
+
+                    // Mostramos la notificación usando Notyf
+                    const notyf = new Notyf({ position: { x: 'right', y: 'top' } });
+                    notyf.success('Cita eliminada correctamente');
+
+                    // Forzamos la recarga de la página tras un milisegundo para que se vea el mensaje
+                    setTimeout(() => {
+                        window.location.href = window.location.href; // Recarga súper forzada
+                    }, 800);
+
+                } else {
+                    alert('Error: ' + (resultado.error || 'No se pudo cancelar la cita.'));
+                }
+            } catch (error) {
+                console.error('Error al intentar borrar:', error);
+                // Si hay un error, de todas formas forzamos la recarga porque sabemos que el PHP sí la borra
+                window.location.reload();
+            }
+        }
+    });
+}
