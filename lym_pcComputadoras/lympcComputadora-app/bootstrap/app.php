@@ -12,6 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->encryptCookies(except: [
+            'LEGACYSESSID',
+            'PHPSESSID',
+        ]);
         $middleware->validateCsrfTokens(except: [
             'php/api_horarios.php',
             'php/api_horarios_admin.php',

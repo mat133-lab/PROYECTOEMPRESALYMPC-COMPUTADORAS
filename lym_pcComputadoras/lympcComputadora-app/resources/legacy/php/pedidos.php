@@ -23,7 +23,7 @@ $statsRow = $stmtStats->fetch(PDO::FETCH_ASSOC);
 $stats['total_pedidos'] = (int)($statsRow['total_pedidos'] ?? 0);
 $stats['total_ventas'] = (float)($statsRow['total_ventas'] ?? 0);
 
-$stmtTop = $conn->query("SELECT pr.nombre, SUM(dp.cantidad) AS unidades FROM detalles_pedido dp JOIN productos pr ON pr.id_producto = dp.id_producto GROUP BY dp.id_producto ORDER BY unidades DESC LIMIT 1");
+$stmtTop = $conn->query("SELECT pr.nombre, SUM(dp.cantidad) AS unidades FROM detalles_pedido dp JOIN productos pr ON pr.id_producto = dp.id_producto GROUP BY dp.id_producto, pr.nombre ORDER BY unidades DESC LIMIT 1");
 $top = $stmtTop->fetch(PDO::FETCH_ASSOC);
 if ($top) {
     $stats['producto_mas_vendido'] = $top['nombre'] . ' (' . (int)$top['unidades'] . ' unidades)';

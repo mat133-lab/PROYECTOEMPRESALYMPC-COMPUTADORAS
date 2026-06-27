@@ -23,17 +23,98 @@ class LegacyRuntime
         $scriptDirectory = dirname($path);
         $headersBefore = headers_list();
 
+        // Evitar que cookies largas/serializadas sean interpretadas como session id inválido.
+        $possibleNames = ['LEGACYSESSID', 'PHPSESSID', session_name(), 'laravel_session', 'lm-pc-computadoras-session'];
+        foreach (array_unique($possibleNames) as $name) {
+            if (! $name) {
+                continue;
+            }
+            if (isset($_COOKIE[$name])) {
+                $cookieVal = $_COOKIE[$name];
+                if (strlen($cookieVal) > 48 || ! preg_match('/^[A-Za-z0-9,-]+$/', $cookieVal)) {
+                    unset($_COOKIE[$name]);
+                    setcookie($name, '', time() - 3600, '/');
+                }
+            }
+        }
+
+        // Para evitar colisiones con las cookies de Laravel y otras, asignamos
+        // un nombre de sesión separado para los scripts legacy y preconfiguramos
+        // un id seguro. No iniciamos la sesión aquí; el script legacy seguirá
+        // llamando a `session_start()` normalmente y recibirá la cookie
+        // `LEGACYSESSID` en lugar de `PHPSESSID`.
+        $legacySessionName = 'LEGACYSESSID';
+        $previousSessionName = session_name();
+
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+            setcookie($previousSessionName, '', time() - 3600, '/');
+            unset($_COOKIE[$previousSessionName], $_COOKIE[session_name()]);
+        }
+
+        session_name($legacySessionName);
+
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            if (isset($_COOKIE[$legacySessionName]) && preg_match('/^[A-Za-z0-9,-]+$/', $_COOKIE[$legacySessionName]) && strlen($_COOKIE[$legacySessionName]) <= 48) {
+                session_id($_COOKIE[$legacySessionName]);
+            } else {
+                try {
+                    $safeId = bin2hex(random_bytes(16));
+                } catch (\Throwable $e) {
+                    $safeId = uniqid('', true);
+                }
+                session_id($safeId);
+            }
+        }
+
+        $shutdownRegistered = false;
+        $registerShutdown = function () use ($legacySessionName, $previousSessionName, &$shutdownRegistered) {
+            if ($shutdownRegistered) {
+                return;
+            }
+            $shutdownRegistered = true;
+            if (session_status() === PHP_SESSION_ACTIVE && session_name() === $legacySessionName) {
+                session_write_close();
+            }
+            if ($previousSessionName) {
+                session_name($previousSessionName);
+            }
+        };
+        register_shutdown_function($registerShutdown);
+
+        $cleanupShutdown = $registerShutdown;
+
         http_response_code(200);
         ob_start();
+
+        // Logging: volcar estado de cookies y headers antes de ejecutar el script legacy
+        $logFile = storage_path('logs/legacy_debug.log');
+        try {
+            file_put_contents($logFile, "--- Legacy pre-run: " . date('c') . "\n", FILE_APPEND);
+            file_put_contents($logFile, "\
+_COOKIE:\n" . print_r($_COOKIE, true) . "\n", FILE_APPEND);
+            file_put_contents($logFile, "headers_list before run:\n" . print_r(headers_list(), true) . "\n", FILE_APPEND);
+        } catch (\Throwable $e) {
+            // noop
+        }
 
         try {
             chdir($scriptDirectory);
             require $path;
             $content = ob_get_clean();
+
+            // Logging: volcar headers y cookies después de ejecutar el script legacy
+            try {
+                file_put_contents($logFile, "--- Legacy post-run: " . date('c') . "\n", FILE_APPEND);
+                file_put_contents($logFile, "headers_list after run:\n" . print_r(headers_list(), true) . "\n", FILE_APPEND);
+            } catch (\Throwable $e) {
+                // noop
+            }
         } catch (\Throwable $exception) {
             ob_end_clean();
             throw $exception;
         } finally {
+            $cleanupShutdown();
             chdir($cwd ?: base_path());
         }
 
