@@ -29,10 +29,10 @@ $alertMessage = '';
 if (isset($_GET['upload'])) {
     if ($_GET['upload'] === 'success') {
         $alertType = 'success';
-        $alertMessage = 'El archivo se cargó correctamente.';
+        $alertMessage = 'El archivo se cargï¿½ correctamente.';
     } elseif ($_GET['upload'] === 'error') {
         $alertType = 'danger';
-        $alertMessage = isset($_GET['message']) ? htmlspecialchars($_GET['message']) : 'Ocurrió un error al cargar el archivo.';
+        $alertMessage = isset($_GET['message']) ? htmlspecialchars($_GET['message']) : 'Ocurriï¿½ un error al cargar el archivo.';
     }
 }
 ?>
@@ -258,9 +258,9 @@ if (isset($_GET['upload'])) {
 
                             <?php if (isset($_SESSION['rol'])): ?> 
                             <span class="text-white me-3">Buen dia, <b><?php echo $_SESSION['usuario']; ?></b></span>
-                            <a href="/php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
+                            <a href="/php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesiï¿½n</a>
                             <?php else: ?>
-                            <a href="/php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
+                            <a href="/php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesiï¿½n</a>
                             <a href="/php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
@@ -302,7 +302,7 @@ if (isset($_GET['upload'])) {
 
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                Cuenta y Configuración
+                                Cuenta y Configuraciï¿½n
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
                                 <li>
@@ -329,9 +329,9 @@ if (isset($_GET['upload'])) {
                             <?php if (isset($_SESSION['rol'])): ?>
                             <span class="text-white me-3">Buen dia,
                                 <b><?php echo $_SESSION['usuario']; ?></b></span>
-                            <a href="/php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
+                            <a href="/php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesiï¿½n</a>
                             <?php else: ?>
-                            <a href="/php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
+                            <a href="/php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesiï¿½n</a>
                             <a href="/php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
@@ -368,18 +368,18 @@ if (isset($_GET['upload'])) {
         <section class="products">
             <div class="box-container">
                 <a href="/php/ubicacion.php" class="box text-decoration-none text-dark">
-                    <img src="/img/ubicacion.webp" alt="Ubicación" onerror="this.style.display='none'">
+                    <img src="/img/ubicacion.webp" alt="Ubicacion" onerror="this.style.display='none'">
                     <div class="product-txt">
-                        <h3>Ubicación</h3>
-                        <p>Consulta la ubicación de la tienda, rutas y zonas de atención.</p>
-                        <span class="precio">Ver Ubicación</span>
+                        <h3>Ubicacion</h3>
+                        <p>Consulta la ubicacion de la tienda, rutas y zonas de atencion.</p>
+                        <span class="precio">Ver Ubicacion</span>
                     </div>
                 </a>
                 <a href="/php/horario.php" class="box text-decoration-none text-dark">
                     <img src="/img/calendar.webp" alt="Calendario" onerror="this.style.display='none'">
                     <div class="product-txt">
                         <h3>Calendario</h3>
-                        <p>Revisa tu agenda, citas programadas y días disponibles.</p>
+                        <p>Revisa tu agenda, citas programadas y dias disponibles.</p>
                         <span class="precio">Ver Calendario</span>
                     </div>
                 </a>
@@ -387,7 +387,7 @@ if (isset($_GET['upload'])) {
                     <img src="/img/users.png" alt="Perfil" onerror="this.style.display='none'">
                     <div class="product-txt">
                         <h3>Perfil</h3>
-                        <p>Actualiza tus datos, credenciales y tu información personal.</p>
+                        <p>Actualiza tus datos, credenciales y tu informacion personal.</p>
                         <span class="precio">Ir al Perfil</span>
                     </div>
                 </a>
@@ -418,7 +418,7 @@ if (isset($_GET['upload'])) {
         <div class="footer-content container">
             <div>
                 <h3>L&M PC Computadoras</h3>
-                <p class="footer-note">Panel del pasante con herramientas enfocadas en proyectos, reportes y recursos rápidos.</p>
+                <p class="footer-note">Panel del pasante con herramientas enfocadas en proyectos, reportes y recursos rï¿½pidos.</p>
             </div>
         </div>
     </footer>
