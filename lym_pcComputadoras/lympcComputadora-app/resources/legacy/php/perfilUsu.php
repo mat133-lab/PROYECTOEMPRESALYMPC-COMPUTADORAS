@@ -466,6 +466,13 @@ if ($UsuId) {
                                         <?php echo $UsuType; ?>
                                     </div>
                                 </div>
+                                <div class="col-12 field-group">
+                                    <div class="p-3 rounded" style="background:#eef7ff; border:1px solid #b8ddf5;">
+                                        <div class="fw-bold mb-1"><i class="fa-brands fa-telegram"></i> Telegram</div>
+                                        <div class="text-muted small mb-2">Vincula tu celular al bot para consultar acciones permitidas según tu rol.</div>
+                                        <a class="btn btn-sm btn-primary" href="/telegram">Configurar Telegram</a>
+                                    </div>
+                                </div>
                             </div>
 
                         </div>

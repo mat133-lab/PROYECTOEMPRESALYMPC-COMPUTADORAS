@@ -23,12 +23,13 @@ $mostrarChatWidget = isset($_SESSION['usuario']) && !in_array($rolChatWidget, ['
 
         <div class="floating-chat__messages" id="floatingChatMessages"></div>
 
-        <form class="floating-chat__form" id="floatingChatForm">
-            <input type="text" id="floatingChatInput" placeholder="Escribe tu consulta..." autocomplete="off" required>
-            <button type="submit" aria-label="Enviar mensaje">
-                <i class="fas fa-paper-plane"></i>
-            </button>
-        </form>
+        <div class="floating-chat__buttons" id="floatingChatButtons">
+            <button class="floating-chat__option" data-message="1">Soporte Tecnico</button>
+            <button class="floating-chat__option" data-message="2">Horarios</button>
+            <button class="floating-chat__option" data-message="3">Direccion</button>
+            <button class="floating-chat__option" data-message="4">Informacion</button>
+            <button class="floating-chat__option" data-message="5">Hablar con Asesor</button>
+        </div>
 
         <div class="floating-chat__rating" id="floatingChatRating" hidden>
             <p>Califica tu experiencia del 1 al 10</p>

@@ -7,8 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const panel = document.getElementById('floatingChatPanel');
     const close = document.getElementById('floatingChatClose');
     const messages = document.getElementById('floatingChatMessages');
-    const form = document.getElementById('floatingChatForm');
-    const input = document.getElementById('floatingChatInput');
     const status = document.getElementById('floatingChatStatus');
     const finish = document.getElementById('floatingChatFinish');
     const rating = document.getElementById('floatingChatRating');
@@ -16,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ratingNumber = document.getElementById('floatingChatRatingNumber');
     const ratingComment = document.getElementById('floatingChatRatingComment');
     const sendRating = document.getElementById('floatingChatSendRating');
+    const optionButtons = document.querySelectorAll('.floating-chat__option');
     let opened = false;
     let pollTimer = null;
 
@@ -68,12 +67,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 6000);
     };
 
+    const sendButtonMessage = async (message) => {
+        const bubble = document.createElement('div');
+        bubble.className = 'floating-chat__bubble floating-chat__bubble--user';
+        bubble.textContent = message;
+        messages.appendChild(bubble);
+        messages.scrollTop = messages.scrollHeight;
+
+        render(await post({ action: 'send', message }));
+    };
+
     button.addEventListener('click', async () => {
         opened = true;
         panel.hidden = false;
         await load();
         startPolling();
-        input.focus();
     });
 
     close.addEventListener('click', () => {
@@ -82,12 +90,12 @@ document.addEventListener('DOMContentLoaded', () => {
         clearInterval(pollTimer);
     });
 
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const message = input.value.trim();
-        if (!message) return;
-        input.value = '';
-        render(await post({ action: 'send', message }));
+    optionButtons.forEach((btn) => {
+        btn.addEventListener('click', async () => {
+            const message = btn.dataset.message;
+            if (!message) return;
+            await sendButtonMessage(message);
+        });
     });
 
     finish.addEventListener('click', () => {
@@ -105,7 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
             comment: ratingComment.value,
         }));
         rating.hidden = true;
-        form.hidden = true;
         finish.hidden = true;
         status.textContent = 'Conversacion finalizada';
     });

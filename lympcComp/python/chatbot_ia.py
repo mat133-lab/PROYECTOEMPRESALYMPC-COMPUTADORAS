@@ -18,15 +18,6 @@ def responder(mensaje):
     necesita_humano = False
     tema = "Consulta general"
 
-    opciones = (
-        "\n\nTambien puedes escribir una de estas opciones:"
-        "\n1. Soporte tecnico"
-        "\n2. Horarios disponibles"
-        "\n3. Direccion o ubicacion"
-        "\n4. Informacion de la empresa"
-        "\n5. Hablar con asistente"
-    )
-
     if contiene(texto, ["humano", "asistente", "persona real", "asesor", "especializada", "especializado", "no entiendo"]):
         necesita_humano = True
         tema = "Asistencia personalizada"
@@ -70,16 +61,13 @@ def responder(mensaje):
         respuesta = (
             "Hola, soy la asistencia virtual de L&M PC Computadoras. "
             "Puedo ayudarte con soporte tecnico, horarios, direccion o informacion de la empresa."
-        ) + opciones
+        )
     else:
         necesita_humano = True
         respuesta = (
             "Puedo orientarte con informacion general, pero tu consulta necesita mas detalle. "
             "Te voy a pasar con alguien de soporte para que revise tu caso de forma personalizada."
         )
-
-    if not necesita_humano and "Tambien puedes escribir" not in respuesta:
-        respuesta += opciones
 
     return {
         "respuesta": respuesta,

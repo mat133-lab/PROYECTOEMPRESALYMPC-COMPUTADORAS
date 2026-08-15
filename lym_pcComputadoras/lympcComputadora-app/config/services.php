@@ -35,4 +35,23 @@ return [
         ],
     ],
 
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'webhook_secret' => env('TELEGRAM_WEBHOOK_SECRET'),
+        'bot_username' => env('TELEGRAM_BOT_USERNAME'),
+    ],
+
+    'assistant_ai' => [
+        // Valores admitidos: gemini, qwen o groq. La clave jamás debe ir al cliente.
+        'provider' => env('AI_PROVIDER', 'gemini'),
+        'gemini_key' => env('GEMINI_API_KEY'),
+        'gemini_model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
+        'qwen_key' => env('QWEN_API_KEY'),
+        'qwen_model' => env('QWEN_MODEL', 'qwen-plus'),
+        'qwen_base_url' => env('QWEN_BASE_URL', 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1'),
+        'groq_key' => env('GROQ_API_KEY', env('QWEN_API_KEY')),
+        'groq_model' => env('GROQ_MODEL', env('QWEN_MODEL', 'qwen/qwen3.6-27b')),
+        'groq_base_url' => env('GROQ_BASE_URL', 'https://api.groq.com/openai/v1'),
+    ],
+
 ];

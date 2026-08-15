@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 25-03-2026 a las 23:03:15
+-- Tiempo de generación: 15-08-2026 a las 02:33:24
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -20,6 +20,87 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `lympc_bd`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `cache`
+--
+
+CREATE TABLE `cache` (
+  `key` varchar(255) NOT NULL,
+  `value` mediumtext NOT NULL,
+  `expiration` bigint(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `cache_locks`
+--
+
+CREATE TABLE `cache_locks` (
+  `key` varchar(255) NOT NULL,
+  `owner` varchar(255) NOT NULL,
+  `expiration` bigint(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `chat_conversaciones`
+--
+
+CREATE TABLE `chat_conversaciones` (
+  `id_conversacion` int(11) NOT NULL,
+  `id_usuario` int(11) DEFAULT NULL,
+  `nombre_usuario` varchar(200) NOT NULL,
+  `correo_usuario` varchar(255) DEFAULT NULL,
+  `estado` varchar(40) NOT NULL DEFAULT 'ia',
+  `tema` varchar(180) DEFAULT NULL,
+  `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp(),
+  `fecha_actualizacion` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `calificacion` tinyint(4) DEFAULT NULL,
+  `comentario_calificacion` text DEFAULT NULL,
+  `fecha_cierre` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `chat_conversaciones`
+--
+
+INSERT INTO `chat_conversaciones` (`id_conversacion`, `id_usuario`, `nombre_usuario`, `correo_usuario`, `estado`, `tema`, `fecha_creacion`, `fecha_actualizacion`, `calificacion`, `comentario_calificacion`, `fecha_cierre`) VALUES
+(1, 20, 'Mateo', 'mateo014esteban@gmail.com', 'finalizado', 'Asistencia personalizada', '2026-06-05 01:23:35', '2026-06-05 01:32:09', 10, '', '2026-06-04 20:32:09');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `chat_mensajes`
+--
+
+CREATE TABLE `chat_mensajes` (
+  `id_mensaje` int(11) NOT NULL,
+  `id_conversacion` int(11) NOT NULL,
+  `remitente` varchar(40) NOT NULL,
+  `nombre_remitente` varchar(200) NOT NULL,
+  `mensaje` text NOT NULL,
+  `fecha_envio` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `chat_mensajes`
+--
+
+INSERT INTO `chat_mensajes` (`id_mensaje`, `id_conversacion`, `remitente`, `nombre_remitente`, `mensaje`, `fecha_envio`) VALUES
+(1, 1, 'ai', 'Asistencia virtual', 'Hola, soy la asistencia virtual de L&M PC Computadoras. Puedo ayudarte con soporte tecnico, direcciones, horarios disponibles e informacion de la empresa. En que se le puede ayudar?\n\nPuedes escribir:\n1. Soporte tecnico\n2. Horarios disponibles\n3. Direccion o ubicacion\n4. Informacion de la empresa\n5. Hablar con asistente', '2026-06-05 01:23:35'),
+(2, 1, 'user', 'Mateo', 'Soporte tecnico', '2026-06-05 01:24:42'),
+(3, 1, 'ai', 'Asistencia virtual', 'Para soporte tecnico, dime por favor: marca del equipo, modelo, que problema presenta, si enciende correctamente y desde cuando ocurre la falla. Con eso puedo darte una orientacion inicial.\n\nTambien puedes escribir una de estas opciones:\n1. Soporte tecnico\n2. Horarios disponibles\n3. Direccion o ubicacion\n4. Informacion de la empresa\n5. Hablar con asistente', '2026-06-05 01:24:43'),
+(4, 1, 'user', 'Mateo', 'Hablar con asistente', '2026-06-05 01:25:49'),
+(5, 1, 'ai', 'Asistencia virtual', 'Entiendo. Te voy a pasar con alguien de soporte para que revise tu caso con mas detalle. Por favor deja escrito marca, modelo del equipo, falla principal y un numero de contacto si aplica.', '2026-06-05 01:25:49'),
+(6, 1, 'asistente', 'matius', 'hola se comunica con el asistente Matt digame cual es el incoveniente?', '2026-06-05 01:27:06'),
+(7, 1, 'user', 'Mateo', 'hola necesito traer un equipo que lo deje desde el dia lunes del otro mes pero no dieron todavia una respuesta', '2026-06-05 01:27:56'),
+(8, 1, 'user', 'Mateo', 'no es nada gracias me he confundido pero ya llego el equipo, gracias', '2026-06-05 01:30:50'),
+(9, 1, 'asistente', 'matius', 'okey un gusto verlo ayudado, califiquenos al cerrar esta conversacion nos importa mucho su calificacion ????✅', '2026-06-05 01:31:38');
 
 -- --------------------------------------------------------
 
@@ -47,11 +128,10 @@ CREATE TABLE `citas` (
 --
 
 INSERT INTO `citas` (`id_cita`, `id_usuario`, `nombre`, `apellido`, `correo`, `cedula`, `archivo_ruc`, `archivo_cedula`, `accion_sensible`, `fecha`, `telefono`, `motivo`) VALUES
-(6, 5, 'mateo1', 'Cisneros', 'mateo.cisneros12@gmail.com', '0000000000', NULL, NULL, 0, '2026-02-09', '0984373472', 'Mi equipo esta mojado'),
-(8, 5, 'mateo1', 'Cisneros', 'mateo.cisneros12@gmail.com', '0000000000', NULL, NULL, 0, '2026-02-11', '0984373472', 'arreglo'),
-(9, 5, 'Mateo', 'Cisneros', 'mateo.cisneros12@gmail.com', '0000000000', NULL, NULL, 0, '2026-02-06', '0984373472', 'ff'),
-(10, 5, 'mateo1', 'jaramillo', 'mateo.cisneros12@gmail.com', '0000000000', NULL, NULL, 0, '2026-02-12', '0984373472', 'Arreglo y Mantenimiento Preventivo'),
-(11, 5, 'Mateo', 'Montoya', 'mateo.cisneros12@gmail.com', '0000000000', NULL, NULL, 0, '2026-02-21', '0984373472', 'Cita Tecnica para el equipo');
+(22, 16, 'mateo', 'Cisneros', 'mateo.cisneros20@gmail.com', '1728734665', '../docs/1778193064_ruc_4.-BITACORAS(ESTUDIANTE)-59-v1.pdf', '../docs/1778193064_cedula_descarga (1).pdf', 0, '2026-05-29', '09843734754350', 'mantenimiento'),
+(32, 16, 'mateo', 'Cisneros', 'mateo.cisneros20@gmail.com', '1728734665', '../docs/1778200337_ruc_comprobante_cita_horario_usuarios_Mateo (10).pdf', '../docs/1778200337_cedula_comprobante_cita_horario_usuarios_mateo_Cisneros.pdf', 0, '2026-05-14', '09843734754350', 'Prueba Final'),
+(33, 24, 'matt', 'Cisneros', 'mateo014esteban@gmail.com', '1728734664', '../docs/1782512084_ruc_PORTAFOLIO - CISNEROS MONTOYA MATEO ESTEBAN - ANALISIS DE DISEÑO DE SOFTWARE 2.pdf', '../docs/1782512084_cedula_Investigacion_Modelado_Proceso_Software_Mateo_Cisneros.pdf', 0, '2026-07-16', '0984373472', 'xd'),
+(34, 24, 'matt', 'Cisneros', 'mateo014esteban@gmail.com', '1728734664', '../docs/1782512164_ruc_PORTAFOLIO - CISNEROS MONTOYA MATEO ESTEBAN - ANALISIS DE DISEÑO DE SOFTWARE 2.pdf', '../docs/1782512164_cedula_PORTAFOLIO - CISNEROS MONTOYA MATEO ESTEBAN - ANALISIS DE DISEÑO DE SOFTWARE 2.pdf', 0, '2026-07-26', '0984373472', 'Mantenimiento ');
 
 -- --------------------------------------------------------
 
@@ -77,9 +157,9 @@ CREATE TABLE `contacto` (
 --
 
 INSERT INTO `contacto` (`id_mensaje`, `id_usuario`, `nombre`, `correo`, `compania`, `mensaje`, `cedula`, `archivo_ruc`, `archivo_cedula`, `fecha`) VALUES
-(1, NULL, 'Guevarra', 'mateo.cisneros098@istvidanueva.edu.ec', 'Ecuavisa', 'Patrocinio Empresarial', '0000000000', NULL, NULL, '2026-03-11 22:28:32'),
 (2, 5, 'mateo', 'mateo.cisneros12@gmail.com', 'Eco-Net', 'Convenio y comprobacion empresarial', '1728734665', '../uploads/1774381634_ruc_ejemplo.webp', '../uploads/1774381634_cedula_ejemplo 2.webp', '2026-03-24 19:47:14'),
-(3, 5, 'mateo', 'mateo.cisneros12@gmail.com', 'NET-LIFE', 'Internet', '1728734665', '../docs/1774383075_ruc_ejemplo.webp', '../docs/1774383075_cedula_ejemplo 2.webp', '2026-03-24 20:11:15');
+(3, 5, 'mateo', 'mateo.cisneros12@gmail.com', 'NET-LIFE', 'Internet', '1728734665', '../docs/1774383075_ruc_ejemplo.webp', '../docs/1774383075_cedula_ejemplo 2.webp', '2026-03-24 20:11:15'),
+(4, 16, 'Mateo Cisneros', 'mateo.cisneros@istvidanueva.edu.ec', 'Ecuavisa', 'Hola', '1728734665', '../docs/1777424459_ruc_ejemplo 1.png', '../docs/1777424459_cedula_ejemplo 2.webp', '2026-04-29 01:00:59');
 
 -- --------------------------------------------------------
 
@@ -109,7 +189,6 @@ INSERT INTO `detalles_pedido` (`id_detalle`, `id_pedido`, `id_producto`, `cantid
 (7, 5, 8, 3, 1400.50),
 (8, 6, 5, 1, 40.00),
 (9, 7, 6, 1, 720.50),
-(10, 8, 9, 2, 1200.00),
 (11, 8, 2, 1, 798.50),
 (12, 9, 5, 2, 40.00),
 (13, 9, 16, 1, 734.00),
@@ -119,7 +198,120 @@ INSERT INTO `detalles_pedido` (`id_detalle`, `id_pedido`, `id_producto`, `cantid
 (17, 10, 6, 12, 720.50),
 (18, 11, 6, 12, 720.50),
 (19, 11, 7, 9, 1420.50),
-(20, 12, 16, 1, 734.00);
+(20, 12, 16, 1, 734.00),
+(21, 13, 13, 1, 300.00),
+(23, 15, 4, 1, 300.00);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `failed_jobs`
+--
+
+CREATE TABLE `failed_jobs` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `uuid` varchar(255) NOT NULL,
+  `connection` varchar(255) NOT NULL,
+  `queue` varchar(255) NOT NULL,
+  `payload` longtext NOT NULL,
+  `exception` longtext NOT NULL,
+  `failed_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `jobs`
+--
+
+CREATE TABLE `jobs` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `queue` varchar(255) NOT NULL,
+  `payload` longtext NOT NULL,
+  `attempts` smallint(5) UNSIGNED NOT NULL,
+  `reserved_at` int(10) UNSIGNED DEFAULT NULL,
+  `available_at` int(10) UNSIGNED NOT NULL,
+  `created_at` int(10) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `job_batches`
+--
+
+CREATE TABLE `job_batches` (
+  `id` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `total_jobs` int(11) NOT NULL,
+  `pending_jobs` int(11) NOT NULL,
+  `failed_jobs` int(11) NOT NULL,
+  `failed_job_ids` longtext NOT NULL,
+  `options` mediumtext DEFAULT NULL,
+  `cancelled_at` int(11) DEFAULT NULL,
+  `created_at` int(11) NOT NULL,
+  `finished_at` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `migrations`
+--
+
+CREATE TABLE `migrations` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `migration` varchar(255) NOT NULL,
+  `batch` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `migrations`
+--
+
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
+(1, '0001_01_01_000000_create_users_table', 1),
+(2, '0001_01_01_000001_create_cache_table', 1),
+(3, '0001_01_01_000002_create_jobs_table', 1),
+(4, '2026_06_24_000001_create_legacy_business_tables', 1),
+(5, '2026_08_14_000001_create_telegram_tables', 2),
+(6, '2026_08_14_000002_create_telegram_action_tables', 3);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `notificaciones`
+--
+
+CREATE TABLE `notificaciones` (
+  `id_notificacion` int(11) NOT NULL,
+  `id_remitente` int(11) DEFAULT NULL,
+  `id_usuario` int(11) DEFAULT NULL,
+  `titulo` varchar(180) NOT NULL,
+  `mensaje` text NOT NULL,
+  `correo_destino` varchar(255) NOT NULL,
+  `estado_correo` varchar(30) NOT NULL DEFAULT 'pendiente',
+  `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `notificaciones`
+--
+
+INSERT INTO `notificaciones` (`id_notificacion`, `id_remitente`, `id_usuario`, `titulo`, `mensaje`, `correo_destino`, `estado_correo`, `fecha_creacion`) VALUES
+(2, 19, 20, 'Precios Nuevos', 'Hola Notificacion', 'mateo014esteban@gmail.com', 'enviado', '2026-05-30 00:10:15');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `password_reset_tokens`
+--
+
+CREATE TABLE `password_reset_tokens` (
+  `email` varchar(255) NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -150,7 +342,9 @@ INSERT INTO `pedidos` (`id_pedido`, `id_usuario`, `fecha_pedido`, `total`) VALUE
 (9, 5, '2026-03-25 14:37:12', 1450.80),
 (10, 5, '2026-03-25 14:39:16', 14235.50),
 (11, 5, '2026-03-25 14:41:26', 21430.50),
-(12, 5, '2026-03-25 14:49:32', 734.00);
+(12, 5, '2026-03-25 14:49:32', 734.00),
+(13, 5, '2026-04-02 14:30:24', 300.00),
+(15, 24, '2026-06-23 20:32:56', 300.00);
 
 -- --------------------------------------------------------
 
@@ -175,22 +369,37 @@ CREATE TABLE `productos` (
 --
 
 INSERT INTO `productos` (`id_producto`, `nombre`, `serie`, `fecha`, `unidades`, `precio`, `imagen`, `id_soporte`, `categoria`) VALUES
-(1, 'NOTEBOOK ASUS RP058 CORE 7', 'Serie Ultra Core', '2026-02-19', 0, 1516.00, '../uploads/asus.jpeg', 1, 'ASUS'),
-(2, 'PC DELL', 'SERIE 7000', '2026-02-19', 0, 798.50, '../uploads/pcdell.webp', 2, 'PC'),
-(3, 'Tablet Ipad', 'Ipad', '2026-02-19', 0, 698.50, '../uploads/tablets.webp', 2, 'Tablets'),
-(4, 'Tinta EPSON 1000 ML', 'Tinta', '2026-02-19', 0, 300.00, '../uploads/tinta.webp', 4, 'Tintas'),
+(1, 'NOTEBOOK ASUS RP058 CORE 9', 'Serie Core i9', '2026-02-20', 35, 1516.16, '../uploads/asus.jpeg', 1, 'ASUS'),
+(2, 'PC DELL', 'SERIE 7000', '2026-02-19', 16, 798.50, '../uploads/pcdell.webp', 2, 'PC'),
+(3, 'Tablet Ipad', 'Ipad', '2026-02-19', 8, 698.50, '../uploads/tablets.webp', 2, 'Tablets'),
+(4, 'Tinta EPSON 1000 ML', 'Tinta', '2026-02-19', 19, 300.00, '../uploads/tinta.webp', 4, 'TINTA1000'),
 (5, 'Unidad duplicadora de disco USB 3.0 Tipo-C Grabadora de CD para computadora portátil Mac Pro MacBook', ' 120 mm/4,72 pulgadas, 80 mm/3,15 pulgadas', '2026-02-19', 0, 40.00, '../uploads/duplicadora.webp', 2, 'DUPLICADORACD'),
 (6, 'HP 2009', 'i7 14 900 K', '2026-02-19', 32, 720.50, '../uploads/pchp.jpg', 2, 'PCHP'),
 (7, 'LENOVO', 'i7 13 900 F', '2025-02-19', 75, 1420.50, '../uploads/lenovo.jpg', 1, 'lenovo'),
-(8, 'MSI GAMER 2024', 'i9 13 900 K', '2026-12-19', 84, 1400.50, '../uploads/msi.jpeg', 1, 'msi'),
-(9, 'Omnibook', 'Core i7 13 va Generacion', '2026-11-19', 92, 1200.00, '../uploads/ominibook.jpeg', 1, 'ominibook'),
+(8, 'MSI GAMER 2024', 'i9 13 900 K', '2026-12-19', 84, 1400.50, '../uploads/msi.jpeg', 1, 'MSI'),
 (10, 'Dell Inspiron 16 5630', 'Ryzen 6000', '2025-11-12', 22, 1100.00, '../uploads/dell.jpeg', 1, 'DELL'),
 (11, 'Copystars Dvd Duplicator 24x Cd-dvd-burner 1 A 3 Copiadora S', 'SYS-1-3-ASUS/LG-CST', '2023-12-24', 39, 31.90, '../uploads/duplicadoradvd.webp', 2, 'DUPLICADORADVD'),
 (12, 'Blu-ray / CD / DVD\r\nDuplicator', 'B01-SSP16XL', '2025-09-12', 11, 100.00, '../uploads/duplicadorablu.jpg', 2, 'DUPLICADORABLU'),
-(13, 'Impresora EPSON L8050 EcoTank Tinta Continua Fotografica PVC', 'EcoTank L8050', '2021-12-12', 93, 300.00, '../uploads/epson.webp', 4, 'EPSON'),
-(14, 'Impresora Canon G1110 Sistema Continuo + Tintas Incluidas', 'SKU 31650', '2025-10-08', 2, 300.40, '../uploads/canon.webp', 4, 'CANON'),
-(15, '100ml Tinta Dye Para Impresoras Epson La Mejor Calidad', 'EDYE', '2026-03-08', 6, 12.00, '../uploads/tinta.webp', 4, 'TINTA100'),
-(16, 'Tinta Dye Premium Para Impresoras Epson Ecotank 1000 ml', 'U0079', '2024-12-24', 5, 734.00, '../uploads/tinta2.webp', 4, 'TINTA1000');
+(13, 'Impresora EPSON L8050 EcoTank Tinta Continua Fotografica PVC', 'EcoTank L8050', '2021-12-12', 91, 300.00, '../uploads/epson.webp', 4, 'EPSON'),
+(14, 'Impresora Canon G1110 Sistema Continuo + Tintas Incluidas', 'SKU 31650', '2025-10-08', 5, 300.40, '../uploads/canon.webp', 4, 'CANON'),
+(15, '100ml Tinta Dye Para Impresoras Epson La Mejor Calidad', 'EDYE', '2026-03-08', 22, 12.00, '../uploads/tinta.webp', 4, 'TINTA100'),
+(16, 'Tinta Dye Premium Para Impresoras Epson Ecotank 1000 ml', 'U0079', '2024-12-24', 5, 734.00, '../uploads/tinta2.webp', 4, 'TINTA1000'),
+(19, 'Omnibook Hp RP058 CORE 9', 'Serie Core i9 14900', '2026-02-20', 27, 1516.16, 'img_69cd95cdba168.jpeg', NULL, 'ominibook');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `sessions`
+--
+
+CREATE TABLE `sessions` (
+  `id` varchar(255) NOT NULL,
+  `user_id` int(10) UNSIGNED DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `user_agent` text DEFAULT NULL,
+  `payload` longtext NOT NULL,
+  `last_activity` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -223,6 +432,100 @@ INSERT INTO `soporte` (`id_soporte`, `Nombre`, `Correo`, `cedula`, `archivo_ruc`
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `telegram_accounts`
+--
+
+CREATE TABLE `telegram_accounts` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `id_usuario` int(10) UNSIGNED NOT NULL,
+  `telegram_chat_id` varchar(32) NOT NULL,
+  `telegram_user_id` varchar(32) NOT NULL,
+  `username` varchar(255) DEFAULT NULL,
+  `telefono` varchar(20) DEFAULT NULL,
+  `telefono_verificado_en` timestamp NULL DEFAULT NULL,
+  `ultima_actividad_en` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `telegram_action_audits`
+--
+
+CREATE TABLE `telegram_action_audits` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `id_usuario` int(11) DEFAULT NULL,
+  `telegram_chat_id` varchar(32) DEFAULT NULL,
+  `accion` varchar(80) NOT NULL,
+  `estado` varchar(30) NOT NULL,
+  `detalle` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`detalle`)),
+  `ip_origen` varchar(45) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `telegram_action_requests`
+--
+
+CREATE TABLE `telegram_action_requests` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `telegram_chat_id` varchar(32) NOT NULL,
+  `accion` varchar(80) NOT NULL,
+  `datos` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`datos`)),
+  `resumen` varchar(1000) NOT NULL,
+  `confirmacion_hash` varchar(64) NOT NULL,
+  `estado` varchar(24) NOT NULL DEFAULT 'pendiente',
+  `expira_en` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `confirmada_en` timestamp NULL DEFAULT NULL,
+  `error` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `telegram_link_codes`
+--
+
+CREATE TABLE `telegram_link_codes` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `codigo_hash` varchar(64) NOT NULL,
+  `expira_en` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `usado_en` timestamp NULL DEFAULT NULL,
+  `ip_solicitud` varchar(45) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `telegram_webhook_updates`
+--
+
+CREATE TABLE `telegram_webhook_updates` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `update_id` bigint(20) UNSIGNED NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `telegram_webhook_updates`
+--
+
+INSERT INTO `telegram_webhook_updates` (`id`, `update_id`, `created_at`) VALUES
+(1, 858395759, '2026-08-15 00:31:21');
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `usuarios`
 --
 
@@ -233,6 +536,7 @@ CREATE TABLE `usuarios` (
   `cedula` varchar(20) DEFAULT NULL,
   `archivo_ruc` varchar(255) DEFAULT NULL,
   `archivo_cedula` varchar(255) DEFAULT NULL,
+  `foto_perfil` varchar(255) DEFAULT NULL,
   `contraseña` varchar(150) NOT NULL,
   `rol` varchar(100) NOT NULL,
   `reset_token` varchar(255) DEFAULT NULL,
@@ -246,17 +550,51 @@ CREATE TABLE `usuarios` (
 -- Volcado de datos para la tabla `usuarios`
 --
 
-INSERT INTO `usuarios` (`id_usuario`, `usuario`, `correo`, `cedula`, `archivo_ruc`, `archivo_cedula`, `contraseña`, `rol`, `reset_token`, `reset_expiration`, `email_verified`, `email_verification_token`, `email_verification_expires`) VALUES
-(4, 'Admin', 'mateo.montoya@gmail.com', NULL, NULL, NULL, '$2y$10$zSEwmXwUVTvCyfL7jzhruOvVQkLNCKpp4Ah/DRUGp1Av4e.UG4yBa', 'admin', '123', '2026-02-04 15:48:28', 1, NULL, NULL),
-(5, 'mateo1', 'mateo.cisneros12@gmail.com', NULL, NULL, NULL, '$2y$10$1U/9.fNzisdGC7if/.NUuefRL6FdCfPVBRjHVFNw4d9SRctuzvqRy', 'usuario', NULL, '2026-02-24 15:48:40', 1, NULL, NULL),
-(6, 'ADMIN', 'mateo.guerrero@gmail.com', NULL, NULL, NULL, '$2y$10$s5SNJPsR.AX8xlxIzGsfW.JzkAA8mk4.lR1VXWTWGRI2hdJ5ySLtK', 'admin', NULL, NULL),
-(7, 'juan', 'mateo.cisneros@istvidanueva.edu.ec', NULL, NULL, NULL, '$2y$10$hIhRCE9/CRABqCPQCCdebeyY0hkMb4NwF6/P9WZU1KE2WkWKrt0VS', 'usuario', '123456', '2026-03-10 15:49:08'),
-(8, 'Aron', 'mateo.cisneros12@istvidanueva.edu.ec', NULL, NULL, NULL, '$2y$10$83eyW5/CyglqqVZwM9VnjeQFSCvNA.M.vAmQzGqLBJOR3aejOQtsS', 'usuario', '1234567', '2026-04-09 15:49:19'),
-(10, 'ADMIN', 'mateo.cisneros13@gmail.com', NULL, NULL, NULL, '$2y$10$XdwmPhfCyZDfh36vKY2bAeFZWlT2uxDa2JxGlGNoW.ifgv11LOmde', 'admin', NULL, NULL);
+INSERT INTO `usuarios` (`id_usuario`, `usuario`, `correo`, `cedula`, `archivo_ruc`, `archivo_cedula`, `foto_perfil`, `contraseña`, `rol`, `reset_token`, `reset_expiration`, `email_verified`, `email_verification_token`, `email_verification_expires`) VALUES
+(4, 'Admin', 'mateo.montoya@gmail.com', NULL, NULL, NULL, NULL, '$2y$10$zSEwmXwUVTvCyfL7jzhruOvVQkLNCKpp4Ah/DRUGp1Av4e.UG4yBa', 'admin', '123', '2026-02-04 15:48:28', 1, NULL, NULL),
+(5, 'mateo1', 'mateo.cisneros12@gmail.com', NULL, NULL, NULL, NULL, '$2y$10$1U/9.fNzisdGC7if/.NUuefRL6FdCfPVBRjHVFNw4d9SRctuzvqRy', 'usuario', NULL, '2026-02-24 15:48:40', 1, NULL, NULL),
+(6, 'ADMIN', 'mateo.guerrero@gmail.com', NULL, NULL, NULL, NULL, '$2y$10$s5SNJPsR.AX8xlxIzGsfW.JzkAA8mk4.lR1VXWTWGRI2hdJ5ySLtK', 'admin', NULL, NULL, 1, NULL, NULL),
+(7, 'juan', 'mateo.cisneros@istvidanueva.edu.ec', NULL, NULL, NULL, NULL, '$2y$10$hIhRCE9/CRABqCPQCCdebeyY0hkMb4NwF6/P9WZU1KE2WkWKrt0VS', 'usuario', '123456', '2026-03-10 15:49:08', 1, NULL, NULL),
+(8, 'Aron', 'mateo.cisneros12@istvidanueva.edu.ec', NULL, NULL, NULL, NULL, '$2y$10$83eyW5/CyglqqVZwM9VnjeQFSCvNA.M.vAmQzGqLBJOR3aejOQtsS', 'usuario', '1234567', '2026-04-09 15:49:19', 1, NULL, NULL),
+(10, 'ADMIN', 'mateo.cisneros13@gmail.com', NULL, NULL, NULL, NULL, '$2y$10$XdwmPhfCyZDfh36vKY2bAeFZWlT2uxDa2JxGlGNoW.ifgv11LOmde', 'admin', NULL, NULL, 1, NULL, NULL),
+(12, 'mateo', 'mateo.cisneros15@gmail.com', '1728734667', '../uploads/mi_cedula.pdf', '../uploads/mi_cedula.pdf', NULL, '$2y$10$sOxr3IJZqmPKSh1f5VgUzOjjAmPJbWuEVqvEZfSonQGrsntgP6apW', 'admin', NULL, NULL, 1, NULL, NULL),
+(13, 'Kim', 'mateo.cisneros16@gmail.com', '1728734664', '../uploads/1775694985_ruc_1775512172_cedula_lenovo.jpg', '../uploads/1775694985_cedula_1775512172_ruc_duplicadorablu.jpg', 'perfil_13_1776896398.jpg', '$2y$10$CDwGdlbwZCXNHZ5iUymkD.gCSgjA8a2ZCghRDNwnGSXFnypBfptqS', 'admin', NULL, NULL, 1, NULL, NULL),
+(16, 'mateo', 'mateo.cisneros20@gmail.com', '1728734665', '../uploads/1776290869_ruc_pchp.jpg', '../uploads/1776290869_cedula_descarga (1).pdf', 'perfil_16_1776723530.jpg', '$2y$10$bPIGjG9hqoUfe3OaDrEjReww6RvgG26GlEC0u146Ea5cEPustY9.S', 'usuario', NULL, NULL, 1, NULL, NULL),
+(17, 'matius_tecnico', 'mateo.cisneros09@gmail.com', '1728734666', '../uploads/1778191625_ruc_4.-BITACORAS(ESTUDIANTE)-59-v1.pdf', '../uploads/1778191625_cedula_descarga (1).pdf', 'perfil_17_1778202513.png', '$2y$10$J0WsSZt8u3bxXQ41kvGq6.rCfZN2AxfIliExNPOVAn7GhojviVWQq', 'tecnico', NULL, NULL, 1, NULL, NULL),
+(18, 'matt', 'mateo.cisneros08@gmail.com', '1728734664', '../uploads/1778708572_ruc_4.-BITACORAS(ESTUDIANTE)-59-v1.pdf', '../uploads/1778708572_cedula_Sherlock_Holmes_The_Dying_Detective (3) (1).pdf', NULL, '$2y$10$abNFZHia97RN4lNt2I.YkeJ.RMhHFeQ3ALXxaYf5kztZg9OMU3JHO', 'pasante', NULL, NULL, 1, NULL, NULL),
+(23, 'Matt', 'mateo.cisneros07@gmail.com', '1728734664', NULL, NULL, NULL, 'admin2003', 'asistente', NULL, NULL, 1, NULL, NULL),
+(24, 'matt', 'mateo014esteban@gmail.com', '1728734664', '../uploads/1781564565_ruc_4.-BITACORAS(ESTUDIANTE)-59-v1.pdf', '../uploads/1781564565_cedula_pruebalectura.pdf', 'perfil_24_1781565038.jpg', '$2y$10$pauMVoxhqVcGP8E23Izxpep2RCWDzpCN9i7.eABlbUebAZbFDkAna', 'asistente', NULL, NULL, 1, NULL, NULL);
 
 --
 -- Índices para tablas volcadas
 --
+
+--
+-- Indices de la tabla `cache`
+--
+ALTER TABLE `cache`
+  ADD PRIMARY KEY (`key`),
+  ADD KEY `cache_expiration_index` (`expiration`);
+
+--
+-- Indices de la tabla `cache_locks`
+--
+ALTER TABLE `cache_locks`
+  ADD PRIMARY KEY (`key`),
+  ADD KEY `cache_locks_expiration_index` (`expiration`);
+
+--
+-- Indices de la tabla `chat_conversaciones`
+--
+ALTER TABLE `chat_conversaciones`
+  ADD PRIMARY KEY (`id_conversacion`);
+
+--
+-- Indices de la tabla `chat_mensajes`
+--
+ALTER TABLE `chat_mensajes`
+  ADD PRIMARY KEY (`id_mensaje`),
+  ADD KEY `id_conversacion` (`id_conversacion`);
 
 --
 -- Indices de la tabla `citas`
@@ -281,6 +619,45 @@ ALTER TABLE `detalles_pedido`
   ADD KEY `fk_detalles_producto` (`id_producto`);
 
 --
+-- Indices de la tabla `failed_jobs`
+--
+ALTER TABLE `failed_jobs`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`),
+  ADD KEY `failed_jobs_connection_queue_failed_at_index` (`connection`,`queue`,`failed_at`);
+
+--
+-- Indices de la tabla `jobs`
+--
+ALTER TABLE `jobs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `jobs_queue_index` (`queue`);
+
+--
+-- Indices de la tabla `job_batches`
+--
+ALTER TABLE `job_batches`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `migrations`
+--
+ALTER TABLE `migrations`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `notificaciones`
+--
+ALTER TABLE `notificaciones`
+  ADD PRIMARY KEY (`id_notificacion`);
+
+--
+-- Indices de la tabla `password_reset_tokens`
+--
+ALTER TABLE `password_reset_tokens`
+  ADD PRIMARY KEY (`email`);
+
+--
 -- Indices de la tabla `pedidos`
 --
 ALTER TABLE `pedidos`
@@ -296,10 +673,55 @@ ALTER TABLE `productos`
   ADD KEY `fk_productos_soporte` (`id_soporte`);
 
 --
+-- Indices de la tabla `sessions`
+--
+ALTER TABLE `sessions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `sessions_user_id_index` (`user_id`),
+  ADD KEY `sessions_last_activity_index` (`last_activity`);
+
+--
 -- Indices de la tabla `soporte`
 --
 ALTER TABLE `soporte`
   ADD PRIMARY KEY (`id_soporte`);
+
+--
+-- Indices de la tabla `telegram_accounts`
+--
+ALTER TABLE `telegram_accounts`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `telegram_action_audits`
+--
+ALTER TABLE `telegram_action_audits`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_usuario` (`id_usuario`);
+
+--
+-- Indices de la tabla `telegram_action_requests`
+--
+ALTER TABLE `telegram_action_requests`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `confirmacion_hash` (`confirmacion_hash`),
+  ADD KEY `id_usuario` (`id_usuario`),
+  ADD KEY `estado` (`estado`);
+
+--
+-- Indices de la tabla `telegram_link_codes`
+--
+ALTER TABLE `telegram_link_codes`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `codigo_hash` (`codigo_hash`),
+  ADD KEY `id_usuario` (`id_usuario`);
+
+--
+-- Indices de la tabla `telegram_webhook_updates`
+--
+ALTER TABLE `telegram_webhook_updates`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `update_id` (`update_id`);
 
 --
 -- Indices de la tabla `usuarios`
@@ -312,34 +734,70 @@ ALTER TABLE `usuarios`
 --
 
 --
+-- AUTO_INCREMENT de la tabla `chat_conversaciones`
+--
+ALTER TABLE `chat_conversaciones`
+  MODIFY `id_conversacion` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `chat_mensajes`
+--
+ALTER TABLE `chat_mensajes`
+  MODIFY `id_mensaje` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
 -- AUTO_INCREMENT de la tabla `citas`
 --
 ALTER TABLE `citas`
-  MODIFY `id_cita` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id_cita` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT de la tabla `contacto`
 --
 ALTER TABLE `contacto`
-  MODIFY `id_mensaje` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id_mensaje` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `detalles_pedido`
 --
 ALTER TABLE `detalles_pedido`
-  MODIFY `id_detalle` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id_detalle` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+
+--
+-- AUTO_INCREMENT de la tabla `failed_jobs`
+--
+ALTER TABLE `failed_jobs`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `jobs`
+--
+ALTER TABLE `jobs`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `migrations`
+--
+ALTER TABLE `migrations`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT de la tabla `notificaciones`
+--
+ALTER TABLE `notificaciones`
+  MODIFY `id_notificacion` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `pedidos`
 --
 ALTER TABLE `pedidos`
-  MODIFY `id_pedido` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id_pedido` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT de la tabla `productos`
 --
 ALTER TABLE `productos`
-  MODIFY `id_producto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id_producto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT de la tabla `soporte`
@@ -348,10 +806,40 @@ ALTER TABLE `soporte`
   MODIFY `id_soporte` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
+-- AUTO_INCREMENT de la tabla `telegram_accounts`
+--
+ALTER TABLE `telegram_accounts`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `telegram_action_audits`
+--
+ALTER TABLE `telegram_action_audits`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `telegram_action_requests`
+--
+ALTER TABLE `telegram_action_requests`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `telegram_link_codes`
+--
+ALTER TABLE `telegram_link_codes`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `telegram_webhook_updates`
+--
+ALTER TABLE `telegram_webhook_updates`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id_usuario` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id_usuario` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- Restricciones para tablas volcadas
@@ -387,6 +875,18 @@ ALTER TABLE `pedidos`
 --
 ALTER TABLE `productos`
   ADD CONSTRAINT `fk_productos_soporte` FOREIGN KEY (`id_soporte`) REFERENCES `soporte` (`id_soporte`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `telegram_action_requests`
+--
+ALTER TABLE `telegram_action_requests`
+  ADD CONSTRAINT `fk_telegram_action_requests_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `telegram_link_codes`
+--
+ALTER TABLE `telegram_link_codes`
+  ADD CONSTRAINT `fk_telegram_link_codes_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

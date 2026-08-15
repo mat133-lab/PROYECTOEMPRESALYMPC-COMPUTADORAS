@@ -2,12 +2,19 @@
 
 use App\Http\Controllers\LegacyController;
 use App\Http\Controllers\LegacyFileController;
+use App\Http\Controllers\TelegramLinkController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/php/login.php');
 Route::redirect('/login', '/php/login.php');
 Route::redirect('/dashboard', '/php/dashboard.php');
 Route::redirect('/admin', '/php/login_admin.php');
+
+Route::get('/telegram', [TelegramLinkController::class, 'show'])->name('telegram.link');
+Route::post('/telegram/codigo-vinculacion', [TelegramLinkController::class, 'createCode'])
+    ->middleware('throttle:4,1')->name('telegram.link.code');
+Route::post('/telegram/desvincular', [TelegramLinkController::class, 'unlink'])
+    ->middleware('throttle:4,1')->name('telegram.unlink');
 
 Route::any('/php/{script}', LegacyController::class)
     ->where('script', '[^/]+\.php')
