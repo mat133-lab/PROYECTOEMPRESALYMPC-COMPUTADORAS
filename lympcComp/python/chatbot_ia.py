@@ -25,6 +25,12 @@ def responder(mensaje):
             "Entiendo. Te voy a pasar con alguien de soporte para que revise tu caso con mas detalle. "
             "Por favor deja escrito marca, modelo del equipo, falla principal y un numero de contacto si aplica."
         )
+    elif contiene(texto, ["manana", "mañana", "hoy", "dia", "fecha", "cuando", "disponibilidad"]):
+        tema = "Horarios disponibles"
+        respuesta = (
+            "Para revisar disponibilidad, indicame si te sirve mañana o en otro dia y el tipo de servicio. "
+            "Si necesitas una hora exacta o una confirmacion final, entonces puedo pasar la consulta a asistencia."
+        )
     elif contiene(texto, ["1", "soporte", "tecnico", "reparacion", "arreglo", "mantenimiento", "formatear", "lento", "virus", "pantalla", "enciende"]):
         tema = "Soporte tecnico"
         respuesta = (
@@ -63,10 +69,11 @@ def responder(mensaje):
             "Puedo ayudarte con soporte tecnico, horarios, direccion o informacion de la empresa."
         )
     else:
-        necesita_humano = True
+        tema = "Consulta general"
         respuesta = (
-            "Puedo orientarte con informacion general, pero tu consulta necesita mas detalle. "
-            "Te voy a pasar con alguien de soporte para que revise tu caso de forma personalizada."
+            "Puedo orientarte con informacion general y ayudarte a definir si te sirve mañana, "
+            "la direccion del local o el tipo de servicio. Si luego necesitas una hora exacta o detalles especificos, "
+            "te paso con asistencia."
         )
 
     return {

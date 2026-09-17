@@ -108,6 +108,7 @@ class UI {
             <p class="modal__item__time" id="cedula_save">${appointment.cedula}</p>
             <p class="modal__item__time" id="ruc_save">${appointment.archivo_ruc ? 'Sí cuenta con Archivo RUC' : 'No proporcionado'}</p>
             <p class="modal__item__time" id="cedula_file_save">${appointment.archivo_cedula ? 'Sí cuenta con Copia de Cédula' : 'No proporcionado'}</p>
+            <p class="modal__item__time" id="fecha_save">${appointment.fecha ? appointment.fecha.split(' ')[0] : 'N/A'}</p>
             <p class="modal__item__time" id="phone_save">${appointment.telefono}</p>
             <p class="modal__item__description" id="description_save">${appointment.motivo}</p>
         </div>
@@ -492,7 +493,8 @@ modalSaveBtn.addEventListener('click', () => {
     const cedula = document.getElementById('cedula_save')?.textContent || document.getElementById('cedula')?.value || 'N/A';
     const ruc = document.getElementById('ruc_save')?.textContent || document.getElementById('archivo_ruc')?.value || 'N/A';
     const archivo_cedula = document.getElementById('cedula_file_save')?.textContent || document.getElementById('archivo_cedula')?.value || 'N/A';
-    const fecha = document.getElementById('fecha')?.value || 'N/A';
+    const selectedAppointment = currentAppointments.find(app => String(getAppointmentId(app)) === String(selectedAppointmentId)) || currentAppointments[0] || null;
+    const fecha = document.getElementById('fecha_save')?.textContent?.trim() || document.getElementById('fecha')?.value || selectedAppointment?.fecha?.split(' ')[0] || 'N/A';
     const email = document.getElementById('email_save')?.textContent || document.getElementById('correo')?.value || 'N/A';
     const telefono = document.getElementById('phone_save')?.textContent || document.getElementById('telefono')?.value || 'N/A';
     //Diseños para el pdf

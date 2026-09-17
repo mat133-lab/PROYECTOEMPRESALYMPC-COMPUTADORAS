@@ -100,29 +100,60 @@ if ($idConversacion > 0) {
     <nav class="navbar navbar-dark bg-warning fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
-href="<?php echo $esAsistente ? '/php/dashboard_asistente.php' : '/php/dashboard.php'; ?>"
+                href="<?php echo $esAsistente ? '/php/dashboard_asistente.php' : '/php/dashboard.php'; ?>"
                 style="max-width: 45%; text-align: center;">L&M PC Computadoras</a>
             <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="offcanvas"
                 data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="offcanvas offcanvas-end text-bg-warning" tabindex="-1" id="offcanvasDarkNavbar">
+
                 <div class="offcanvas-header">
                     <h5 class="offcanvas-title">Menu</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
                 </div>
+
                 <div class="offcanvas-body">
                     <ul class="navbar-nav flex-grow-1 pe-3">
-                        <li class="nav-item"><a class="nav-link" href="<?php echo $esAsistente ? '/php/dashboard_asistente.php' : '/php/dashboard.php'; ?>">Inicio</a></li>
-                        <?php if ($esAsistente): ?>
-                        <li class="nav-item"><a class="nav-link" href="/php/lecturadoc.php">Documentos de Pasante</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/php/notificaciones.php">Crear Notificaciones</a></li>
-                        <?php endif; ?>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                Cuenta y Configuración
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li>
+                                    <a class="dropdown-item categoria-link" href="../php/perfilasistente.php"
+                                        data-categoria="estructura">
+                                        Perfil
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item categoria-link" href="#" data-categoria="techos">
+                                        Configuracion
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item categoria-link" href="#" data-categoria="techos">
+                                        Termino y Condiciones
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <div class="d-flex align-items-center">
+
+                            <?php if (isset($_SESSION['rol'])): ?>
+                            <span class="text-white me-3">Buen dia,
+                                <b><?php echo $_SESSION['usuario']; ?></b></span>
+                            <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
+                            <?php else: ?>
+                            <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
+                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <?php endif; ?>
+
+                        </div>
+
                     </ul>
-                    <div class="d-flex align-items-center mt-3">
-                        <span class="text-white me-3">Buen dia, <b><?php echo htmlspecialchars($nombreUsuario); ?></b></span>
-                        <a href="/php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesion</a>
-                    </div>
                 </div>
             </div>
         </div>
@@ -132,11 +163,14 @@ href="<?php echo $esAsistente ? '/php/dashboard_asistente.php' : '/php/dashboard
         <div class="row align-items-center">
             <div class="col-lg-8">
                 <h1><?php echo $esAsistente ? 'Chat con Clientes' : 'Soporte por Chat'; ?></h1>
-                <p><?php echo $esAsistente ? 'Atiende consultas que la asistencia virtual deriva para soporte personalizado.' : 'Consulta sobre soporte tecnico, direcciones, horarios disponibles o informacion de la empresa.'; ?></p>
+                <p><?php echo $esAsistente ? 'Atiende consultas que la asistencia virtual deriva para soporte personalizado.' : 'Consulta sobre soporte tecnico, direcciones, horarios disponibles o informacion de la empresa.'; ?>
+                </p>
                 <?php if ($conversacionActual): ?>
-                <span class="summary-badge"><i class="fas fa-comments"></i> Estado: <?php echo htmlspecialchars($conversacionActual['estado']); ?></span>
+                <span class="summary-badge"><i class="fas fa-comments"></i> Estado:
+                    <?php echo htmlspecialchars($conversacionActual['estado']); ?></span>
                 <?php if ($esAsistente && !empty($conversacionActual['calificacion'])): ?>
-                <span class="summary-badge"><i class="fas fa-star"></i> Calificacion: <?php echo (int)$conversacionActual['calificacion']; ?>/10</span>
+                <span class="summary-badge"><i class="fas fa-star"></i> Calificacion:
+                    <?php echo (int)$conversacionActual['calificacion']; ?>/10</span>
                 <?php endif; ?>
                 <?php endif; ?>
             </div>
@@ -151,14 +185,16 @@ href="<?php echo $esAsistente ? '/php/dashboard_asistente.php' : '/php/dashboard
                 <?php if (empty($conversaciones)): ?>
                 <div class="tool-card">
                     <h2 class="tool-title h5">Sin conversaciones por ahora</h2>
-                    <p class="tool-muted mb-0">Cuando un cliente escriba desde el icono flotante del dashboard, aparecera aqui para atenderlo.</p>
+                    <p class="tool-muted mb-0">Cuando un cliente escriba desde el icono flotante del dashboard,
+                        aparecera aqui para atenderlo.</p>
                 </div>
                 <?php endif; ?>
                 <?php foreach ($conversaciones as $conv): ?>
                 <a class="conversation-link <?php echo (int)$conv['id_conversacion'] === $idConversacion ? 'active' : ''; ?>"
                     href="/php/chat.php?conversacion=<?php echo (int)$conv['id_conversacion']; ?>">
                     <strong><?php echo htmlspecialchars($conv['nombre_usuario']); ?></strong>
-                    <small class="d-block tool-muted"><?php echo htmlspecialchars($conv['correo_usuario'] ?? 'Sin correo'); ?></small>
+                    <small
+                        class="d-block tool-muted"><?php echo htmlspecialchars($conv['correo_usuario'] ?? 'Sin correo'); ?></small>
                     <span class="status-pill mt-2"><?php echo htmlspecialchars($conv['estado']); ?></span>
                 </a>
                 <?php endforeach; ?>
@@ -169,7 +205,8 @@ href="<?php echo $esAsistente ? '/php/dashboard_asistente.php' : '/php/dashboard
                 <?php if (!$esAsistente && isset($_GET['finalizado'])): ?>
                 <div class="tool-card text-center mb-0">
                     <h2 class="tool-title h4">Conversacion finalizada</h2>
-                    <p class="tool-muted">Gracias por calificar tu experiencia. Puedes iniciar una nueva consulta cuando lo necesites.</p>
+                    <p class="tool-muted">Gracias por calificar tu experiencia. Puedes iniciar una nueva consulta cuando
+                        lo necesites.</p>
                     <a class="btn tool-action px-4" href="/php/chat.php?nuevo=1">
                         <i class="fas fa-plus"></i> Nueva conversacion
                     </a>
@@ -180,7 +217,8 @@ href="<?php echo $esAsistente ? '/php/dashboard_asistente.php' : '/php/dashboard
                     <div class="text-center mt-5">
                         <p class="tool-muted mb-2">Selecciona una conversacion para revisar los mensajes.</p>
                         <?php if ($esAsistente): ?>
-                        <a class="btn btn-sm tool-action" href="/php/chat.php"><i class="fas fa-rotate"></i> Actualizar</a>
+                        <a class="btn btn-sm tool-action" href="/php/chat.php"><i class="fas fa-rotate"></i>
+                            Actualizar</a>
                         <?php endif; ?>
                     </div>
                     <?php endif; ?>
@@ -209,11 +247,13 @@ href="<?php echo $esAsistente ? '/php/dashboard_asistente.php' : '/php/dashboard
                         placeholder="Escribe tu mensaje..."></textarea>
                     <div class="d-flex flex-wrap justify-content-end gap-2 mt-3">
                         <?php if (!$esAsistente): ?>
-                        <button class="btn tool-secondary px-4" type="button" data-bs-toggle="modal" data-bs-target="#modalCalificacion">
+                        <button class="btn tool-secondary px-4" type="button" data-bs-toggle="modal"
+                            data-bs-target="#modalCalificacion">
                             <i class="fas fa-check-circle"></i> Finalizar conversacion
                         </button>
                         <?php endif; ?>
-                        <button class="btn tool-action px-4" type="submit"><i class="fas fa-paper-plane"></i> Enviar</button>
+                        <button class="btn tool-action px-4" type="submit"><i class="fas fa-paper-plane"></i>
+                            Enviar</button>
                     </div>
                 </form>
                 <?php endif; ?>
@@ -223,7 +263,8 @@ href="<?php echo $esAsistente ? '/php/dashboard_asistente.php' : '/php/dashboard
     </main>
 
     <?php if (!$esAsistente && $idConversacion > 0): ?>
-    <div class="modal fade" id="modalCalificacion" tabindex="-1" aria-labelledby="modalCalificacionLabel" aria-hidden="true">
+    <div class="modal fade" id="modalCalificacion" tabindex="-1" aria-labelledby="modalCalificacionLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content rating-modal">
                 <form method="POST">
@@ -234,14 +275,17 @@ href="<?php echo $esAsistente ? '/php/dashboard_asistente.php' : '/php/dashboard
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
                     <div class="modal-body">
-                        <label class="form-label fw-semibold" for="calificacion">Del 1 al 10, como fue tu experiencia?</label>
-                        <input class="form-range" type="range" min="1" max="10" value="10" id="calificacion" name="calificacion"
+                        <label class="form-label fw-semibold" for="calificacion">Del 1 al 10, como fue tu
+                            experiencia?</label>
+                        <input class="form-range" type="range" min="1" max="10" value="10" id="calificacion"
+                            name="calificacion"
                             oninput="document.getElementById('ratingValue').textContent = this.value">
                         <div class="rating-number" id="ratingValue">10</div>
 
-                        <label class="form-label fw-semibold mt-3" for="comentario_calificacion">Comentario opcional</label>
-                        <textarea class="form-control" id="comentario_calificacion" name="comentario_calificacion" rows="3"
-                            placeholder="Cuéntanos que podemos mejorar..."></textarea>
+                        <label class="form-label fw-semibold mt-3" for="comentario_calificacion">Comentario
+                            opcional</label>
+                        <textarea class="form-control" id="comentario_calificacion" name="comentario_calificacion"
+                            rows="3" placeholder="Cuéntanos que podemos mejorar..."></textarea>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn tool-secondary" data-bs-dismiss="modal">Volver al chat</button>
@@ -263,19 +307,19 @@ href="<?php echo $esAsistente ? '/php/dashboard_asistente.php' : '/php/dashboard
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
+    </script>
     <?php if ($esAsistente): ?>
     <script>
-        setInterval(() => {
-            const active = document.activeElement;
-            const isTyping = active && (active.tagName === 'TEXTAREA' || active.tagName === 'INPUT');
-            if (!isTyping) {
-                window.location.reload();
-            }
-        }, 15000);
+    setInterval(() => {
+        const active = document.activeElement;
+        const isTyping = active && (active.tagName === 'TEXTAREA' || active.tagName === 'INPUT');
+        if (!isTyping) {
+            window.location.reload();
+        }
+    }, 15000);
     </script>
     <?php endif; ?>
 </body>
 
 </html>
-

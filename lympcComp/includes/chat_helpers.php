@@ -99,6 +99,9 @@ function chatBotFallback($mensaje) {
         $necesitaHumano = true;
         $tema = 'Asistencia personalizada';
         $respuesta = 'Te voy a pasar con asistencia para revisar tu caso con mas detalle. Un asistente continuara la conversacion aqui.';
+    } elseif (str_contains($texto, 'manana') || str_contains($texto, 'mañana') || str_contains($texto, 'hoy') || str_contains($texto, 'dia') || str_contains($texto, 'fecha') || str_contains($texto, 'disponibilidad')) {
+        $tema = 'Horarios disponibles';
+        $respuesta = 'Para revisar disponibilidad, indícame si te sirve mañana o en otro día y el tipo de servicio. Si luego necesitas una hora exacta, entonces puedo pasarte con asistencia.';
     } elseif (str_contains($texto, 'horario') || str_contains($texto, 'disponible') || str_contains($texto, 'dias')) {
         $tema = 'Horarios disponibles';
         $respuesta = 'Atendemos consultas sobre horarios y citas tecnicas. Puedes indicar el dia que prefieres y el tipo de equipo para revisar disponibilidad.';
@@ -112,8 +115,7 @@ function chatBotFallback($mensaje) {
         $tema = 'Informacion de la empresa';
         $respuesta = 'L&M PC Computadoras ofrece venta de equipos, accesorios, mantenimiento y reparacion. Si deseas informacion comercial concreta, asistencia puede darte mas detalles.';
     } else {
-        $necesitaHumano = true;
-        $respuesta = 'Puedo ayudarte con horarios, direcciones, soporte tecnico e informacion de la empresa. Como tu consulta necesita mas contexto, te paso con asistencia.';
+        $respuesta = 'Puedo orientarte con informacion general y ayudarte a definir si te sirve mañana, la direccion del local o el tipo de servicio. Si luego necesitas una hora exacta o detalles especificos, te paso con asistencia.';
     }
 
     return [$respuesta, $necesitaHumano, $tema];

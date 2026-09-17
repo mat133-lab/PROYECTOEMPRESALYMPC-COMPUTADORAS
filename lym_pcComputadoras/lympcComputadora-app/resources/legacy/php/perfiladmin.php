@@ -352,7 +352,7 @@ if ($adminId) {
                             <div class="foto-placeholder shadow-sm"
                                 style="overflow: hidden; display: flex; justify-content: center; align-items: center; background-color: #e9ecef;">
                                 <?php if(!empty($adminFoto)): ?>
-                                <img src="/storage/uploads/profile/<?php echo $adminFoto; ?>" alt="Foto de Perfil"
+                                <img src="<?php echo htmlspecialchars(legacy_file_url('uploads/profile/' . $adminFoto) ?? '', ENT_QUOTES, 'UTF-8'); ?>" alt="Foto de Perfil"
                                     style="width: 100%; height: 100%; object-fit: cover;">
                                 <?php else: ?>
                                 <i class="fas fa-user" style="font-size: 3rem; color: #adb5bd;"></i>
@@ -445,12 +445,12 @@ if ($adminId) {
                                         <div class="d-flex flex-column gap-2">
                                             <?php if ($adminCopia && $adminCopia !== 'NULL'): ?>
                                             <div class="d-flex align-items-center gap-2">
-                                                <a href="<?php echo htmlspecialchars($adminCopia); ?>" target="_blank"
+                                                <a href="<?php echo htmlspecialchars(legacy_file_url($adminCopia) ?? '#', ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer"
                                                     class="btn btn-sm btn-outline-primary"
                                                     style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">
                                                     <i class="fas fa-eye me-1"></i> Ver Cédula
                                                 </a>
-                                                <a href="<?php echo htmlspecialchars($adminCopia); ?>" download
+                                                <a href="<?php echo htmlspecialchars(legacy_file_url($adminCopia, true) ?? '#', ENT_QUOTES, 'UTF-8'); ?>" download
                                                     class="btn btn-sm btn-primary"
                                                     style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">
                                                     <i class="fas fa-download"></i>
@@ -459,12 +459,12 @@ if ($adminId) {
                                             <?php endif; ?>
                                             <?php if ($adminRuc && $adminRuc !== 'NULL'): ?>
                                             <div class="d-flex align-items-center gap-2">
-                                                <a href="<?php echo htmlspecialchars($adminRuc); ?>" target="_blank"
+                                                <a href="<?php echo htmlspecialchars(legacy_file_url($adminRuc) ?? '#', ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer"
                                                     class="btn btn-sm btn-outline-success"
                                                     style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">
                                                     <i class="fas fa-eye me-1"></i> Ver RUC
                                                 </a>
-                                                <a href="<?php echo htmlspecialchars($adminRuc); ?>" download
+                                                <a href="<?php echo htmlspecialchars(legacy_file_url($adminRuc, true) ?? '#', ENT_QUOTES, 'UTF-8'); ?>" download
                                                     class="btn btn-sm btn-success"
                                                     style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">
                                                     <i class="fas fa-download"></i>

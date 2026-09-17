@@ -90,30 +90,119 @@ function chatAddMessage(PDO $conn, $idConversacion, $remitente, $nombreRemitente
     $stmt->execute([$idConversacion, $remitente, $nombreRemitente, $mensaje]);
 }
 
+function chatNormalizeText($mensaje) {
+    $texto = function_exists('mb_strtolower') ? mb_strtolower((string)$mensaje, 'UTF-8') : strtolower((string)$mensaje);
+    return strtr($texto, [
+        'á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ü' => 'u', 'ñ' => 'n',
+    ]);
+}
+
+function chatContainsAny($texto, array $palabras) {
+    foreach ($palabras as $palabra) {
+        if (str_contains($texto, $palabra)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function chatContainsOption($texto, $numero) {
+    return preg_match('/(?:^|\\s)' . preg_quote((string)$numero, '/') . '(?:[.)\\-:]|\\s|$)/u', $texto) === 1;
+}
+
+function chatSupportHasDetails($texto) {
+    $marcas = ['asus', 'acer', 'lenovo', 'dell', 'hp', 'hewlett', 'msi', 'apple', 'toshiba', 'samsung', 'huawei'];
+    $fallas = [
+        'no enciende', 'no prende', 'no arranca', 'se apaga', 'se reinicia', 'pantalla', 'sonido', 'sonidos',
+        'ruido', 'pitido', 'pitidos', 'lento', 'calienta', 'sobrecalienta', 'virus', 'error', 'falla', 'problema',
+        'no carga', 'carga', 'bateria',
+    ];
+    $tiempo = ['desde ayer', 'desde hoy', 'desde anoche', 'hace ', 'desde ', 'ayer', 'hoy'];
+
+    return chatContainsAny($texto, $fallas) && (
+        chatContainsAny($texto, $marcas) || str_contains($texto, 'modelo') || chatContainsAny($texto, $tiempo)
+    );
+}
+
+function chatSupportAdvanced($texto) {
+    $noEncendido = chatContainsAny($texto, ['no enciende', 'no prende', 'no arranca']);
+    $sonidos = chatContainsAny($texto, ['sonido', 'sonidos', 'ruido', 'pitido', 'pitidos']);
+    $senalesPeligro = chatContainsAny($texto, ['olor a quemado', 'humo', 'liquido', 'se sobrecalienta', 'sobrecalienta']);
+    $comportamientoRepetido = chatContainsAny($texto, ['se apaga', 'se reinicia']);
+
+    return ($noEncendido && $sonidos) || $senalesPeligro || $comportamientoRepetido;
+}
+
+function chatSupportResponse($texto) {
+    $marcas = ['asus', 'acer', 'lenovo', 'dell', 'hp', 'hewlett', 'msi', 'apple', 'toshiba', 'samsung', 'huawei'];
+    $marca = 'no indicada';
+    foreach ($marcas as $posibleMarca) {
+        if (str_contains($texto, $posibleMarca)) {
+            $marca = function_exists('mb_strtoupper') ? mb_strtoupper($posibleMarca, 'UTF-8') : strtoupper($posibleMarca);
+            break;
+        }
+    }
+
+    $modelo = 'no indicado';
+    if (preg_match('/\\bmodelo\\s*[:#-]?\\s*([^,.;\\n]+)/u', $texto, $matches) === 1 && trim($matches[1]) !== '') {
+        $modelo = trim($matches[1]);
+    } elseif ($marca !== 'no indicada') {
+        $modelo = $marca;
+    }
+
+    if (chatSupportAdvanced($texto)) {
+        return "Gracias por la informacion. Registre un equipo {$marca}, modelo {$modelo}, con una falla que requiere revision. Como comprobacion basica, desconecta los perifericos y verifica el cargador una sola vez. No sigas intentando encenderlo si el sonido continua, se calienta o huele a quemado. Tu caso quedara en espera de un asistente de soporte.";
+    }
+
+    if (chatContainsAny($texto, ['no enciende', 'no prende', 'no arranca'])) {
+        return "Gracias por la informacion del equipo {$marca}, modelo {$modelo}. Como comprobacion basica, revisa el cargador y prueba otro tomacorriente una sola vez. Si continua sin encender, comunicate con un asistente para revisarlo.";
+    }
+
+    return "Gracias por la informacion del equipo {$marca}, modelo {$modelo}. Prueba reiniciarlo una vez y verifica que sus conexiones esten firmes. Si la falla continua, comunicate con un asistente de soporte.";
+}
+
 function chatBotFallback($mensaje) {
-    $texto = function_exists('mb_strtolower') ? mb_strtolower($mensaje, 'UTF-8') : strtolower($mensaje);
+    $texto = chatNormalizeText($mensaje);
     $necesitaHumano = false;
     $tema = 'Consulta general';
+    $mostrarOpciones = true;
 
-    if (str_contains($texto, 'humano') || str_contains($texto, 'asistente') || str_contains($texto, 'personalizada') || str_contains($texto, 'especifica')) {
+    if (chatContainsAny($texto, ['humano', 'asistente', 'personalizada', 'especifica'])) {
         $necesitaHumano = true;
         $tema = 'Asistencia personalizada';
         $respuesta = 'Te voy a pasar con asistencia para revisar tu caso con mas detalle. Un asistente continuara la conversacion aqui.';
-    } elseif (str_contains($texto, 'horario') || str_contains($texto, 'disponible') || str_contains($texto, 'dias')) {
-        $tema = 'Horarios disponibles';
-        $respuesta = 'Atendemos consultas sobre horarios y citas tecnicas. Puedes indicar el dia que prefieres y el tipo de equipo para revisar disponibilidad.';
-    } elseif (str_contains($texto, 'direccion') || str_contains($texto, 'ubicacion') || str_contains($texto, 'donde')) {
-        $tema = 'Direccion y ubicacion';
-        $respuesta = 'L&M PC Computadoras puede ayudarte con ubicacion, rutas y referencias. Si necesitas una direccion exacta o envio, te paso con asistencia.';
-    } elseif (str_contains($texto, 'soporte') || str_contains($texto, 'tecnico') || str_contains($texto, 'reparacion') || str_contains($texto, 'arreglo')) {
+    } elseif (chatContainsOption($texto, 1) || chatContainsAny($texto, ['soporte', 'tecnico', 'reparacion', 'arreglo', 'mantenimiento', 'formatear']) || chatSupportHasDetails($texto)) {
         $tema = 'Soporte tecnico';
-        $respuesta = 'Para soporte tecnico indica marca, modelo, falla principal y si el equipo enciende. Con esos datos se puede orientar el diagnostico inicial.';
-    } elseif (str_contains($texto, 'empresa') || str_contains($texto, 'informacion') || str_contains($texto, 'lympc')) {
+        if (chatSupportHasDetails($texto)) {
+            $respuesta = chatSupportResponse($texto);
+            $necesitaHumano = chatSupportAdvanced($texto);
+            $mostrarOpciones = false;
+        } else {
+            $respuesta = 'Para soporte tecnico indica marca, modelo, falla principal y si el equipo enciende. Si ya tienes esos datos, escribelos juntos y te dare una orientacion concreta.';
+        }
+    } elseif (chatContainsAny($texto, ['manana', 'mañana', 'hoy', 'dia', 'fecha', 'cuando', 'disponibilidad']) || chatContainsOption($texto, 2) || chatContainsAny($texto, ['horario', 'disponible', 'dias'])) {
+        $tema = 'Horarios disponibles';
+        $respuesta = 'Para revisar disponibilidad, indícame si te sirve mañana o en otro día y el tipo de servicio. Si más adelante necesitas una hora exacta, entonces te paso con asistencia.';
+    } elseif (chatContainsOption($texto, 3) || chatContainsAny($texto, ['direccion', 'ubicacion', 'donde'])) {
+        $tema = 'Direccion y ubicacion';
+        $respuesta = 'La ubicacion de L&M PC Computadoras es: Ecuador, Quito, sector La Ecuatoriana, por la Joaquin Jativa. '
+            . 'Referencia: Las Orquideas / Oe9 Martha Bucaram / S37-49 / S37A. '
+            . 'Puedes abrir la ubicacion en Google Maps: https://maps.app.goo.gl/V8ghM2XY9M4H8v6Z9';
+        $mostrarOpciones = false;
+    } elseif (chatContainsOption($texto, 4) || chatContainsAny($texto, ['empresa', 'informacion', 'lympc'])) {
         $tema = 'Informacion de la empresa';
         $respuesta = 'L&M PC Computadoras ofrece venta de equipos, accesorios, mantenimiento y reparacion. Si deseas informacion comercial concreta, asistencia puede darte mas detalles.';
-    } else {
+    } elseif (chatContainsOption($texto, 5) || chatContainsAny($texto, ['hablar', 'contactar'])) {
         $necesitaHumano = true;
-        $respuesta = 'Puedo ayudarte con horarios, direcciones, soporte tecnico e informacion de la empresa. Como tu consulta necesita mas contexto, te paso con asistencia.';
+        $tema = 'Solicitud de asistente';
+        $respuesta = 'Claro. Te paso con un asistente real para continuar la conversacion y resolver tus dudas especificas.';
+    } else {
+        $respuesta = 'Puedo ayudarte con horarios, direccion del local o soporte tecnico. Si luego necesitas una hora exacta o detalles específicos, te paso con asistencia.';
+    }
+
+    if ($mostrarOpciones && !$necesitaHumano) {
+        $respuesta .= "\n\nTambien puedes escribir una de estas opciones:\n1. Soporte tecnico\n2. Horarios disponibles\n3. Direccion o ubicacion\n4. Informacion de la empresa\n5. Hablar con asistente";
     }
 
     return [$respuesta, $necesitaHumano, $tema];

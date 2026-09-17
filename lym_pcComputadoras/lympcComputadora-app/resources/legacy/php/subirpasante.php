@@ -349,8 +349,7 @@ if (isset($_GET['upload'])) {
                     <h5 class="mb-0">Subir archivo de proyecto</h5>
                 </div>
                 <div class="card-body">
-                    <p class="small-note">Registro de proyectos con referencia a un repositorio GitHub. El documento se
-                        guarda localmente y se vincula al repositorio.</p>
+                    <p class="small-note">El archivo se guardará localmente y se publicará como un nuevo archivo dentro del repositorio de GitHub indicado.</p>
                     <form action="/php/pasante_upload.php" method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="upload_type" value="project">
                         <div class="mb-3">
@@ -359,9 +358,17 @@ if (isset($_GET['upload'])) {
                                 placeholder="Nombre breve del proyecto" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Repositorio GitHub</label>
-                            <input type="url" name="repo_url" class="form-control"
-                                placeholder="https://github.com/usuario/repositorio">
+                            <label class="form-label" for="repo_url">Repositorio GitHub</label>
+                            <input type="url" id="repo_url" name="repo_url" class="form-control"
+                                placeholder="https://github.com/usuario/repositorio" required>
+                            <div class="form-text">Necesitas permisos de escritura en este repositorio.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="github_branch">Rama de destino (opcional)</label>
+                            <input type="text" id="github_branch" name="github_branch" class="form-control"
+                                value="<?php echo htmlspecialchars((string) config('services.github.branch', 'main'), ENT_QUOTES, 'UTF-8'); ?>"
+                                maxlength="255" pattern="[A-Za-z0-9._/-]+" placeholder="main">
+                            <div class="form-text">Si la dejas vacía, se utilizará la rama configurada en el servidor.</div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Descripción</label>

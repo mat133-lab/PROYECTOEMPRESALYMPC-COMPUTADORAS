@@ -302,7 +302,7 @@ if (isset($_GET['upload'])) {
 
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                Cuenta y Configuraci�n
+                                Cuenta y Configuracion
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
                                 <li>
@@ -329,9 +329,9 @@ if (isset($_GET['upload'])) {
                             <?php if (isset($_SESSION['rol'])): ?>
                             <span class="text-white me-3">Buen dia,
                                 <b><?php echo $_SESSION['usuario']; ?></b></span>
-                            <a href="/php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesi�n</a>
+                            <a href="/php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesion</a>
                             <?php else: ?>
-                            <a href="/php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesi�n</a>
+                            <a href="/php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesion</a>
                             <a href="/php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 

@@ -30,12 +30,32 @@ class LegacyFileController extends Controller
 
     private function publicFile(string $path): Response|BinaryFileResponse
     {
-        $path = ltrim($path, '/\\');
-        if (! Storage::disk('public')->exists($path)) {
+        $path = str_replace('\\', '/', $path);
+        $path = ltrim($path, '/');
+        $parts = explode('/', $path);
+
+        if ($path === '' || in_array('', $parts, true) || in_array('.', $parts, true) || in_array('..', $parts, true)) {
             abort(404);
         }
 
-        return response()->file(Storage::disk('public')->path($path));
+        $disk = Storage::disk('public');
+        if (! $disk->exists($path)) {
+            abort(404);
+        }
+
+        $filePath = realpath($disk->path($path));
+        $basePath = realpath($disk->path(''));
+        if (! $filePath || ! $basePath || ! is_file($filePath) || ! str_starts_with($filePath, $basePath.DIRECTORY_SEPARATOR)) {
+            abort(404);
+        }
+
+        if (request()->boolean('download')) {
+            return response()->download($filePath, basename($filePath), [
+                'Content-Type' => mime_content_type($filePath) ?: 'application/octet-stream',
+            ]);
+        }
+
+        return response()->file($filePath);
     }
 
     private function resourceFile(string $path): Response|BinaryFileResponse

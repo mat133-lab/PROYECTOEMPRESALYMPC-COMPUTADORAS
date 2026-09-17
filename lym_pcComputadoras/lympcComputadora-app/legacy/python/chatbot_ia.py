@@ -41,6 +41,12 @@ def responder(mensaje):
             "si enciende correctamente y desde cuando ocurre la falla. "
             "Con eso puedo darte una orientacion inicial."
         )
+    elif contiene(texto, ["manana", "mañana", "hoy", "dia", "fecha", "cuando", "disponibilidad", "hora"]):
+        tema = "Horarios disponibles"
+        respuesta = (
+            "Para revisar disponibilidad, indicame si te sirve mañana o en otro dia y el tipo de servicio. "
+            "Si después necesitas una hora exacta o una confirmación final, entonces te paso con asistencia."
+        )
     elif contiene(texto, ["2", "horario", "horarios", "disponible", "disponibles", "dias", "cita", "agenda"]):
         tema = "Horarios disponibles"
         respuesta = (
@@ -72,10 +78,10 @@ def responder(mensaje):
             "Puedo ayudarte con soporte tecnico, horarios, direccion o informacion de la empresa."
         ) + opciones
     else:
-        necesita_humano = True
+        tema = "Consulta general"
         respuesta = (
-            "Puedo orientarte con informacion general, pero tu consulta necesita mas detalle. "
-            "Te voy a pasar con alguien de soporte para que revise tu caso de forma personalizada."
+            "Puedo ayudarte con horarios, direccion del local o soporte tecnico. "
+            "Si luego necesitas una hora exacta o detalles especificos, te paso con asistencia."
         )
 
     if not necesita_humano and "Tambien puedes escribir" not in respuesta:

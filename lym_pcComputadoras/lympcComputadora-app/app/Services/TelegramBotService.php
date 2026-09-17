@@ -3,16 +3,50 @@
 namespace App\Services;
 
 use App\Models\Cita;
+use App\Models\Contacto;
 use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\TelegramAccount;
 use App\Models\TelegramLinkCode;
+use App\Models\TelegramSession;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 
 class TelegramBotService
 {
-    private array $userSessions = [];
+    private const PAGE_SIZE = 5;
+
+    private const CATEGORIES = [
+        'laptops' => ['label' => '💻 Laptops', 'cat' => ['ASUS', 'DELL', 'lenovo', 'MSI', 'ominibook']],
+        'pc' => ['label' => '🖥️ PCs de Escritorio', 'cat' => ['PC', 'PCHP']],
+        'tablets' => ['label' => '📱 Tablets', 'cat' => ['Tablets']],
+        'impresoras' => ['label' => '🖨️ Impresoras', 'cat' => ['CANON', 'EPSON']],
+        'insumos' => ['label' => '🧪 Insumos', 'cat' => ['TINTA100', 'TINTA1000']],
+        'duplicadoras' => ['label' => '💿 Duplicadores', 'cat' => ['DUPLICADORACD', 'DUPLICADORADVD', 'DUPLICADORABLU']],
+    ];
+
+    private const CITA_MOTIVOS = [
+        'Mantenimiento preventivo',
+        'Reparación de equipo',
+        'Diagnóstico de fallas',
+        'Instalación de software',
+        'Limpieza interna',
+        'Cambio de componentes',
+        'Asesoría técnica',
+        'Otro motivo',
+    ];
+
+    private const CONSULTA_ASUNTOS = [
+        'Consulta sobre producto',
+        'Disponibilidad y stock',
+        'Precios y formas de pago',
+        'Garantía y devoluciones',
+        'Estado de mi pedido',
+        'Reparación o soporte',
+        'Facturación / RUC',
+        'Otra consulta',
+    ];
 
     public function handle(array $message): void
     {
@@ -36,10 +70,24 @@ class TelegramBotService
             $this->start($m[1] ?? '', $chatId, $fromId, (string) data_get($message, 'from.username'));
             return;
         }
+        if (preg_match('/^\/(start|menu|inicio)$/i', $text)) {
+            $this->resetSession($chatId);
+            $account = TelegramAccount::where('telegram_user_id', $fromId)->first();
+            if (! $account) {
+                $this->send($chatId, $this->unlinkedHelp(), null);
+                return;
+            }
+            $user = User::find($account->id_usuario);
+            if (! $user) {
+                return;
+            }
+            $this->sendWelcome($chatId, $user);
+            return;
+        }
 
         $account = TelegramAccount::where('telegram_user_id', $fromId)->first();
         if (! $account) {
-            $this->send($chatId, 'Primero vincula tu cuenta desde el portal de L&M PC y usa el código con /vincular.');
+            $this->send($chatId, $this->unlinkedHelp(), null);
             return;
         }
 
@@ -49,404 +97,606 @@ class TelegramBotService
             return;
         }
 
-        if (preg_match('/^\/menu$/i', $text) || preg_match('/^\/start$/i', $text)) {
-            $this->resetSession($chatId);
-            $this->sendMainMenu($chatId, $user->rol);
-            return;
-        }
+        // Cualquier texto fuera de comando se trata como "volver al menú"
+        // porque el flujo normal se controla 100% con botones inline.
+        $this->sendWelcome($chatId, $user, "No entendí ese mensaje. Usa los botones para continuar. 👇");
+    }
 
-        if ($text === '/mis_citas') {
-            $items = Cita::where('id_usuario', $user->id_usuario)->orderByDesc('fecha')->limit(5)->get();
-            $reply = $items->isEmpty() ? 'No tienes citas registradas.' : 'Tus citas:' . $items->map(fn ($x) => "\n• {$x->fecha->format('d/m/Y')} — {$x->motivo}")->implode('');
-            $this->send($chatId, $reply, $this->mainMenuKeyboard($user->rol));
+    public function handleCallback(array $callback): void
+    {
+        $chatId = (string) data_get($callback, 'message.chat.id');
+        $messageId = data_get($callback, 'message.message_id');
+        if (! $chatId) {
             return;
         }
+        $data = (string) data_get($callback, 'data');
+        $this->answerCallback($callback, 'Procesando…');
 
-        if ($text === '/mis_pedidos') {
-            $items = Pedido::where('id_usuario', $user->id_usuario)->orderByDesc('fecha_pedido')->limit(5)->get();
-            $reply = $items->isEmpty() ? 'No tienes pedidos registrados.' : 'Tus últimos pedidos:' . $items->map(fn ($x) => "\n• #{$x->id_pedido}: $ {$x->total}")->implode('');
-            $this->send($chatId, $reply, $this->mainMenuKeyboard($user->rol));
+        $fromId = (string) data_get($callback, 'from.id');
+        $account = TelegramAccount::where('telegram_user_id', $fromId)->first();
+        if (! $account) {
+            $this->answerCallback($callback, '🔒 Vincula tu cuenta primero');
+            $this->send($chatId, $this->unlinkedHelp());
             return;
         }
-
-        if ($text === '/agenda_hoy' && in_array(strtolower($user->rol), ['admin', 'tecnico', 'encargado', 'pasante'], true)) {
-            $this->send($chatId, 'Citas de hoy: '.Cita::whereDate('fecha', today())->count(), $this->mainMenuKeyboard($user->rol));
+        $user = User::find($account->id_usuario);
+        if (! $user) {
             return;
         }
-
-        if ($text === '/resumen' && strtolower($user->rol) === 'admin') {
-            $this->send($chatId, 'Resumen de hoy: '.Pedido::whereDate('fecha_pedido', today())->count().' pedido(s) y '.Cita::whereDate('fecha', today())->count().' cita(s).', $this->mainMenuKeyboard($user->rol));
-            return;
-        }
+        $account->update(['ultima_actividad_en' => now(), 'telegram_chat_id' => $chatId]);
 
         $session = $this->getSession($chatId);
-
-        if ($text === 'Volver al menu' || $text === 'Atras') {
-            $this->resetSession($chatId);
-            $this->sendMainMenu($chatId, $user->rol);
-            return;
-        }
-
-        if (! isset($session['state'])) {
-            $this->sendMainMenu($chatId, $user->rol);
-            return;
-        }
-
-        $this->routeState($user, $chatId, $text, $session);
+        $this->dispatch($user, $chatId, $data, $session, $messageId);
+        $this->setSession($chatId, $session);
     }
 
-    private function routeState(User $user, string $chatId, string $text, array &$session): void
+    private function dispatch(User $user, string $chatId, string $data, array &$session, ?int $messageId): void
     {
-        $state = $session['state'];
+        // El prefijo identifica el handler; el resto es el payload.
+        $parts = explode('|', $data, 2);
+        $action = $parts[0];
+        $payload = $parts[1] ?? '';
 
-        switch ($state) {
-            case 'MAIN_MENU':
-                $this->handleMainMenu($user, $chatId, $text, $session);
-                break;
-            case 'PRODUCTOS':
-                $this->handleProductCategory($user, $chatId, $text, $session);
-                break;
-            case 'PRODUCTO_DETALLE':
-                $this->handleProductDetail($user, $chatId, $text, $session);
-                break;
-            case 'SERVICIO_TECNICO':
-                $this->handleServicioTecnico($user, $chatId, $text, $session);
-                break;
-            case 'CONTACTO':
-                $this->handleContacto($user, $chatId, $text, $session);
-                break;
-            case 'CONTACTO_MENSAJE':
-                $this->handleContactoMensaje($user, $chatId, $text, $session);
-                break;
-            case 'CITA_FECHA':
-                $this->handleCitaFecha($user, $chatId, $text, $session);
-                break;
-            case 'CITA_MOTIVO':
-                $this->handleCitaMotivo($user, $chatId, $text, $session);
-                break;
-            case 'MI_CUENTA':
-                $this->handleMiCuenta($user, $chatId, $text, $session);
-                break;
-            default:
-                $this->resetSession($chatId);
-                $this->sendMainMenu($chatId, $user->rol);
-        }
+        match ($action) {
+            'menu' => $this->screenWelcome($user, $chatId, $payload),
+            'cat' => $this->screenCategory($chatId, $payload, $session, $messageId),
+            'cat_page' => $this->screenCategory($chatId, $payload, $session, $messageId, true),
+            'prod' => $this->screenProduct($user, $chatId, $payload, $session, $messageId),
+            'cart_add' => $this->actionCartAdd($user, $chatId, $payload, $session, $messageId),
+            'cart_view' => $this->screenCart($user, $chatId, $session, $messageId),
+            'cart_clear' => $this->actionCartClear($user, $chatId, $session, $messageId),
+            'cart_checkout' => $this->actionCartCheckout($user, $chatId, $session, $messageId),
+            'svc' => $this->screenService($user, $chatId, $payload, $session, $messageId),
+            'cita_mes' => $this->screenCitaDias($chatId, $payload, $session, $messageId),
+            'cita_dia' => $this->screenCitaMotivos($chatId, $payload, $session, $messageId),
+            'cita_mot' => $this->actionCitaCrear($user, $chatId, $payload, $session, $messageId),
+            'cuenta' => $this->screenCuenta($user, $chatId, $payload, $session, $messageId),
+            'cuenta_cita' => $this->screenCuentaCitaDetalle($user, $chatId, $payload, $messageId),
+            'cuenta_ped' => $this->screenCuentaPedidoDetalle($user, $chatId, $payload, $messageId),
+            'asesor' => $this->screenAsesor($user, $chatId, $payload, $session, $messageId),
+            'asesor_asunto' => $this->actionAsesorCrear($user, $chatId, $payload, $session, $messageId),
+            'cancel' => $this->actionCancelar($user, $chatId, $session, $messageId),
+            'noop' => null,
+            default => $this->screenWelcome($user, $chatId, 'Opción no reconocida. Vuelve al menú principal 👇'),
+        };
     }
 
-    private function handleMainMenu(User $user, string $chatId, string $text, array &$session): void
+    // ────────────────────────── Pantallas (call center) ──────────────────────────
+
+    private function screenWelcome(User $user, string $chatId, string $note = ''): void
     {
-        switch ($text) {
-            case '🛒 Ver Productos':
-                $session['state'] = 'PRODUCTOS';
-                $this->send($chatId, 'Selecciona una categoria:', $this->productCategoriesKeyboard());
-                break;
-            case '🔧 Servicio Tecnico':
-                $session['state'] = 'SERVICIO_TECNICO';
-                $this->send($chatId, 'Selecciona una opcion de Servicio Tecnico:', $this->servicioTecnicoKeyboard());
-                break;
-            case '📱 Mi Cuenta':
-                $session['state'] = 'MI_CUENTA';
-                $this->send($chatId, 'Selecciona una opcion:', $this->miCuentaKeyboard($user->rol));
-                break;
-            case '💬 Hablar con Asesor':
-                $session['state'] = 'CONTACTO';
-                $this->send($chatId, 'Selecciona el tipo de consulta para contactar a un asesor:', $this->contactoTiposKeyboard());
-                break;
-            default:
-                $this->sendMainMenu($chatId, $user->rol);
-        }
+        $this->resetSession($chatId);
+        $this->sendWelcome($chatId, $user, $note);
     }
 
-    private function handleProductCategory(User $user, string $chatId, string $text, array &$session): void
+    private function sendWelcome(string $chatId, User $user, string $note = ''): void
     {
-        $map = [
-            'PC Escritorio' => 'PC',
-            'Laptops' => 'laptops',
-            'Duplicadoras' => 'duplicadoras',
-            'Tablets' => 'Tablets',
-            'Impresoras' => 'impresoras',
-            'Tintas' => 'tintas',
+        $name = (string) $user->usuario;
+        $rol = ucfirst((string) $user->rol);
+        $text = "👋 Hola <b>{$name}</b> ({$rol})\n\nSoy el asistente de <b>L&amp;M PC Computadoras</b>. Selecciona una opción para continuar:";
+        if ($note !== '') {
+            $text = $note . "\n\n" . $text;
+        }
+        $this->send($chatId, $text, $this->welcomeKeyboard($user));
+        $this->setSession($chatId, ['state' => 'MENU', 'payload' => []]);
+    }
+
+    private function welcomeKeyboard(User $user): array
+    {
+        $isStaff = in_array(strtolower((string) $user->rol), ['admin', 'tecnico'], true);
+        $rows = [
+            [['text' => '🛒 Ver Productos', 'callback_data' => 'cat|laptops']],
+            [['text' => '🔧 Servicio Técnico', 'callback_data' => 'svc|menu']],
+            [['text' => '📱 Mi Cuenta', 'callback_data' => 'cuenta|menu']],
+            [['text' => '💬 Hablar con Asesor', 'callback_data' => 'asesor|tipos']],
         ];
-
-        $categoria = $map[$text] ?? null;
-        if (! $categoria) {
-            $this->send($chatId, 'Selecciona una categoria valida.', $this->productCategoriesKeyboard());
-            return;
+        if ($isStaff) {
+            $rows[] = [['text' => '🛍 Carrito de cliente', 'callback_data' => 'cart_view|']];
         }
-
-        $session['state'] = 'PRODUCTO_DETALLE';
-        $session['categoria'] = $categoria;
-
-        $productos = $this->getProductosPorCategoria($categoria);
-        if ($productos->isEmpty()) {
-            $this->send($chatId, "No hay productos disponibles en esta categoria.", $this->productCategoriesKeyboard());
-            $session['state'] = 'PRODUCTOS';
-            return;
-        }
-
-        $lines = ["Productos en {$text}:\n"];
-        foreach ($productos as $p) {
-            $stock = (int) $p->unidades > 0 ? (int) $p->unidades . ' en stock' : 'Agotado';
-            $lines[] = "• {$p->nombre}\n  Serie: {$p->serie}\n  Precio: $".number_format($p->precio, 2)."\n  Stock: {$stock}\n";
-        }
-
-        $keyboard = $productos->map(fn ($p) => ['text' => $p->nombre])->toArray();
-        $keyboard[] = ['text' => 'Volver al menu'];
-
-        $this->send($chatId, implode("\n", $lines), $this->buildReplyKeyboard($keyboard));
+        return $this->inlineKeyboard($rows);
     }
 
-    private function handleProductDetail(User $user, string $chatId, string $text, array &$session): void
+    // ────────────────────────── Productos ──────────────────────────
+
+    private function screenCategory(string $chatId, string $key, array &$session, ?int $messageId, bool $paginated = false): void
     {
-        if ($text === 'Volver al menu') {
-            $this->resetSession($chatId);
-            $this->sendMainMenu($chatId, $user->rol);
+        if (! isset(self::CATEGORIES[$key])) {
+            $this->editOrSend($chatId, $messageId, '❓ Categoría no válida.', $this->backToMenu());
+            return;
+        }
+        if (! $paginated) {
+            $session['categoria'] = $key;
+            $session['pagina'] = 0;
+        }
+        $page = (int) ($session['pagina'] ?? 0);
+        $cat = self::CATEGORIES[$key];
+        $total = Producto::whereIn('categoria', $cat['cat'])->count();
+        $items = Producto::whereIn('categoria', $cat['cat'])
+            ->orderBy('nombre')->skip($page * self::PAGE_SIZE)->take(self::PAGE_SIZE)->get();
+
+        if ($total === 0) {
+            $this->editOrSend($chatId, $messageId, "📭 No hay productos disponibles en <b>{$cat['label']}</b>.", $this->categoryKeyboard($key, 0, 0));
             return;
         }
 
-        $categoria = $session['categoria'] ?? '';
-        $productos = $this->getProductosPorCategoria($categoria);
-        $producto = $productos->firstWhere('nombre', $text);
+        $lines = ["<b>{$cat['label']}</b> — {$total} producto(s)\n"];
+        foreach ($items as $p) {
+            $stock = (int) $p->unidades > 0 ? "{$p->unidades} en stock" : 'Agotado';
+            $lines[] = "• <b>{$p->nombre}</b>\n  💲 {$p->precio} · 📦 {$stock}";
+        }
+        $this->editOrSend($chatId, $messageId, implode("\n", $lines), $this->categoryKeyboard($key, $page, $total));
+    }
 
+    private function categoryKeyboard(string $key, int $page, int $total): array
+    {
+        $cat = self::CATEGORIES[$key];
+        $rows = [];
+        $offset = $page * self::PAGE_SIZE;
+        $pageSize = self::PAGE_SIZE;
+        $items = Producto::whereIn('categoria', $cat['cat'])
+            ->orderBy('nombre')->skip($offset)->take($pageSize)->get();
+        foreach ($items as $p) {
+            $label = mb_substr((string) $p->nombre, 0, 32) . ' · $' . $p->precio;
+            $rows[] = [['text' => $label, 'callback_data' => "prod|{$p->id_producto}"]];
+        }
+        // Paginación
+        $maxPage = (int) max(0, ceil($total / $pageSize) - 1);
+        if ($maxPage > 0) {
+            $nav = [];
+            if ($page > 0) $nav[] = ['text' => '◀️ Anterior', 'callback_data' => "cat_page|{$key}:".($page - 1)];
+            $nav[] = ['text' => '📄 '.($page + 1).'/'.($maxPage + 1), 'callback_data' => 'noop|'];
+            if ($page < $maxPage) $nav[] = ['text' => 'Siguiente ▶️', 'callback_data' => "cat_page|{$key}:".($page + 1)];
+            $rows[] = $nav;
+        }
+        // Cambio rápido de categoría
+        $switcher = [];
+        foreach (self::CATEGORIES as $k => $c) {
+            $switcher[] = ['text' => $c['label'], 'callback_data' => "cat|{$k}"];
+        }
+        foreach (array_chunk($switcher, 2) as $chunk) {
+            $rows[] = $chunk;
+        }
+        $rows[] = [['text' => '🏠 Menú principal', 'callback_data' => 'menu|']];
+        return $this->inlineKeyboard($rows);
+    }
+
+    private function screenProduct(User $user, string $chatId, string $id, array &$session, ?int $messageId): void
+    {
+        $producto = Producto::find((int) $id);
         if (! $producto) {
-            $this->send($chatId, 'Selecciona un producto de la lista.', $this->buildReplyKeyboard(
-                $productos->map(fn ($p) => ['text' => $p->nombre])->push(['text' => 'Volver al menu'])->toArray()
-            ));
+            $this->editOrSend($chatId, $messageId, '❌ Producto no disponible.', $this->backToMenu());
             return;
         }
+        $stock = (int) $producto->unidades > 0
+            ? "✅ {$producto->unidades} unidades disponibles"
+            : '⛔ Agotado';
+        $cart = $this->cartGet($session);
+        $enCarrito = isset($cart[(int) $producto->id_producto]) ? (int) $cart[(int) $producto->id_producto] : 0;
+        $text = "<b>{$producto->nombre}</b>\n\n"
+            . "🔖 Serie: <code>{$producto->serie}</code>\n"
+            . "💲 Precio: <b>\${$producto->precio}</b>\n"
+            . "📦 {$stock}\n"
+            . "🏷 Categoría: " . self::CATEGORIES[self::reverseCategory($producto->categoria)]['label'] . "\n"
+            . ($enCarrito > 0 ? "\n🛒 En tu carrito: <b>{$enCarrito}</b>" : '');
 
-        $stock = (int) $producto->unidades > 0 ? (int) $producto->unidades . ' unidades disponibles' : 'Producto agotado';
-        $reply = "Detalle del producto:\n\nNombre: {$producto->nombre}\nSerie: {$producto->serie}\nPrecio: $".number_format($producto->precio, 2)."\nStock: {$stock}\n\nSi deseas comprar o consultar, usa la opcion de Contacto en el menu principal.";
-        $this->send($chatId, $reply, $this->buildReplyKeyboard([['text' => 'Volver al menu']]));
-        $session['state'] = 'PRODUCTOS';
-        $session['categoria'] = null;
-    }
-
-    private function handleServicioTecnico(User $user, string $chatId, string $text, array &$session): void
-    {
-        if ($text === 'Volver al menu') {
-            $this->resetSession($chatId);
-            $this->sendMainMenu($chatId, $user->rol);
-            return;
+        $rows = [];
+        if ((int) $producto->unidades > 0) {
+            $rows[] = [
+                ['text' => '➕ Agregar 1', 'callback_data' => "cart_add|{$producto->id_producto}:1"],
+                ['text' => '➕ Agregar 3', 'callback_data' => "cart_add|{$producto->id_producto}:3"],
+            ];
         }
-
-        switch ($text) {
-            case 'Horarios':
-                $reply = "Horarios de atencion:\n\nLunes a Viernes: 9:00 AM - 7:00 PM\nSabado: 9:00 AM - 5:00 PM\nDomingo: Cerrado\n\nPara agendar una cita, selecciona 'Agendar Cita' en el menu de Servicio Tecnico.";
-                $this->send($chatId, $reply, $this->servicioTecnicoKeyboard());
-                break;
-            case 'Ubicacion':
-                $reply = "Ubicacion: La Ecuatoriana - Las Orquideas / Oe9 Martha Bucaram / S37-49 / S37a, Quito (170140), Ecuador.\n\nGoogle Maps: https://maps.app.goo.gl/V8ghM2XY9M4H8v6Z9";
-                $this->send($chatId, $reply, $this->servicioTecnicoKeyboard());
-                break;
-            case 'Contacto':
-                $session['state'] = 'CONTACTO';
-                $this->send($chatId, 'Selecciona el tipo de consulta:', $this->contactoTiposKeyboard());
-                break;
-            case 'Agendar Cita':
-                $session['state'] = 'CITA_FECHA';
-                $this->send($chatId, 'Selecciona la fecha para tu cita (formato YYYY-MM-DD). Ejemplo: 2026-08-20\n\nEscribe la fecha o usa el boton de Volver.', $this->buildReplyKeyboard([['text' => 'Volver al menu']]));
-                break;
-            default:
-                $this->send($chatId, 'Opcion no valida. Selecciona una opcion del menu.', $this->servicioTecnicoKeyboard());
-        }
-    }
-
-    private function handleContacto(User $user, string $chatId, string $text, array &$session): void
-    {
-        if ($text === 'Volver al menu') {
-            $this->resetSession($chatId);
-            $this->sendMainMenu($chatId, $user->rol);
-            return;
-        }
-
-        $tipos = [
-            'Soporte Tecnico' => 'Consulta sobre soporte tecnico, reparaciones o mantenimiento.',
-            'Informacion Comercial' => 'Consulta sobre productos, precios o compras.',
-            'Otro' => 'Otra consulta general.',
+        $rows[] = [['text' => '💬 Consultar este producto', 'callback_data' => "asesor|producto:{$producto->id_producto}"]];
+        $rows[] = [
+            ['text' => '↩️ Volver a la categoría', 'callback_data' => "cat|" . self::reverseCategory($producto->categoria)],
+            ['text' => '🏠 Menú', 'callback_data' => 'menu|'],
         ];
-
-        if (! isset($tipos[$text])) {
-            $this->send($chatId, 'Selecciona un tipo de consulta valido.', $this->contactoTiposKeyboard());
-            return;
-        }
-
-        $session['contacto_tipo'] = $text;
-        $session['state'] = 'CONTACTO_MENSAJE';
-        $this->send($chatId, "Has seleccionado: {$text}\n\nAhora escribe tu mensaje. Un asesor se pondra en contacto contigo.\n\nO presiona 'Volver al menu' para cancelar.", $this->buildReplyKeyboard([['text' => 'Volver al menu']]));
+        $this->editOrSend($chatId, $messageId, $text, $this->inlineKeyboard($rows));
     }
 
-    private function handleContactoMensaje(User $user, string $chatId, string $text, array &$session): void
+    // ────────────────────────── Carrito (call-center style) ──────────────────────────
+
+    private function actionCartAdd(User $user, string $chatId, string $payload, array &$session, ?int $messageId): void
     {
-        if ($text === 'Volver al menu') {
-            $this->resetSession($chatId);
-            $this->sendMainMenu($chatId, $user->rol);
+        [$id, $qty] = array_pad(explode(':', $payload, 2), 2, '1');
+        $producto = Producto::find((int) $id);
+        if (! $producto || (int) $producto->unidades <= 0) {
+            $this->answerCallbackText($chatId, $messageId, '⛔ Producto agotado', $this->backToMenu());
             return;
         }
+        $cart = $this->cartGet($session);
+        $current = (int) ($cart[(int) $id] ?? 0);
+        $add = max(1, (int) $qty);
+        $new = min((int) $producto->unidades, $current + $add);
+        $cart[(int) $id] = $new;
+        $this->cartSet($session, $cart);
 
-        $tipo = $session['contacto_tipo'] ?? 'General';
-        $mensaje = "[{$tipo}] {$text}";
+        $rows = [
+            [['text' => '➕ Agregar otro', 'callback_data' => "prod|{$id}"]],
+            [['text' => '🛒 Ver carrito', 'callback_data' => 'cart_view|']],
+            [['text' => '🛍 Seguir comprando', 'callback_data' => 'cat|laptops']],
+            [['text' => '🏠 Menú principal', 'callback_data' => 'menu|']],
+        ];
+        $text = "✅ Agregado <b>{$producto->nombre}</b> al carrito.\n\nLlevas <b>{$new}</b> unidad(es) de este producto.";
+        $this->editOrSend($chatId, $messageId, $text, $this->inlineKeyboard($rows));
+    }
 
+    private function screenCart(User $user, string $chatId, array &$session, ?int $messageId): void
+    {
+        $cart = $this->cartGet($session);
+        if (empty($cart)) {
+            $this->editOrSend($chatId, $messageId, "🛒 Tu carrito está vacío.\n\nEmpieza agregando productos desde el menú principal.",
+                $this->inlineKeyboard([
+                    [['text' => '🛒 Ver productos', 'callback_data' => 'cat|laptops']],
+                    [['text' => '🏠 Menú principal', 'callback_data' => 'menu|']],
+                ]));
+            return;
+        }
+        $productos = Producto::whereIn('id_producto', array_keys($cart))->get()->keyBy('id_producto');
+        $total = 0;
+        $lines = ["<b>🛒 Tu carrito</b>\n"];
+        foreach ($cart as $id => $qty) {
+            $p = $productos->get((int) $id);
+            if (! $p) {
+                unset($cart[$id]);
+                continue;
+            }
+            $sub = (float) $p->precio * (int) $qty;
+            $total += $sub;
+            $lines[] = "• {$p->nombre}\n   {$qty} × \${$p->precio} = <b>\$" . number_format($sub, 2) . "</b>";
+        }
+        $this->cartSet($session, $cart);
+        $lines[] = "\n💲 <b>Total: \$" . number_format($total, 2) . "</b>";
+
+        $rows = [
+            [['text' => '✅ Confirmar pedido', 'callback_data' => 'cart_checkout|']],
+            [['text' => '➕ Seguir comprando', 'callback_data' => 'cat|laptops']],
+            [['text' => '🗑 Vaciar carrito', 'callback_data' => 'cart_clear|']],
+            [['text' => '🏠 Menú principal', 'callback_data' => 'menu|']],
+        ];
+        $this->editOrSend($chatId, $messageId, implode("\n", $lines), $this->inlineKeyboard($rows));
+    }
+
+    private function actionCartClear(User $user, string $chatId, array &$session, ?int $messageId): void
+    {
+        $this->cartSet($session, []);
+        $this->editOrSend($chatId, $messageId, "🗑 Carrito vaciado.", $this->backToMenu());
+    }
+
+    private function actionCartCheckout(User $user, string $chatId, array &$session, ?int $messageId): void
+    {
+        $cart = $this->cartGet($session);
+        if (empty($cart)) {
+            $this->editOrSend($chatId, $messageId, "🛒 Tu carrito está vacío.", $this->backToMenu());
+            return;
+        }
+        $rows = [
+            [
+                ['text' => '✅ Sí, enviar pedido', 'callback_data' => 'cart_checkout|confirm'],
+            ],
+            [['text' => '❌ Cancelar', 'callback_data' => 'cart_view|']],
+        ];
+        $this->editOrSend($chatId, $messageId, "¿Confirmas que quieres enviar este pedido?\nUn asesor revisará stock y te contactará por correo.",
+            $this->inlineKeyboard($rows));
+    }
+
+    // ────────────────────────── Servicio Técnico ──────────────────────────
+
+    private function screenService(User $user, string $chatId, string $payload, array &$session, ?int $messageId): void
+    {
+        if ($payload === 'horarios') {
+            $this->editOrSend($chatId, $messageId,
+                "🕐 <b>Horarios de atención</b>\n\n• Lunes a Viernes: 9:00 — 19:00\n• Sábado: 9:00 — 17:00\n• Domingo: cerrado",
+                $this->serviceKeyboard());
+            return;
+        }
+        if ($payload === 'ubicacion') {
+            $this->editOrSend($chatId, $messageId,
+                "📍 <b>Ubicación</b>\n\nLa Ecuatoriana — Las Orquídeas / Oe9 Martha Bucaram / S37-49 / S37a, Quito.\n\n🗺 <a href=\"https://maps.app.goo.gl/V8ghM2XY9M4H8v6Z9\">Abrir en Google Maps</a>",
+                $this->serviceKeyboard());
+            return;
+        }
+        $this->editOrSend($chatId, $messageId, "🔧 <b>Servicio Técnico</b>\n\nSelecciona una opción:", $this->serviceKeyboard());
+    }
+
+    private function serviceKeyboard(): array
+    {
+        return $this->inlineKeyboard([
+            [['text' => '🕐 Ver horarios', 'callback_data' => 'svc|horarios']],
+            [['text' => '📍 Ver ubicación', 'callback_data' => 'svc|ubicacion']],
+            [['text' => '📅 Agendar cita', 'callback_data' => 'cita_mes|0']],
+            [['text' => '🆘 Hablar con soporte', 'callback_data' => 'asesor|tipos']],
+            [['text' => '🏠 Menú principal', 'callback_data' => 'menu|']],
+        ]);
+    }
+
+    private function screenCitaDias(string $chatId, string $payload, array &$session, ?int $messageId): void
+    {
+        $offset = max(0, (int) $payload);
+        $start = Carbon::today()->addDays($offset);
+        $rows = [];
+        $rows[] = [['text' => '📅 Elige un día disponible:', 'callback_data' => 'noop|']];
+        for ($i = 0; $i < 14; $i++) {
+            $d = $start->copy()->addDays($i);
+            $label = $d->locale('es')->isoFormat('ddd D MMM');
+            $rows[] = [['text' => $label, 'callback_data' => "cita_dia|{$d->toDateString()}"]];
+        }
+        $nav = [];
+        if ($offset > 0) $nav[] = ['text' => '◀️ Sem. anterior', 'callback_data' => "cita_mes|" . max(0, $offset - 14)];
+        $nav[] = ['text' => '▶️ Sem. siguiente', 'callback_data' => "cita_mes|" . ($offset + 14)];
+        $rows[] = $nav;
+        $rows[] = [['text' => '↩️ Volver', 'callback_data' => 'svc|menu'], ['text' => '🏠 Menú', 'callback_data' => 'menu|']];
+        $this->editOrSend($chatId, $messageId, "📅 <b>Agendar cita</b>\n\nSelecciona el día:", $this->inlineKeyboard($rows));
+    }
+
+    private function screenCitaMotivos(string $chatId, string $fecha, array &$session, ?int $messageId): void
+    {
         try {
-            \App\Models\Contacto::create([
-                'id_usuario' => $user->id_usuario,
-                'nombre' => $user->usuario,
-                'correo' => $user->correo,
-                'compania' => 'Telegram',
-                'mensaje' => $mensaje,
-            ]);
-            $this->send($chatId, 'Tu mensaje ha sido registrado. Un asesor te contactara pronto.', $this->servicioTecnicoKeyboard());
-        } catch (\Throwable $e) {
-            report($e);
-            $this->send($chatId, 'No fue posible enviar el mensaje. Intenta mas tarde.', $this->servicioTecnicoKeyboard());
+            $d = Carbon::createFromFormat('Y-m-d', $fecha);
+        } catch (\Throwable) {
+            $this->editOrSend($chatId, $messageId, '❌ Fecha inválida.', $this->serviceKeyboard());
+            return;
         }
-        $session['state'] = 'SERVICIO_TECNICO';
-        $session['contacto_tipo'] = null;
+        if ($d->isPast()) {
+            $this->editOrSend($chatId, $messageId, '⛔ La fecha debe ser futura.', $this->serviceKeyboard());
+            return;
+        }
+        $session['cita_fecha'] = $fecha;
+        $rows = [];
+        $label = $d->locale('es')->isoFormat('dddd D [de] MMMM');
+        $rows[] = [['text' => "📆 {$label}", 'callback_data' => 'noop|']];
+        foreach (self::CITA_MOTIVOS as $i => $motivo) {
+            $rows[] = [['text' => "🛠 {$motivo}", 'callback_data' => "cita_mot|{$i}"]];
+        }
+        $rows[] = [['text' => '↩️ Elegir otro día', 'callback_data' => 'cita_mes|0'], ['text' => '🏠 Menú', 'callback_data' => 'menu|']];
+        $this->editOrSend($chatId, $messageId, "📅 <b>Motivo de la cita</b>\n\nDía elegido: <b>{$label}</b>\nSelecciona el motivo:", $this->inlineKeyboard($rows));
     }
 
-    private function handleCitaFecha(User $user, string $chatId, string $text, array &$session): void
+    private function actionCitaCrear(User $user, string $chatId, string $payload, array &$session, ?int $messageId): void
     {
-        if ($text === 'Volver al menu') {
-            $this->resetSession($chatId);
-            $this->sendMainMenu($chatId, $user->rol);
-            return;
-        }
-
-        if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $text)) {
-            $this->send($chatId, 'Formato invalido. Usa YYYY-MM-DD (ejemplo: 2026-08-20).', $this->buildReplyKeyboard([['text' => 'Volver al menu']]));
-            return;
-        }
-
-        $fecha = \Carbon\Carbon::createFromFormat('Y-m-d', $text);
-        if ($fecha->isPast()) {
-            $this->send($chatId, 'La fecha debe ser futura.', $this->buildReplyKeyboard([['text' => 'Volver al menu']]));
-            return;
-        }
-
-        $session['cita_fecha'] = $text;
-        $session['state'] = 'CITA_MOTIVO';
-        $this->send($chatId, "Fecha seleccionada: {$text}\n\nAhora escribe el motivo de la cita (ejemplo: mantenimiento, reparacion, etc.):", $this->buildReplyKeyboard([['text' => 'Volver al menu']]));
-    }
-
-    private function handleCitaMotivo(User $user, string $chatId, string $text, array &$session): void
-    {
-        if ($text === 'Volver al menu') {
-            $this->resetSession($chatId);
-            $this->sendMainMenu($chatId, $user->rol);
-            return;
-        }
-
+        $idx = (int) $payload;
+        $motivo = self::CITA_MOTIVOS[$idx] ?? null;
         $fecha = $session['cita_fecha'] ?? '';
-        $motivo = trim($text);
-
-        if ($motivo === '') {
-            $this->send($chatId, 'El motivo no puede estar vacio.', $this->buildReplyKeyboard([['text' => 'Volver al menu']]));
+        if (! $motivo || $fecha === '') {
+            $this->editOrSend($chatId, $messageId, '❌ Falta información para crear la cita.', $this->serviceKeyboard());
             return;
         }
-
         try {
-            $fecha = $session['cita_fecha'] ?? '';
             Cita::create([
                 'id_usuario' => $user->id_usuario,
                 'nombre' => $user->usuario,
                 'apellido' => '-',
                 'correo' => $user->correo,
                 'fecha' => $fecha,
-                'telefono' => $user->telegramAccounts->first()?->telefono ?? 'No registrado',
+                'telefono' => optional($user->telegramAccounts()->first())->telefono ?? 'No registrado',
                 'motivo' => $motivo,
             ]);
-            $this->send($chatId, "Cita registrada para el {$fecha} por: {$motivo}\n\nRecibiras confirmacion por correo.", $this->mainMenuKeyboard($user->rol));
+            $label = Carbon::createFromFormat('Y-m-d', $fecha)->locale('es')->isoFormat('dddd D [de] MMMM');
+            $this->editOrSend($chatId, $messageId,
+                "✅ <b>Cita registrada</b>\n\n📅 {$label}\n🛠 {$motivo}\n\nTe enviaremos confirmación al correo.",
+                $this->inlineKeyboard([
+                    [['text' => '📅 Agendar otra cita', 'callback_data' => 'cita_mes|0']],
+                    [['text' => '🏠 Menú principal', 'callback_data' => 'menu|']],
+                ]));
+            $this->resetSession($chatId);
         } catch (\Throwable $e) {
             report($e);
-            $this->send($chatId, 'No fue posible registrar la cita. Intenta mas tarde.', $this->mainMenuKeyboard($user->rol));
+            $this->editOrSend($chatId, $messageId, '❌ No fue posible registrar la cita. Intenta más tarde.', $this->serviceKeyboard());
         }
-
-        $session['state'] = null;
-        $session['cita_fecha'] = null;
     }
 
-    private function handleMiCuenta(User $user, string $chatId, string $text, array &$session): void
+    // ────────────────────────── Mi Cuenta ──────────────────────────
+
+    private function screenCuenta(User $user, string $chatId, string $payload, array &$session, ?int $messageId): void
     {
-        if ($text === 'Volver al menu') {
-            $this->resetSession($chatId);
-            $this->sendMainMenu($chatId, $user->rol);
+        if ($payload === 'citas') {
+            $items = Cita::where('id_usuario', $user->id_usuario)->orderByDesc('fecha')->limit(self::PAGE_SIZE)->get();
+            $rows = [];
+            $rows[] = [['text' => '📋 Tus últimas citas', 'callback_data' => 'noop|']];
+            if ($items->isEmpty()) {
+                $rows[] = [['text' => '— Sin citas registradas —', 'callback_data' => 'noop|']];
+            } else {
+                foreach ($items as $c) {
+                    $rows[] = [['text' => "📅 {$c->fecha->format('d/m/Y')} · {$c->motivo}", 'callback_data' => "cuenta_cita|{$c->id_cita}"]];
+                }
+            }
+            $rows[] = [['text' => '📦 Ver mis pedidos', 'callback_data' => 'cuenta|pedidos']];
+            $rows[] = [['text' => '🏠 Menú principal', 'callback_data' => 'menu|']];
+            $this->editOrSend($chatId, $messageId, "📋 <b>Mis citas</b>", $this->inlineKeyboard($rows));
             return;
         }
-
-        if ($text === 'Mis Citas') {
-            $items = Cita::where('id_usuario', $user->id_usuario)->orderByDesc('fecha')->limit(5)->get();
-            $reply = $items->isEmpty() ? 'No tienes citas registradas.' : 'Tus citas:' . $items->map(fn ($x) => "\n• {$x->fecha->format('d/m/Y')} — {$x->motivo}")->implode('');
-            $this->send($chatId, $reply, $this->mainMenuKeyboard($user->rol));
-        } elseif ($text === 'Mis Pedidos') {
-            $items = Pedido::where('id_usuario', $user->id_usuario)->orderByDesc('fecha_pedido')->limit(5)->get();
-            $reply = $items->isEmpty() ? 'No tienes pedidos registrados.' : 'Tus últimos pedidos:' . $items->map(fn ($x) => "\n• #{$x->id_pedido}: $ {$x->total}")->implode('');
-            $this->send($chatId, $reply, $this->mainMenuKeyboard($user->rol));
-        } else {
-            $this->send($chatId, 'Opcion no valida.', $this->mainMenuKeyboard($user->rol));
+        if ($payload === 'pedidos') {
+            $items = Pedido::where('id_usuario', $user->id_usuario)->orderByDesc('fecha_pedido')->limit(self::PAGE_SIZE)->get();
+            $rows = [];
+            $rows[] = [['text' => '📦 Tus últimos pedidos', 'callback_data' => 'noop|']];
+            if ($items->isEmpty()) {
+                $rows[] = [['text' => '— Sin pedidos registrados —', 'callback_data' => 'noop|']];
+            } else {
+                foreach ($items as $p) {
+                    $rows[] = [['text' => "🧾 #{$p->id_pedido} · \$" . number_format((float) $p->total, 2), 'callback_data' => "cuenta_ped|{$p->id_pedido}"]];
+                }
+            }
+            $rows[] = [['text' => '📋 Ver mis citas', 'callback_data' => 'cuenta|citas']];
+            $rows[] = [['text' => '🏠 Menú principal', 'callback_data' => 'menu|']];
+            $this->editOrSend($chatId, $messageId, "📦 <b>Mis pedidos</b>", $this->inlineKeyboard($rows));
+            return;
         }
-
-        $session['state'] = null;
-    }
-
-    private function sendMainMenu(string $chatId, string $role): void
-    {
-        $text = "Bienvenido a L&M PC Computadoras.\n\nSelecciona una opcion para continuar:";
-        $this->send($chatId, $text, $this->mainMenuKeyboard($role));
-        $this->setSession($chatId, ['state' => 'MAIN_MENU']);
-    }
-
-    private function mainMenuKeyboard(string $role): array
-    {
-        $keyboard = [
-            ['🛒 Ver Productos'],
-            ['🔧 Servicio Tecnico'],
-            ['📱 Mi Cuenta'],
-            ['💬 Hablar con Asesor'],
+        // Resumen de cuenta
+        $cuenta = [
+            "👤 <b>{$user->usuario}</b>",
+            "📧 {$user->correo}",
+            "🛡 Rol: " . ucfirst((string) $user->rol),
         ];
-
-        return $this->buildReplyKeyboard($keyboard);
+        $cuenta[] = "📅 Citas registradas: " . Cita::where('id_usuario', $user->id_usuario)->count();
+        $cuenta[] = "📦 Pedidos realizados: " . Pedido::where('id_usuario', $user->id_usuario)->count();
+        $this->editOrSend($chatId, $messageId, implode("\n", $cuenta), $this->inlineKeyboard([
+            [['text' => '📋 Mis citas', 'callback_data' => 'cuenta|citas'], ['text' => '📦 Mis pedidos', 'callback_data' => 'cuenta|pedidos']],
+            [['text' => '🛍 Mi carrito', 'callback_data' => 'cart_view|']],
+            [['text' => '🏠 Menú principal', 'callback_data' => 'menu|']],
+        ]));
     }
 
-    private function productCategoriesKeyboard(): array
+    private function screenCuentaCitaDetalle(User $user, string $chatId, string $id, ?int $messageId): void
     {
-        return $this->buildReplyKeyboard([
-            ['PC Escritorio'],
-            ['Laptops'],
-            ['Duplicadoras'],
-            ['Tablets'],
-            ['Impresoras'],
-            ['Tintas'],
-            ['Volver al menu'],
+        $cita = Cita::where('id_usuario', $user->id_usuario)->where('id_cita', (int) $id)->first();
+        if (! $cita) {
+            $this->editOrSend($chatId, $messageId, '❌ Cita no encontrada.', $this->backToMenu());
+            return;
+        }
+        $text = "📅 <b>Cita #{$cita->id_cita}</b>\n\n"
+            . "📆 {$cita->fecha->format('d/m/Y')}\n"
+            . "🛠 {$cita->motivo}\n"
+            . "📞 {$cita->telefono}\n"
+            . "📧 {$cita->correo}";
+        $this->editOrSend($chatId, $messageId, $text, $this->inlineKeyboard([
+            [['text' => '📅 Agendar otra', 'callback_data' => 'cita_mes|0']],
+            [['text' => '↩️ Volver a mis citas', 'callback_data' => 'cuenta|citas']],
+            [['text' => '🏠 Menú principal', 'callback_data' => 'menu|']],
+        ]));
+    }
+
+    private function screenCuentaPedidoDetalle(User $user, string $chatId, string $id, ?int $messageId): void
+    {
+        $pedido = Pedido::where('id_usuario', $user->id_usuario)->where('id_pedido', (int) $id)->first();
+        if (! $pedido) {
+            $this->editOrSend($chatId, $messageId, '❌ Pedido no encontrado.', $this->backToMenu());
+            return;
+        }
+        $text = "🧾 <b>Pedido #{$pedido->id_pedido}</b>\n\n"
+            . "📆 {$pedido->fecha_pedido->format('d/m/Y H:i')}\n"
+            . "💲 Total: <b>\$" . number_format((float) $pedido->total, 2) . "</b>\n"
+            . "📦 Estado: " . ucfirst((string) $pedido->estado ?? 'registrado');
+        $this->editOrSend($chatId, $messageId, $text, $this->inlineKeyboard([
+            [['text' => '↩️ Volver a mis pedidos', 'callback_data' => 'cuenta|pedidos']],
+            [['text' => '🏠 Menú principal', 'callback_data' => 'menu|']],
+        ]));
+    }
+
+    // ────────────────────────── Asesor ──────────────────────────
+
+    private function screenAsesor(User $user, string $chatId, string $payload, array &$session, ?int $messageId): void
+    {
+        if (str_starts_with($payload, 'producto:')) {
+            $producto = Producto::find((int) substr($payload, 9));
+            $session['asesor_producto'] = $producto?->id_producto;
+            $this->editOrSend($chatId, $messageId,
+                "💬 Vas a consultar por <b>" . ($producto?->nombre ?? 'un producto') . "</b>.\n\nSelecciona el motivo de tu consulta:",
+                $this->inlineKeyboard($this->asuntosRows()));
+            return;
+        }
+        $this->editOrSend($chatId, $messageId, "💬 <b>Hablar con un asesor</b>\n\nSelecciona el motivo de tu consulta:", $this->inlineKeyboard($this->asuntosRows()));
+    }
+
+    private function asuntosRows(): array
+    {
+        $rows = [];
+        foreach (self::CONSULTA_ASUNTOS as $i => $asunto) {
+            $rows[] = [['text' => "📨 {$asunto}", 'callback_data' => "asesor_asunto|{$i}"]];
+        }
+        $rows[] = [['text' => '↩️ Cancelar', 'callback_data' => 'cancel|']];
+        return $rows;
+    }
+
+    private function actionAsesorCrear(User $user, string $chatId, string $payload, array &$session, ?int $messageId): void
+    {
+        $idx = (int) $payload;
+        $asunto = self::CONSULTA_ASUNTOS[$idx] ?? null;
+        if (! $asunto) {
+            $this->editOrSend($chatId, $messageId, '❌ Opción no válida.', $this->backToMenu());
+            return;
+        }
+        $productoId = $session['asesor_producto'] ?? null;
+        $mensaje = $asunto;
+        if ($productoId) {
+            $p = Producto::find($productoId);
+            if ($p) {
+                $mensaje = "[Producto: {$p->nombre} (serie {$p->serie})] " . $asunto;
+            }
+        }
+        try {
+            Contacto::create([
+                'id_usuario' => $user->id_usuario,
+                'nombre' => $user->usuario,
+                'correo' => $user->correo,
+                'compania' => 'Telegram',
+                'mensaje' => $mensaje,
+            ]);
+            $this->editOrSend($chatId, $messageId,
+                "✅ <b>Mensaje enviado</b>\n\n📨 {$asunto}\n\nUn asesor revisará tu solicitud y te contactará al correo registrado.",
+                $this->inlineKeyboard([
+                    [['text' => '💬 Enviar otra consulta', 'callback_data' => 'asesor|tipos']],
+                    [['text' => '🏠 Menú principal', 'callback_data' => 'menu|']],
+                ]));
+            $this->resetSession($chatId);
+        } catch (\Throwable $e) {
+            report($e);
+            $this->editOrSend($chatId, $messageId, '❌ No fue posible enviar el mensaje.', $this->backToMenu());
+        }
+    }
+
+    private function actionCancelar(User $user, string $chatId, array &$session, ?int $messageId): void
+    {
+        $this->editOrSend($chatId, $messageId, "❌ Operación cancelada.", $this->backToMenu());
+        $this->resetSession($chatId);
+    }
+
+    // ────────────────────────── Vinculación ──────────────────────────
+
+    private function start(string $code, string $chatId, string $fromId, string $username): void
+    {
+        if ($code === '') {
+            $this->send($chatId, "Para vincularte:\n\n1) Entra a tu perfil en L&amp;M PC\n2) Haz clic en <b>Configurar Telegram</b>\n3) Pulsa <b>Generar código seguro</b>\n4) Regresa aquí y escribe:\n\n<code>/vincular TU-CODIGO</code>");
+            return;
+        }
+        $link = TelegramLinkCode::where('codigo_hash', hash('sha256', strtoupper($code)))->whereNull('usado_en')->where('expira_en', '>', now())->first();
+        if (! $link) {
+            $this->send($chatId, '❌ Código inválido, usado o vencido. Genera otro desde el portal.');
+            return;
+        }
+        if (TelegramAccount::where('id_usuario', $link->id_usuario)->exists() || TelegramAccount::where('telegram_user_id', $fromId)->exists()) {
+            $this->send($chatId, '⚠ Esta cuenta de usuario o de Telegram ya está vinculada. Desvincúlala primero desde el portal.');
+            return;
+        }
+        TelegramAccount::create([
+            'id_usuario' => $link->id_usuario,
+            'telegram_chat_id' => $chatId,
+            'telegram_user_id' => $fromId,
+            'username' => $username ?: null,
+            'ultima_actividad_en' => now(),
         ]);
+        $link->update(['usado_en' => now()]);
+        $this->send($chatId,
+            "✅ <b>Cuenta vinculada con éxito</b>.\n\nAhora comparte tu número para verificar tu identidad. Toca el botón:",
+            $this->buildReplyKeyboard([['text' => '📱 Compartir mi contacto', 'request_contact' => true]]));
     }
 
-    private function servicioTecnicoKeyboard(): array
+    private function saveContact(?TelegramAccount $account, array $contact, string $fromId, string $chatId): void
     {
-        return $this->buildReplyKeyboard([
-            ['Horarios'],
-            ['Ubicacion'],
-            ['Contacto'],
-            ['Agendar Cita'],
-            ['Volver al menu'],
-        ]);
+        if (! $account || (string) data_get($contact, 'user_id') !== $fromId) {
+            $this->send($chatId, '🔒 Por seguridad solo acepto el contacto de la misma cuenta de Telegram vinculada.');
+            return;
+        }
+        $phone = preg_replace('/[^0-9+]/', '', (string) data_get($contact, 'phone_number'));
+        if (strlen(str_replace('+', '', $phone)) < 8 || strlen($phone) > 20) {
+            $this->send($chatId, '❌ El número recibido no es válido.');
+            return;
+        }
+        $account->update(['telefono' => $phone, 'telefono_verificado_en' => now()]);
+        $user = User::find($account->id_usuario);
+        $this->send($chatId, "✅ Número verificado.\n\nToca <b>/menu</b> o escribe <code>menu</code> para ver las opciones.", null);
     }
 
-    private function contactoTiposKeyboard(): array
+    // ────────────────────────── Helpers de teclado ──────────────────────────
+
+    private function inlineKeyboard(array $rows): array
     {
-        return $this->buildReplyKeyboard([
-            ['Soporte Tecnico'],
-            ['Informacion Comercial'],
-            ['Otro'],
-            ['Volver al menu'],
-        ]);
+        return ['inline_keyboard' => $rows];
     }
 
-    private function miCuentaKeyboard(string $role): array
+    private function backToMenu(): array
     {
-        return $this->buildReplyKeyboard([
-            ['Mis Citas'],
-            ['Mis Pedidos'],
-            ['Volver al menu'],
+        return $this->inlineKeyboard([
+            [['text' => '🏠 Menú principal', 'callback_data' => 'menu|']],
         ]);
     }
 
@@ -455,88 +705,49 @@ class TelegramBotService
         return [
             'keyboard' => $rows,
             'resize_keyboard' => true,
-            'one_time_keyboard' => false,
-            'selective' => true,
+            'one_time_keyboard' => true,
+            'selective' => false,
         ];
     }
 
-    public function handleCallback(array $callback): void
+    private function unlinkedHelp(): string
     {
-        $chatId = (string) data_get($callback, 'message.chat.id');
-        if (! $chatId) {
-            return;
-        }
-        $data = data_get($callback, 'data');
-        $this->answerCallback($callback);
-        $this->send($chatId, "Callback recibido: {$data}\n\nEsta funcion se expandira en el futuro.", $this->mainMenuKeyboard('usuario'));
+        return "🔒 <b>Tu cuenta aún no está vinculada.</b>\n\n"
+            . "Para usar el bot:\n"
+            . "1) Inicia sesión en el portal de L&amp;M PC\n"
+            . "2) Entra a <b>Configurar Telegram</b>\n"
+            . "3) Genera un código y envíalo aquí:\n\n"
+            . "<code>/vincular TU-CODIGO</code>";
     }
 
-    private function answerCallback(array $callback): void
+    private function reverseCategory(string $cat): string
     {
-        $token = config('services.telegram.bot_token');
-        if (! $token) {
-            return;
+        foreach (self::CATEGORIES as $key => $def) {
+            if (in_array($cat, $def['cat'], true)) {
+                return $key;
+            }
         }
-        $callbackQueryId = data_get($callback, 'id');
-        if ($callbackQueryId) {
-            Http::timeout(8)->post("https://api.telegram.org/bot{$token}/answerCallbackQuery", [
-                'callback_query_id' => $callbackQueryId,
-                'text' => 'Procesado',
-            ]);
-        }
+        return 'laptops';
     }
 
-    private function start(string $code, string $chatId, string $fromId, string $username): void
+    // ────────────────────────── Carrito (persistente en sesión) ──────────────────────────
+
+    private function cartGet(array &$session): array
     {
-        if ($code === '') {
-            $this->send($chatId, 'Para vincularte, genera un código en el portal y envía /vincular CÓDIGO.');
-            return;
-        }
-        $link = TelegramLinkCode::where('codigo_hash', hash('sha256', strtoupper($code)))->whereNull('usado_en')->where('expira_en', '>', now())->first();
-        if (! $link) {
-            $this->send($chatId, 'Código inválido, usado o vencido. Genera otro código en el portal.');
-            return;
-        }
-        if (TelegramAccount::where('id_usuario', $link->id_usuario)->exists() || TelegramAccount::where('telegram_user_id', $fromId)->exists()) {
-            $this->send($chatId, 'Esta cuenta de usuario o Telegram ya está vinculada. Desvincúlala primero desde el portal.');
-            return;
-        }
-        TelegramAccount::create(['id_usuario' => $link->id_usuario, 'telegram_chat_id' => $chatId, 'telegram_user_id' => $fromId, 'username' => $username ?: null, 'ultima_actividad_en' => now()]);
-        $link->update(['usado_en' => now()]);
-        $this->send($chatId, 'Cuenta vinculada. Para verificar tu número, usa el botón “Compartir mi contacto” y después escribe /menu.', [['text' => 'Compartir mi contacto', 'request_contact' => true]]);
+        $payload = $session['payload'] ?? [];
+        return $payload['cart'] ?? [];
     }
 
-    private function saveContact(?TelegramAccount $account, array $contact, string $fromId, string $chatId): void
+    private function cartSet(array &$session, array $cart): void
     {
-        if (! $account || (string) data_get($contact, 'user_id') !== $fromId) {
-            $this->send($chatId, 'Por seguridad, solo acepto el contacto de la misma cuenta de Telegram vinculada.');
-            return;
-        }
-        $phone = preg_replace('/[^0-9+]/', '', (string) data_get($contact, 'phone_number'));
-        if (strlen(str_replace('+', '', $phone)) < 8 || strlen($phone) > 20) {
-            $this->send($chatId, 'El número recibido no es válido.');
-            return;
-        }
-        $account->update(['telefono' => $phone, 'telefono_verificado_en' => now()]);
-        $this->send($chatId, 'Número verificado. Escribe /menu para ver tus acciones disponibles.');
+        $payload = $session['payload'] ?? [];
+        $payload['cart'] = $cart;
+        $session['payload'] = $payload;
     }
 
-    private function getProductosPorCategoria(string $categoria)
-    {
-        $map = [
-            'PC' => ['PC'],
-            'laptops' => ['ASUS', 'lenovo', 'ominibook', 'msi', 'DELL'],
-            'duplicadoras' => ['DUPLICADORACD', 'DUPLICADORADVD', 'DUPLICADORABLU'],
-            'Tablets' => ['Tablets'],
-            'impresoras' => ['EPSON', 'CANON'],
-            'tintas' => ['TINTA100', 'TINTA1000'],
-        ];
+    // ────────────────────────── Telegram API ──────────────────────────
 
-        $categorias = $map[$categoria] ?? [$categoria];
-        return Producto::whereIn('categoria', $categorias)->orderBy('nombre')->get();
-    }
-
-    private function send(string $chatId, string $text, ?array $keyboard = null): void
+    private function send(string $chatId, string $text, ?array $markup = null): void
     {
         $token = config('services.telegram.bot_token');
         if (! $token) {
@@ -546,28 +757,105 @@ class TelegramBotService
             'chat_id' => $chatId,
             'text' => mb_substr($text, 0, 4000),
             'parse_mode' => 'HTML',
+            'disable_web_page_preview' => true,
         ];
-        if ($keyboard) {
-            $body['reply_markup'] = $keyboard;
+        if ($markup) {
+            $body['reply_markup'] = json_encode($markup);
         }
         Http::timeout(8)->post("https://api.telegram.org/bot{$token}/sendMessage", $body);
     }
 
+    private function editOrSend(string $chatId, ?int $messageId, string $text, array $markup): void
+    {
+        $token = config('services.telegram.bot_token');
+        if (! $token) {
+            return;
+        }
+        $body = [
+            'chat_id' => $chatId,
+            'text' => mb_substr($text, 0, 4000),
+            'parse_mode' => 'HTML',
+            'reply_markup' => json_encode($markup),
+            'disable_web_page_preview' => true,
+        ];
+        if ($messageId) {
+            $body['message_id'] = $messageId;
+            $resp = Http::timeout(8)->post("https://api.telegram.org/bot{$token}/editMessageText", $body);
+            // Si el mensaje no se puede editar (muy antiguo, sin cambios, etc.) enviamos uno nuevo.
+            if ($resp->successful() || $resp->json('description') === 'Bad Request: message is not modified') {
+                return;
+            }
+        }
+        $body['reply_markup'] = $markup;
+        Http::timeout(8)->post("https://api.telegram.org/bot{$token}/sendMessage", $body);
+    }
+
+    private function answerCallback(array $callback, string $text = ''): void
+    {
+        $token = config('services.telegram.bot_token');
+        $id = data_get($callback, 'id');
+        if (! $token || ! $id) {
+            return;
+        }
+        Http::timeout(8)->post("https://api.telegram.org/bot{$token}/answerCallbackQuery", [
+            'callback_query_id' => $id,
+            'text' => $text,
+            'show_alert' => false,
+        ]);
+    }
+
+    private function answerCallbackText(string $chatId, ?int $messageId, string $note, array $markup): void
+    {
+        $this->editOrSend($chatId, $messageId, $note, $markup);
+    }
+
+    // ────────────────────────── Sesión (compatible con modelo existente) ──────────────────────────
+
     private function getSession(string $chatId): array
     {
-        if (! isset($this->userSessions[$chatId])) {
-            $this->userSessions[$chatId] = [];
+        $session = TelegramSession::where('telegram_chat_id', $chatId)->first();
+        if (! $session) {
+            return ['state' => 'MENU', 'payload' => []];
         }
-        return $this->userSessions[$chatId];
+        $session->update(['ultima_actividad_en' => now()]);
+        $payload = $session->payload ?? [];
+        // Compatibilidad: si el payload antiguo no es un array, reiniciamos.
+        if (! is_array($payload)) {
+            $payload = [];
+        }
+        return [
+            'state' => $session->state ?? 'MENU',
+            'categoria' => $session->categoria,
+            'pagina' => (int) ($payload['pagina'] ?? 0),
+            'cita_fecha' => $session->cita_fecha,
+            'asesor_producto' => $payload['asesor_producto'] ?? null,
+            'payload' => $payload,
+        ];
     }
 
     private function setSession(string $chatId, array $data): void
     {
-        $this->userSessions[$chatId] = $data;
+        $session = TelegramSession::updateOrCreate(
+            ['telegram_chat_id' => $chatId],
+            ['ultima_actividad_en' => now()]
+        );
+        if (isset($data['state'])) {
+            $session->state = $data['state'];
+        }
+        if (array_key_exists('categoria', $data)) {
+            $session->categoria = $data['categoria'];
+        }
+        if (array_key_exists('cita_fecha', $data)) {
+            $session->cita_fecha = $data['cita_fecha'];
+        }
+        if (isset($data['payload']) && is_array($data['payload'])) {
+            $session->payload = $data['payload'];
+        }
+        $session->save();
     }
 
     private function resetSession(string $chatId): void
     {
-        $this->userSessions[$chatId] = [];
+        TelegramSession::where('telegram_chat_id', $chatId)->delete();
     }
 }

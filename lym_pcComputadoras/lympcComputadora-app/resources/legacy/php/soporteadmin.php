@@ -23,18 +23,23 @@ if(isset($_POST['guardar_soporte'])){
     if(!empty($nombre) && !empty($correo) && !empty($compania)){
         $ruta_ruc = null;
     $ruta_cedula = null;
-    $directorio_subida = "../docs/";
+    $directorio_subida = storage_path('app/public/docs/');
+    if (!is_dir($directorio_subida)) {
+        mkdir($directorio_subida, 0755, true);
+    }
 
     // Subir RUC
     if (isset($_FILES['archivo_ruc']) && $_FILES['archivo_ruc']['error'] === UPLOAD_ERR_OK){
-        $destino_ruc = $directorio_subida . time() . "_ruc_" . basename($_FILES['archivo_ruc']['name']);
-        if (move_uploaded_file($_FILES['archivo_ruc']['tmp_name'], $destino_ruc)) $ruta_ruc = $destino_ruc;
+        $nombre_ruc = time() . "_ruc_" . preg_replace('/[^A-Za-z0-9._-]/', '_', basename($_FILES['archivo_ruc']['name']));
+        $destino_ruc = $directorio_subida . $nombre_ruc;
+        if (move_uploaded_file($_FILES['archivo_ruc']['tmp_name'], $destino_ruc)) $ruta_ruc = 'docs/' . $nombre_ruc;
     }
 
     // Subir Cédula
     if (isset($_FILES['archivo_cedula']) && $_FILES['archivo_cedula']['error'] === UPLOAD_ERR_OK){
-        $destino_cedula = $directorio_subida . time() . "_cedula_prov_" . basename($_FILES['archivo_cedula']['name']);
-        if (move_uploaded_file($_FILES['archivo_cedula']['tmp_name'], $destino_cedula)) $ruta_cedula = $destino_cedula;
+        $nombre_cedula = time() . "_cedula_prov_" . preg_replace('/[^A-Za-z0-9._-]/', '_', basename($_FILES['archivo_cedula']['name']));
+        $destino_cedula = $directorio_subida . $nombre_cedula;
+        if (move_uploaded_file($_FILES['archivo_cedula']['tmp_name'], $destino_cedula)) $ruta_cedula = 'docs/' . $nombre_cedula;
     }  
         $stmt = $conn->prepare("INSERT INTO soporte (Nombre, Correo, cedula, archivo_ruc, archivo_cedula, Compania, Mensaje) VALUES (?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([$nombre, $correo, $cedula, $ruta_ruc, $ruta_cedula, $compania, $mensaje]);
@@ -428,8 +433,10 @@ if(isset($_POST['guardar_soporte'])){
                         foreach($query as $row){
                             
                             // Lógica para mostrar botones de descarga si el archivo existe
-                            $btnRuc = !empty($row['archivo_ruc']) ? "<a href='{$row['archivo_ruc']}' target='_blank' class='btn btn-sm btn-info mb-1 d-block' style='font-size:0.75rem;'>RUC</a>" : "";
-                            $btnCedula = !empty($row['archivo_cedula']) ? "<a href='{$row['archivo_cedula']}' target='_blank' class='btn btn-sm btn-secondary d-block' style='font-size:0.75rem;'>Cédula</a>" : "";
+                            $rucUrl = legacy_file_url($row['archivo_ruc'] ?? null);
+                            $cedulaUrl = legacy_file_url($row['archivo_cedula'] ?? null);
+                            $btnRuc = $rucUrl ? "<a href='" . htmlspecialchars($rucUrl, ENT_QUOTES, 'UTF-8') . "' target='_blank' rel='noopener noreferrer' class='btn btn-sm btn-info mb-1' style='font-size:0.75rem;'>RUC</a> <a href='" . htmlspecialchars(legacy_file_url($row['archivo_ruc'] ?? null, true), ENT_QUOTES, 'UTF-8') . "' class='btn btn-sm btn-outline-info mb-1' download style='font-size:0.75rem;'>Descargar</a>" : "";
+                            $btnCedula = $cedulaUrl ? "<a href='" . htmlspecialchars($cedulaUrl, ENT_QUOTES, 'UTF-8') . "' target='_blank' rel='noopener noreferrer' class='btn btn-sm btn-secondary mb-1' style='font-size:0.75rem;'>Cédula</a> <a href='" . htmlspecialchars(legacy_file_url($row['archivo_cedula'] ?? null, true), ENT_QUOTES, 'UTF-8') . "' class='btn btn-sm btn-outline-secondary mb-1' download style='font-size:0.75rem;'>Descargar</a>" : "";
                             $archivos = ($btnRuc == "" && $btnCedula == "") ? "<span class='text-muted' style='font-size:0.8rem;'>Ninguno</span>" : $btnRuc . $btnCedula;
 
                             echo "<tr>

@@ -123,8 +123,9 @@ function tipoDocumento($type) {
                         <td><?php echo htmlspecialchars($item['user_name'] ?? 'Pasante'); ?></td>
                         <td><span class="status-pill"><?php echo tipoDocumento($item['type'] ?? 'project'); ?></span></td>
                         <td>
-                            <?php if (!empty($item['repo_url'])): ?>
-                            <a href="<?php echo htmlspecialchars($item['repo_url']); ?>" target="_blank" rel="noopener">Ver repo</a>
+                            <?php $githubUrl = $item['github_url'] ?? $item['repo_url'] ?? ''; ?>
+                            <?php if ($githubUrl !== ''): ?>
+                            <a href="<?php echo htmlspecialchars($githubUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">Ver en GitHub</a>
                             <?php else: ?>
                             <span class="tool-muted">No registrado</span>
                             <?php endif; ?>
@@ -132,8 +133,11 @@ function tipoDocumento($type) {
                         <td><?php echo htmlspecialchars($item['uploaded_at'] ?? ''); ?></td>
                         <td>
                             <?php if (!empty($item['path'])): ?>
-                            <a class="btn btn-sm tool-action" href="<?php echo htmlspecialchars($item['path']); ?>" target="_blank">
+                            <a class="btn btn-sm tool-action" href="<?php echo htmlspecialchars(legacy_file_url($item['path']) ?? '#', ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
                                 <i class="fas fa-eye"></i> Ver
+                            </a>
+                            <a class="btn btn-sm btn-outline-secondary" href="<?php echo htmlspecialchars(legacy_file_url($item['path'], true) ?? '#', ENT_QUOTES, 'UTF-8'); ?>" download>
+                                <i class="fas fa-download"></i> Descargar
                             </a>
                             <?php endif; ?>
                         </td>

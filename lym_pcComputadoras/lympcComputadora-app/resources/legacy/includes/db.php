@@ -1,8 +1,45 @@
 <?php
 
+require_once __DIR__.'/file_helpers.php';
+
+if (!function_exists('env')) {
+    function env($key, $default = null) {
+        static $vars = null;
+
+        if ($vars === null) {
+            $vars = [];
+            $envPath = dirname(__DIR__, 2) . '/.env';
+
+            if (is_file($envPath)) {
+                $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+                foreach ($lines as $line) {
+                    $trimmed = trim($line);
+                    if ($trimmed === '' || str_starts_with($trimmed, '#')) {
+                        continue;
+                    }
+
+                    if (preg_match('/^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/', $trimmed, $matches)) {
+                        $value = trim($matches[2]);
+                        if ((str_starts_with($value, '"') && str_ends_with($value, '"')) || (str_starts_with($value, "'") && str_ends_with($value, "'"))) {
+                            $value = substr($value, 1, -1);
+                        }
+                        $vars[$matches[1]] = $value;
+                    }
+                }
+            }
+        }
+
+        return array_key_exists($key, $vars) ? $vars[$key] : $default;
+    }
+}
+
 try {
-    $conn = \Illuminate\Support\Facades\DB::connection()->getPdo();
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    if (class_exists('Illuminate\\Support\\Facades\\DB')) {
+        $conn = \Illuminate\Support\Facades\DB::connection()->getPdo();
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    } else {
+        throw new RuntimeException('Laravel DB facade not available.');
+    }
 } catch (Throwable $e) {
     $host = env('DB_HOST', '127.0.0.1');
     $db_name = env('DB_DATABASE', 'lympc_bd');

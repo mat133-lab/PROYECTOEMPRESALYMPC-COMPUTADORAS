@@ -352,7 +352,7 @@ if ($asistenteId) {
                             <div class="foto-placeholder shadow-sm"
                                 style="overflow: hidden; display: flex; justify-content: center; align-items: center; background-color: #e9ecef;">
                                 <?php if(!empty($asistenteFoto)): ?>
-                                <img src="/storage/uploads/profile/<?php echo $asistenteFoto; ?>" alt="Foto de Perfil"
+                                <img src="<?php echo htmlspecialchars(legacy_file_url('uploads/profile/' . $asistenteFoto) ?? '', ENT_QUOTES, 'UTF-8'); ?>" alt="Foto de Perfil"
                                     style="width: 100%; height: 100%; object-fit: cover;">
                                 <?php else: ?>
                                 <i class="fas fa-user" style="font-size: 3rem; color: #adb5bd;"></i>
@@ -445,12 +445,12 @@ if ($asistenteId) {
                                         <div class="d-flex flex-column gap-2">
                                             <?php if ($asistenteCopia && $asistenteCopia !== 'NULL'): ?>
                                             <div class="d-flex align-items-center gap-2">
-                                                <a href="<?php echo htmlspecialchars($asistenteCopia); ?>" target="_blank"
+                                                <a href="<?php echo htmlspecialchars(legacy_file_url($asistenteCopia) ?? '#', ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer"
                                                     class="btn btn-sm btn-outline-primary"
                                                     style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">
                                                     <i class="fas fa-eye me-1"></i> Ver Cédula
                                                 </a>
-                                                <a href="<?php echo htmlspecialchars($asistenteCopia); ?>" download
+                                                <a href="<?php echo htmlspecialchars(legacy_file_url($asistenteCopia, true) ?? '#', ENT_QUOTES, 'UTF-8'); ?>" download
                                                     class="btn btn-sm btn-primary"
                                                     style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">
                                                     <i class="fas fa-download"></i>
@@ -459,12 +459,12 @@ if ($asistenteId) {
                                             <?php endif; ?>
                                             <?php if ($asistenteRuc && $asistenteRuc !== 'NULL'): ?>
                                             <div class="d-flex align-items-center gap-2">
-                                                <a href="<?php echo htmlspecialchars($asistenteRuc); ?>" target="_blank"
+                                                <a href="<?php echo htmlspecialchars(legacy_file_url($asistenteRuc) ?? '#', ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer"
                                                     class="btn btn-sm btn-outline-success"
                                                     style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">
                                                     <i class="fas fa-eye me-1"></i> Ver RUC
                                                 </a>
-                                                <a href="<?php echo htmlspecialchars($asistenteRuc); ?>" download
+                                                <a href="<?php echo htmlspecialchars(legacy_file_url($asistenteRuc, true) ?? '#', ENT_QUOTES, 'UTF-8'); ?>" download
                                                     class="btn btn-sm btn-success"
                                                     style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">
                                                     <i class="fas fa-download"></i>

@@ -41,6 +41,16 @@ return [
         'bot_username' => env('TELEGRAM_BOT_USERNAME'),
     ],
 
+    'github' => [
+        'token' => env('GITHUB_TOKEN'),
+        'api_url' => env('GITHUB_API_URL', 'https://api.github.com'),
+        'branch' => env('GITHUB_REPOSITORY_BRANCH', 'main'),
+        'directory' => env('GITHUB_UPLOAD_DIRECTORY', 'uploads/pasantes'),
+        'max_file_bytes' => (int) env('GITHUB_MAX_FILE_BYTES', 52428800),
+        'timeout' => (int) env('GITHUB_TIMEOUT', 20),
+        'user_agent' => env('GITHUB_USER_AGENT', 'L&M-PC-Computadoras'),
+    ],
+
     'assistant_ai' => [
         // Valores admitidos: gemini, qwen o groq. La clave jamás debe ir al cliente.
         'provider' => env('AI_PROVIDER', 'gemini'),

@@ -36,6 +36,11 @@ try {
     ");
     $stmt->execute([$_SESSION['id_usuario'], $desde, $hasta]);
     $citas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($citas as &$cita) {
+        $cita['archivo_ruc'] = legacy_file_url($cita['archivo_ruc'] ?? null);
+        $cita['archivo_cedula'] = legacy_file_url($cita['archivo_cedula'] ?? null);
+    }
+    unset($cita);
     
     // Retornar JSON
     header('Content-Type: application/json');

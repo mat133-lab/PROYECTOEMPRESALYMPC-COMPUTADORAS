@@ -347,8 +347,10 @@ $usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Técnico');
                                     foreach($query as $row){
                                         
                                         // Generar botones de descarga para RUC y Cédula
-                                        $btnRuc = !empty($row['archivo_ruc']) ? "<a href='{$row['archivo_ruc']}' target='_blank' class='btn btn-sm btn-info mb-1' style='font-size:0.75rem;'>RUC</a>" : "";
-                                        $btnCedula = !empty($row['archivo_cedula']) ? "<a href='{$row['archivo_cedula']}' target='_blank' class='btn btn-sm btn-secondary' style='font-size:0.75rem;'>Cédula</a>" : "";
+                                        $rucUrl = legacy_file_url($row['archivo_ruc'] ?? null);
+                                        $cedulaUrl = legacy_file_url($row['archivo_cedula'] ?? null);
+                                        $btnRuc = $rucUrl ? "<a href='" . htmlspecialchars($rucUrl, ENT_QUOTES, 'UTF-8') . "' target='_blank' rel='noopener noreferrer' class='btn btn-sm btn-info mb-1' style='font-size:0.75rem;'>RUC</a> <a href='" . htmlspecialchars(legacy_file_url($row['archivo_ruc'] ?? null, true), ENT_QUOTES, 'UTF-8') . "' class='btn btn-sm btn-outline-info mb-1' download style='font-size:0.75rem;'>Descargar</a>" : "";
+                                        $btnCedula = $cedulaUrl ? "<a href='" . htmlspecialchars($cedulaUrl, ENT_QUOTES, 'UTF-8') . "' target='_blank' rel='noopener noreferrer' class='btn btn-sm btn-secondary mb-1' style='font-size:0.75rem;'>Cédula</a> <a href='" . htmlspecialchars(legacy_file_url($row['archivo_cedula'] ?? null, true), ENT_QUOTES, 'UTF-8') . "' class='btn btn-sm btn-outline-secondary mb-1' download style='font-size:0.75rem;'>Descargar</a>" : "";
                                         $archivos = ($btnRuc == "" && $btnCedula == "") ? "<span class='text-muted' style='font-size:0.8rem;'>Ninguno</span>" : $btnRuc . $btnCedula;
 
                                         echo "<tr>

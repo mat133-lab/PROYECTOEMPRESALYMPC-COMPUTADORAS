@@ -26,21 +26,32 @@ if (isset($_POST['enviar'])) {
         
         $ruta_ruc = null;
         $ruta_cedula = null;
-        $directorio_subida = "../docs/";
+        $directorio_subida = storage_path('app/public/docs/');
+    if (!is_dir($directorio_subida)) {
+        mkdir($directorio_subida, 0755, true);
+    }
 
         // Procesar subida de RUC
         if (isset($_FILES['archivo_ruc']) && $_FILES['archivo_ruc']['error'] === UPLOAD_ERR_OK){
-            $destino_ruc = $directorio_subida . time() . "_ruc_" . basename($_FILES['archivo_ruc']['name']);
+            $nombre_ruc = time() . "_ruc_" . preg_replace('/[^A-Za-z0-9._-]/', '_', basename($_FILES['archivo_ruc']['name']));
+
+            $destino_ruc = $directorio_subida . $nombre_ruc;
+
             if (move_uploaded_file($_FILES['archivo_ruc']['tmp_name'], $destino_ruc)) {
-                $ruta_ruc = $destino_ruc;
+
+                $ruta_ruc = 'docs/' . $nombre_ruc;
             }
         }
 
         // Procesar subida de Cédula
         if (isset($_FILES['archivo_cedula']) && $_FILES['archivo_cedula']['error'] === UPLOAD_ERR_OK){
-            $destino_cedula = $directorio_subida . time() . "_cedula_" . basename($_FILES['archivo_cedula']['name']);
+            $nombre_cedula = time() . "_cedula_" . preg_replace('/[^A-Za-z0-9._-]/', '_', basename($_FILES['archivo_cedula']['name']));
+
+            $destino_cedula = $directorio_subida . $nombre_cedula;
+
             if (move_uploaded_file($_FILES['archivo_cedula']['tmp_name'], $destino_cedula)) {
-                $ruta_cedula = $destino_cedula;
+
+                $ruta_cedula = 'docs/' . $nombre_cedula;
             }
         }
 

@@ -409,9 +409,10 @@ if (isset($_GET['upload'])) {
                                 <td><?php echo htmlspecialchars($item['user_name'] ?? ''); ?></td>
                                 <td><?php echo htmlspecialchars($item['uploaded_at'] ?? ''); ?></td>
                                 <td>
-                                    <?php if (!empty($item['repo_url']) && $item['type'] === 'project'): ?>
-                                    <a href="<?php echo htmlspecialchars($item['repo_url']); ?>" target="_blank"
-                                        class="btn btn-sm btn-outline-info">GitHub</a>
+                                    <?php $githubUrl = $item['github_url'] ?? $item['repo_url'] ?? ''; ?>
+                                    <?php if ($githubUrl !== '' && $item['type'] === 'project'): ?>
+                                    <a href="<?php echo htmlspecialchars($githubUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank"
+                                        rel="noopener noreferrer" class="btn btn-sm btn-outline-info">GitHub</a>
                                     <?php else: ?>
                                     <span class="text-muted">-</span>
                                     <?php endif; ?>
@@ -419,8 +420,10 @@ if (isset($_GET['upload'])) {
                                 <td><?php echo htmlspecialchars($item['original_name'] ?? ''); ?></td>
                                 <td>
                                     <?php if (!empty($item['path'])): ?>
-                                    <a href="<?php echo htmlspecialchars($item['path']); ?>" target="_blank"
+                                    <a href="<?php echo htmlspecialchars(legacy_file_url($item['path']) ?? '#', ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer"
                                         class="btn btn-sm btn-outline-primary">Ver</a>
+                                    <a href="<?php echo htmlspecialchars(legacy_file_url($item['path'], true) ?? '#', ENT_QUOTES, 'UTF-8'); ?>" download
+                                        class="btn btn-sm btn-outline-secondary">Descargar</a>
                                     <?php else: ?>
                                     <span class="text-muted">No disponible</span>
                                     <?php endif; ?>

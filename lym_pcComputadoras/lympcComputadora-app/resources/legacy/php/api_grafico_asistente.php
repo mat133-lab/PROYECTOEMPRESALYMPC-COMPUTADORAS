@@ -8,7 +8,7 @@ try {
         SELECT p.nombre, SUM(dp.cantidad) as total_vendido
         FROM detalles_pedido dp
         INNER JOIN productos p ON dp.id_producto = p.id_producto
-        GROUP BY dp.id_producto
+        GROUP BY dp.id_producto, p.nombre
         ORDER BY total_vendido DESC
         LIMIT 20
     ";
@@ -16,7 +16,7 @@ try {
     $sql1 = "
         SELECT pd.nombre, SUM(pd.unidades) as total_vendido1
         FROM productos pd
-        GROUP BY pd.id_producto
+        GROUP BY pd.id_producto, pd.nombre
         ORDER BY total_vendido1 DESC
         LIMIT 20
     ";
@@ -107,9 +107,13 @@ try {
         ]
     ]);
 
-} catch (Exception $e) {
+} catch (Throwable $e) {
+    error_log('Error al cargar las gráficas del asistente: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    echo json_encode([
+        'success' => false,
+        'error' => 'No se pudo cargar la información de las gráficas.',
+    ]);
 }
 ?>
 
