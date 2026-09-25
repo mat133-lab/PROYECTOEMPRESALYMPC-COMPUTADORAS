@@ -1,7 +1,7 @@
 # L&M PC Computadoras
 
 ## Creador
-Cisneros Matt
+Cisneros Mateo
 
 ## Descripción del Proyecto
 
