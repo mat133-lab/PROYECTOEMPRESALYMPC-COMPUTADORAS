@@ -5,7 +5,7 @@ use App\Http\Controllers\LegacyFileController;
 use App\Http\Controllers\TelegramLinkController;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/php/login.php');
+Route::redirect('/', '/php/vistabeta.php');
 Route::redirect('/login', '/php/login.php');
 Route::redirect('/dashboard', '/php/dashboard.php');
 Route::redirect('/admin', '/php/login_admin.php');

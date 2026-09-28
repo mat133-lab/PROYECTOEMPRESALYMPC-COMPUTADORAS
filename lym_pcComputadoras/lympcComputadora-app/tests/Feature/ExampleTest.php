@@ -10,11 +10,11 @@ class ExampleTest extends TestCase
     /**
      * A basic test example.
      */
-    public function test_the_application_redirects_to_the_legacy_login(): void
+    public function test_the_application_redirects_to_the_beta_view(): void
     {
         $response = $this->get('/');
 
-        $response->assertRedirect('/php/login.php');
+        $response->assertRedirect('/php/vistabeta.php');
     }
 
     public function test_the_legacy_login_is_served_through_laravel(): void
