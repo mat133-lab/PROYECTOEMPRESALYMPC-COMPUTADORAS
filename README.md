@@ -1234,4 +1234,5 @@ tar -czf backup_uploads_$(date +%Y%m%d).tar.gz lymptcComp/uploads/
 - `lympcComp/assets/GUIA_USUARIO.md` - Guía de usuario
 - `lympcComp/assets/API.md` - Documentación de APIs legacy
 - `lym_pcComputadoras/lympcComputadora-app/docs/TELEGRAM.md` - Guía de integración Telegram
-- `lym_pcComputadoras/lympcComputadora-app/docs/TECHNICAL_REPORT_LEGACY_SESSION_FIX.md` - Reporte técnico de corrección de sesiones
+- `lym_pcComputadoras/lympcComputadora-app/docs/TECHNICAL_REPORT_LEGACY_SESSION_FIX.md` - Reporte técnico de corrección de sesiones#   l y m P c C o m p u t a d o r a s  
+ 
