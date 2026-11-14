@@ -4,12 +4,12 @@ require_once '../includes/db.php';
 
 // Verificar si el usuario está logueado
 if (!isset($_SESSION['usuario'])) {
-    header("Location: /php/login.php");
+    header("Location: ../php/login.php");
     exit();
 }
 // Verificar si es administrador
 if (!isset($_SESSION['rol']) || strtolower($_SESSION['rol']) !== 'admin') {
-    header("Location: /php/contacto.php");
+    header("Location: ../php/contacto.php");
     exit();
 } 
 
@@ -38,7 +38,7 @@ if(isset($_POST['guardar_soporte'])){
     }  
         $stmt = $conn->prepare("INSERT INTO soporte (Nombre, Correo, cedula, archivo_ruc, archivo_cedula, Compania, Mensaje) VALUES (?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([$nombre, $correo, $cedula, $ruta_ruc, $ruta_cedula, $compania, $mensaje]);
-        header("Location: /php/soporteadmin.php"); // Recargar para limpiar el POST
+        header("Location: ../php/soporteadmin.php"); // Recargar para limpiar el POST
     exit();
     }    
 }
@@ -55,10 +55,13 @@ if(isset($_POST['guardar_soporte'])){
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="../css/stylecitas.css">
     <link rel="stylesheet" href="../css/footer.css">
+    <link rel="stylesheet" href="../css/pdf_print_branding.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body>
+    <div class="pdf-branding-header"><img src="../img/headerlym.png" alt="L&M PC Computadoras"></div>
+    <div class="pdf-branding-footer"><img src="../img/footerlym.png" alt="Información de contacto"></div>
     <nav class="navbar navbar-dark bg-warning fixed-top">
         <div class="container-fluid">
             <?php 
@@ -268,7 +271,7 @@ if(isset($_POST['guardar_soporte'])){
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
-                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>
@@ -327,7 +330,7 @@ if(isset($_POST['guardar_soporte'])){
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
-                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>
@@ -450,7 +453,7 @@ if(isset($_POST['guardar_soporte'])){
                 </table>
             </div>
             <div style="margin-top:0.75rem; text-align:right;">
-                <button onclick="window.print()" class="btn btn-primary">Exportar PDF</button>
+                <button onclick="window.print()" class="btn btn-primary pdf-export-button">Exportar PDF</button>
             </div>
         </div>
         <?php

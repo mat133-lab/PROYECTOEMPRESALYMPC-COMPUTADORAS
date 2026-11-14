@@ -67,7 +67,9 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
                         <tbody id="lista-libro"></tbody>
                     </table>
 
-                    <div id="carrito-acciones" class="carrito-acciones disabled">
+                    <div id="carrito-acciones" class="carrito-acciones disabled"
+                        data-api-url="paypal_api.php"
+                        data-pdf-url="generar_pedido_pdf.php">
                         <div class="carrito-acciones-izquierda">
                             <button class="carrito-acciones-vaciar" id="carrito-acciones-vaciar">
                                 Vaciar Carrito
@@ -79,9 +81,12 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
                                 <p>Compras Totales:</p>
                                 <p id="total">$0</p>
                             </div>
-                            <button class="carrito-acciones-comprar" id="carrito-acciones-comprar">
-                                Comprar ahora
+                            <button class="carrito-acciones-comprar" id="carrito-acciones-comprar" type="button">
+                                Comprar con PayPal
                             </button>
+                            <div id="paypal-button-container" hidden></div>
+                            <button id="paypal-cancelar" type="button" hidden>Cancelar pago</button>
+                            <p id="paypal-estado" role="status" aria-live="polite"></p>
                         </div>
                     </div>
                 </div>
@@ -269,7 +274,7 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
-                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>
@@ -392,6 +397,7 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
 
         <?php include '../includes/chat_widget.php'; ?>
 
+        <script src="../js/pasarelaP.js"></script>
         <script src="../js/dashboard.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">

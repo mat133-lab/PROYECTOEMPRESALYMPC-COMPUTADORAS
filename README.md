@@ -5,7 +5,7 @@ Cisneros Mateo
 
 ## Descripción del Proyecto
 
-L&M PC Computadoras es una plataforma web integral para la gestión de una empresa de tecnología especializada en computadoras, laptops, accesorios y servicios técnicos. El sistema combina un **módulo legacy PHP** monolítico con un **wrapper moderno en Laravel 13**, integrando además un **bot de Telegram** con interfaz de botones y un **widget de chat web con IA**.
+L&M PC Computadoras es una plataforma web integral para la gestión de una empresa de tecnología especializada en computadoras, laptops, accesorios y servicios técnicos. El sistema combina un **módulo legacy PHP** monolítico con un **wrapper moderno en Laravel 13**, integrando además un **bot de Telegram** y un **chat web de asistencia virtual basado en reglas**.
 
 ---
 
@@ -15,7 +15,7 @@ L&M PC Computadoras es una plataforma web integral para la gestión de una empre
 - Gestión de productos por categorías: laptops, PCs, tablets, impresoras, insumos, duplicadores
 - Control de inventario (unidades, precios, series, imágenes)
 - Carrito de compras con pasarela de pago
-- Generación de PDFs de pedidos
+- Generación de PDFs de pedidos, citas y contactos; las vistas de reportes imprimibles también usan encabezado y pie de marca
 
 ### Gestión de Citas
 - Sistema de agendamiento de citas técnicas
@@ -29,9 +29,9 @@ L&M PC Computadoras es una plataforma web integral para la gestión de una empre
 - Recuperación y cambio de contraseña
 - Vinculación de cuentas de Telegram
 
-### Chat en Línea con IA
+### Chat en Línea con Asistencia Virtual
 - Widget flotante de chat para usuarios web
-- Clasificador de intenciones mediante red neuronal Python
+- Clasificación local de consultas mediante reglas Python y fallback PHP (no es un modelo de IA/LLM)
 - Escalamiento a asistente humano
 - Sistema de calificación de conversaciones (1-10)
 
@@ -92,10 +92,10 @@ lymPCComputadoras/
 | **Frontend** | HTML, CSS, JavaScript, Tailwind CSS | v4 |
 | **Build Tool** | Vite | 8.x |
 | **Bot Telegram** | PHP (Laravel) + Webhook/Polling | - |
-| **IA Chatbot** | Python (Red Neuronal) | 3.x |
+| **Asistencia virtual web** | Python (reglas) + fallback PHP | 3.x |
 | **PDF** | Dompdf | 3.1 |
 | **Email** | PHPMailer | 7.1 |
-| **IA Providers** | Gemini / Qwen / Groq | Configurable |
+| **Proveedores IA** | Gemini / Qwen / Groq | Configurados, sin integración confirmada en el chat web ni en las gráficas |
 
 ---
 
@@ -160,11 +160,19 @@ Archivos: `productos.php`, `guardar_producto.php`, `editar.php`, `eliminar.php`
 
 ### Carrito de Compras
 
-Archivo: `cart_action.php`
+Archivos: `cart_action.php`, `paypal_api.php`, `generar_pedido_pdf.php`
 
-- Acciones: `add` (agregar), `clear` (limpiar), `purchase` (comprar)
-- Validación de stock
-- Creación de pedido con detalles
+- El carrito se mantiene en la sesión; agregar productos no descuenta inventario.
+- PayPal crea y captura la orden desde el servidor usando precios consultados en la base de datos.
+- El pedido, sus detalles y el descuento de inventario se registran en una transacción después de verificar el cobro.
+- Al confirmarse, se abre el PDF del pedido con el encabezado y pie de marca existentes.
+- `procesar_compra.php` ya no registra pedidos sin pago confirmado.
+
+#### Configuración PayPal
+
+Usa primero credenciales de **Sandbox**. En Laravel configura `PAYPAL_MODE=sandbox`, `PAYPAL_CLIENT_ID` y `PAYPAL_CLIENT_SECRET` en `lym_pcComputadoras/lympcComputadora-app/.env`; ejecuta `php artisan migrate` para crear la tabla de idempotencia `paypal_pedidos`. En XAMPP configura esas tres variables en el entorno de Apache y reinicia Apache. No pongas el `client secret` en JavaScript ni lo subas al repositorio.
+
+El checkout activo funciona dentro del mismo sitio PHP/Laravel; no necesita los servidores Flask de demostración ni URLs `localhost:3000`/`localhost:5000`. `resources/legacy/python/pasarelaP.py` es solo un comprobador manual de credenciales, no un servidor web. Desde la raíz del repositorio puedes probarlas con `python lym_pcComputadoras/lympcComputadora-app/resources/legacy/python/pasarelaP.py` cuando las variables estén disponibles en el entorno de la consola.
 
 ### Gestión de Citas
 
@@ -214,7 +222,7 @@ Archivos: `subirpasante.php`, `subireport.php`, `lecturadoc.php`, `pasante_uploa
 
 - `calendar.js`, `calendario.js` - FullCalendar
 - `horario-calendario.js`, `horario-calendario-admin.js` - Calendarios específicos
-- `grafico_asistente.js`, `grafica.php` - Gráficos estadísticos
+- `grafico_asistente.js`, `grafica.php` - Gráficos y resúmenes estadísticos locales (no usan un proveedor LLM)
 
 ---
 
@@ -532,15 +540,12 @@ Para acciones sensibles (crear citas, contactos, etc.), el bot no ejecuta direct
 5. Se registra en `TelegramActionAudit`
 6. Bot notifica al usuario del resultado
 
-### Interpretación de IA (`AiIntentService`)
+### Servicio de interpretación (`AiIntentService`)
 
 **Archivo**: `app/Services/AiIntentService.php`
 
-- Proveedores: Gemini (default), Qwen, Groq
-- Envía texto del usuario a IA para extraer intención estructurada
-- Acciones soportadas: `crear_cita`, `crear_contacto`, `crear_producto`, `consultar_cita`, `consultar_pedido`, `consultar_producto`
-- Parámetros extraídos: nombres, fechas, montos, categorías
-- Si la IA no puede interpretar, responde con opciones de botón
+- Tiene configuración para Gemini, Qwen y Groq, pero no se encontró una llamada a `interpret()` desde el flujo activo del chat web o del análisis de gráficas.
+- No se debe asumir que esos flujos envían consultas a un proveedor externo; el chat web usa reglas locales y las gráficas calculan estadísticas en JavaScript.
 
 ### Modo de Ejecución
 
@@ -568,7 +573,7 @@ Para acciones sensibles (crear citas, contactos, etc.), el bot no ejecuta direct
 
 ## Widget de Chat Web
 
-El widget de chat web es un componente flotante que permite a los usuarios interactuar con un asistente virtual basado en IA o escalar a un asistente humano.
+El widget de chat web es un componente flotante que permite a los usuarios interactuar con respuestas locales por reglas o escalar a un asistente humano. No usa un LLM.
 
 ### Arquitectura del Chat
 
@@ -582,7 +587,7 @@ chat_api.php (API backend)
     ↓
 chat_helpers.php
     ↓
-    ├── chatbot_ia.py (IA - Python)
+    ├── chatbot_ia.py (reglas de intención - Python)
     └── chatBotFallback() (PHP - keyword matching)
 ```
 
@@ -592,10 +597,10 @@ chat_helpers.php
 
 - Widget flotante en esquina inferior derecha
 - Solo visible para usuarios autenticados que NO son staff
-- Botones de acción rápida (sin texto libre)
+- Entrada de texto y controles de acción rápida
 - Historial de mensajes con diferenciación de remitente (usuario, IA, asistente)
 - Sistema de calificación post-conversación (1-10 con comentario)
-- Indicador de estado: typing, en línea, fuera de línea
+- Indicador de estado de la conversación (asistencia virtual, en espera o atendida)
 
 ### Backend API (`chat_api.php`)
 
@@ -606,14 +611,14 @@ Acciones soportadas:
 | Acción | Parámetros | Descripción |
 |--------|-----------|-------------|
 | `bootstrap` | - | Inicializa o recupera conversación activa |
-| `send` | mensaje, tema | Envía mensaje y obtiene respuesta |
+| `send` | mensaje | Guarda el mensaje y obtiene una respuesta local o lo deriva a asistencia |
 | `rate` | calificacion, comentario | Califica la conversación finalizada |
 
 Flujo:
 1. Verifica sesión activa y rol de usuario
 2. Si no es staff, permite acceso
 3. Para `bootstrap`: crea o recupera conversación en estado `ia`
-4. Para `send`: guarda mensaje, invoca IA, actualiza estado
+4. Para `send`: valida la conversación, guarda el mensaje, ejecuta reglas locales o cambia el estado a espera de asistente
 5. Para `rate`: cierra conversación con calificación
 
 ### Lógica de Chat (`chat_helpers.php`)
@@ -634,7 +639,7 @@ Funciones principales:
 
 **Archivo**: `lympcComp/python/chatbot_ia.py`
 
-Tecnología: Red neuronal Python con capas y neuronas (forward/backward propagation).
+Tecnología: reglas deterministas de palabras clave y expresiones regulares en Python; no es una red neuronal ni un LLM.
 
 - Normalización Unicode de entrada
 - Clasificación de intenciones:
@@ -646,11 +651,11 @@ Tecnología: Red neuronal Python con capas y neuronas (forward/backward propagat
 - Si intención = asistente humano: cambia estado a `pendiente_asistente`
 - Invocado mediante `proc_open()` desde PHP
 
-### Red Neuronal (`neuronal_network.py`, `layer.py`, `neuron.py`)
+### Módulos de red neuronal experimentales
 
 **Archivos**: `lympcComp/python/neuronal_network.py`, `layer.py`, `neuron.py`
 
-Componentes:
+Estos módulos no son invocados por `chatbot_ia.py` en el flujo actual. Componentes:
 - `Neuron`: Neurona con activación sigmoide, pesos y bias
 - `Layer`: Capa de neuronas, propagación hacia adelante y atrás
 - `NeuronalNetwork`: Red completa con MSE loss, entrenamiento y predicción
@@ -680,8 +685,8 @@ Funcionalidades:
 
 1. Usuario abre widget → `bootstrap` crea/recupera conversación
 2. Usuario envía mensaje → `send` guarda y procesa
-3. `chatBotResponse()` clasifica intención
-4. Si es consulta simple → respuesta automática de IA
+3. `chatBotResponse()` clasifica la intención mediante reglas Python (o usa el fallback PHP si Python no responde)
+4. Si es consulta simple → respuesta automática local
 5. Si requiere humano → estado cambia a `pendiente_asistente`
 6. Asistente se conecta y responde desde panel admin
 7. Conversación se cierra → usuario califica (1-10 + comentario)
@@ -690,7 +695,7 @@ Funcionalidades:
 
 - No disponible para personal staff (admin, técnico, pasante, asistente)
 - Requiere sesión activa de usuario web
-- Python debe estar disponible en el servidor para IA; si no, usa fallback PHP
+- Python es opcional: si no está disponible o falla la comunicación, se usa el fallback PHP
 - Una conversación activa por usuario a la vez
 
 ---
@@ -999,11 +1004,13 @@ Las migraciones crean las tablas de Telegram y Chat en la base de datos configur
    ```bash
    npm run dev
    ```
-9. Iniciar servidor:
+9. Iniciar el servidor Laravel desde `lym_pcComputadoras/lympcComputadora-app`:
    ```bash
-   php artisan serve
+   php artisan serve --host=127.0.0.1 --port=8000
    ```
-10. Acceder a `http://localhost:8000`
+10. Acceder a `http://127.0.0.1:8000/php/login.php`
+
+Las páginas legacy del wrapper se ejecutan mediante Laravel en `/php/*.php`. No abras directamente los archivos de `resources/legacy/php/` ni uses el servidor de Vite para esas rutas: Vite solo sirve los assets y no ejecuta los controladores PHP legacy. Si necesitas usar otro puerto, inicia Laravel con `--port=PUERTO` y abre la misma ruta `/php/login.php` en ese puerto.
 
 ### Configuración del Bot de Telegram
 

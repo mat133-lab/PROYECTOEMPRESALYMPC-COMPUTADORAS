@@ -3,7 +3,7 @@ session_start();
 include_once '../includes/db.php';
 
 if(!isset($_SESSION['usuario'])){
-    header("Location: /php/login.php");
+    header("Location: ../php/login.php");
     exit;
 }
 
@@ -39,7 +39,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
         $stmt = $conn->prepare($query);
 
 if($stmt->execute($params)){
-             header("Location: /php/productos.php?mensaje=actualizado_exito");
+             header("Location: ../php/productos.php?mensaje=actualizado_exito");
              exit;
          }
 
@@ -47,7 +47,7 @@ if($stmt->execute($params)){
         throw new RuntimeException((string) ("Error en la base de datos. " . $e->getMessage()));
     }
 }else{
-    header("Location: /php/asus.php");
+    header("Location: ../php/asus.php");
     exit;
 }
 ?>

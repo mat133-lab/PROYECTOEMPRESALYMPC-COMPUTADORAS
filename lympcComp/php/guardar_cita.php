@@ -3,7 +3,7 @@ require_once '../includes/db.php';
 session_start();
 
 if (!isset($_SESSION['usuario'])) {
-    header("Location: /php/login.php");
+    header("Location: ../php/login.php");
     exit();
 }
 
@@ -33,7 +33,7 @@ $fecha     = $_POST['fecha'];
 $motivo    = $_POST['motivo'];
 
 if (!$fecha || !$motivo) {
-    header("Location: /php/horario.php?error=datos");
+    header("Location: ../php/horario.php?error=datos");
     exit();
 }
 
@@ -44,5 +44,5 @@ $sql = "INSERT INTO citas (id_usuario, nombre, apellido, correo, cedula, archivo
 $stmt = $conn->prepare($sql);
 $stmt->execute([$id_usuario, $nombre, $apellido, $correo, $cedula, $ruta_ruc, $ruta_cedula, $fecha, $telefono, $motivo]);
 
-header("Location: /php/horario.php?ok=1");
+header("Location: ../php/horario.php?ok=1");
 exit();

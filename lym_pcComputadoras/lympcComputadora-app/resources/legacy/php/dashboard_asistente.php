@@ -3,7 +3,7 @@ session_start();
 require_once '../includes/db.php';
 
 if (!isset($_SESSION['rol']) || strtolower($_SESSION['rol']) !== 'asistente') {
-    header('Location: /php/login.php');
+    header('Location: ../php/login.php');
     exit();
 }
 
@@ -23,9 +23,9 @@ $alertMessage = '';
     <title>Dashboard Asistente - L&M PC Computadoras</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/dashboard_pasante.css">
-    <link rel="stylesheet" href="../css/asistente_tools.css">
+    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/style.css') : '../../../public/css/style.css' ?>">
+    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/dashboard_pasante.css') : '../../../public/css/dashboard_pasante.css' ?>">
+    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/asistente_tools.css') : '../../../public/css/asistente_tools.css' ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
@@ -239,7 +239,7 @@ $alertMessage = '';
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
-                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>
@@ -256,7 +256,7 @@ $alertMessage = '';
                 href="../php/dashboard_tecnico.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
             <?php elseif(strtolower($_SESSION['rol']) === 'encargado'): ?>
             <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
-                href="../php/dashboard_encargado.php" style="max-width: 45%; text-align: center;"> L&M PC
+                href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC
                 Computadoras</a>
             <?php elseif(strtolower($_SESSION['rol']) === 'pasante'): ?>
             <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
@@ -314,7 +314,7 @@ $alertMessage = '';
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
-                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>
@@ -395,7 +395,7 @@ $alertMessage = '';
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
     </script>
-    <script src="../js/dashboard_asistente.js"></script>
+    <script src="<?= function_exists('url') ? url('js/dashboard_asistente.js') : '../../../public/js/dashboard_asistente.js' ?>"></script>
 
 </body>
 

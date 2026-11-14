@@ -1,0 +1,44 @@
+.pdf-branding-header,
+.pdf-branding-footer {
+    display: none;
+}
+
+@page {
+    size: A4;
+    margin: 48mm 10mm 18mm;
+}
+
+@media print {
+    .pdf-branding-header,
+    .pdf-branding-footer {
+        position: fixed;
+        left: -10mm;
+        display: block;
+        width: 210mm;
+        z-index: 9999;
+    }
+
+    .pdf-branding-header {
+        top: -48mm;
+    }
+
+    .pdf-branding-footer {
+        bottom: -16mm;
+    }
+
+    .pdf-branding-header img,
+    .pdf-branding-footer img {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+
+    .pdf-export-button,
+    nav,
+    .navbar,
+    .offcanvas,
+    .footer,
+    .modal {
+        display: none !important;
+    }
+}

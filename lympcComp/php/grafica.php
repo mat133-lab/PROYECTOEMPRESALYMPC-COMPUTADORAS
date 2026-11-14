@@ -3,7 +3,7 @@ session_start();
 require_once '../includes/db.php';
 
 if (!isset($_SESSION['rol']) || strtolower($_SESSION['rol']) !== 'asistente') {
-    header('Location: /php/login.php');
+    header('Location: ../php/login.php');
     exit();
 }
 
@@ -238,7 +238,7 @@ $alertMessage = '';
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
-                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>
@@ -255,7 +255,7 @@ $alertMessage = '';
                 href="../php/dashboard_tecnico.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
             <?php elseif(strtolower($_SESSION['rol']) === 'encargado'): ?>
             <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
-                href="../php/dashboard_encargado.php" style="max-width: 45%; text-align: center;"> L&M PC
+                href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC
                 Computadoras</a>
             <?php elseif(strtolower($_SESSION['rol']) === 'pasante'): ?>
             <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
@@ -314,7 +314,7 @@ $alertMessage = '';
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
-                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>
@@ -334,10 +334,10 @@ $alertMessage = '';
                     <!--Espacio dedicado para crear la grafica de las ultimas compras de los usuarios, llegada de productos al local,
         el incremento de envios tanto en la pagina contacto y citas de los usuarios asi como ver cuantos usuarios decidieron registrarse-->
                     <div class="grafica-container bg-white p-4 rounded shadow-sm">
-                        <h2 class="mb-4 text-center">Grafica de Compras Recientes por los Usuarios</h2>
+                        <h2 class="mb-4 text-center">Top 20 de productos más vendidos</h2>
                         <div style="position: relative; height: 50vh; width: 100%;">
                             <canvas id="graficaAsistente"></canvas>
-                            <div id="iaAnalisisGrafica0" class="ia-analisis-grafica ia-analisis-vacio">Cargando análisis de IA...</div>
+                            <div id="iaAnalisisGrafica0" class="ia-analisis-grafica ia-analisis-vacio">Calculando resumen estadístico...</div>
                         </div>
                     </div>
                 </main>
@@ -345,10 +345,10 @@ $alertMessage = '';
             <div class="carousel-item">
                 <main class="container asistente-hero main-content" style="margin-top: 100px">
                     <div class="grafica-container bg-white p-4 rounded shadow-sm">
-                        <h2 class="mb-4 text-center">Grafica de la Cantidad de Productos Llegados al Local</h2>
+                        <h2 class="mb-4 text-center">Top 20 de productos por unidades en inventario</h2>
                         <div style="position: relative; height: 50vh; width: 100%;">
                             <canvas id="graficaAsistente1"></canvas>
-                            <div id="iaAnalisisGrafica1" class="ia-analisis-grafica ia-analisis-vacio">Cargando análisis de IA...</div>
+                            <div id="iaAnalisisGrafica1" class="ia-analisis-grafica ia-analisis-vacio">Calculando resumen estadístico...</div>
                         </div>
                     </div>
                 </main>
@@ -356,11 +356,10 @@ $alertMessage = '';
             <div class="carousel-item">
                 <main class="container asistente-hero main-content" style="margin-top: 100px">
                     <div class="grafica-container bg-white p-4 rounded shadow-sm">
-                        <h2 class="mb-4 text-center">Grafica de los Datos enviados por el Usuario a la Pagina Contacto
-                        </h2>
+                        <h2 class="mb-4 text-center">Top 20 de contactos por mensajes recibidos</h2>
                         <div style="position: relative; height: 50vh; width: 100%;">
                             <canvas id="graficaAsistente2"></canvas>
-                            <div id="iaAnalisisGrafica2" class="ia-analisis-grafica ia-analisis-vacio">Cargando análisis de IA...</div>
+                            <div id="iaAnalisisGrafica2" class="ia-analisis-grafica ia-analisis-vacio">Calculando resumen estadístico...</div>
                         </div>
                     </div>
                 </main>
@@ -368,10 +367,10 @@ $alertMessage = '';
             <div class="carousel-item">
                 <main class="container asistente-hero main-content" style="margin-top: 100px">
                     <div class="grafica-container bg-white p-4 rounded shadow-sm">
-                        <h2 class="mb-4 text-center">Grafica de los Datos enviados por el Usuario a la Pagina Citas</h2>
+                        <h2 class="mb-4 text-center">Top 20 de usuarios por citas registradas</h2>
                         <div style="position: relative; height: 50vh; width: 100%;">
                             <canvas id="graficaAsistente3"></canvas>
-                            <div id="iaAnalisisGrafica3" class="ia-analisis-grafica ia-analisis-vacio">Cargando análisis de IA...</div>
+                            <div id="iaAnalisisGrafica3" class="ia-analisis-grafica ia-analisis-vacio">Calculando resumen estadístico...</div>
                         </div>
                     </div>
                 </main>

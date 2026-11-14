@@ -3,7 +3,7 @@ session_start();
 require_once '../includes/db.php';
 
 if (!isset($_SESSION['rol']) || strtolower($_SESSION['rol']) !== 'tecnico') {
-    header('Location: /php/login.php');
+    header('Location: ../php/login.php');
     exit();
 }
 
@@ -20,10 +20,13 @@ $usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Técnico');
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/pdf_print_branding.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body>
+    <div class="pdf-branding-header"><img src="../img/headerlym.png" alt="L&M PC Computadoras"></div>
+    <div class="pdf-branding-footer"><img src="../img/footerlym.png" alt="Información de contacto"></div>
     <nav class="navbar navbar-dark bg-warning fixed-top">
         <div class="container-fluid">
             <?php 
@@ -233,7 +236,7 @@ $usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Técnico');
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
-                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>
@@ -250,7 +253,7 @@ $usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Técnico');
                 href="../php/dashboard_tecnico.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
             <?php elseif(strtolower($_SESSION['rol']) === 'encargado'): ?>
                 <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
-                href="../php/dashboard_encargado.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+                href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
             <?php elseif(strtolower($_SESSION['rol']) === 'pasante'): ?>
                 <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
                 href="../php/dashboard_pasante.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
@@ -304,7 +307,7 @@ $usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Técnico');
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
-                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>
@@ -370,7 +373,7 @@ $usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Técnico');
                     </table>
                 </div>
                 <div class="mt-3 text-end">
-                    <button onclick="window.print()" class="btn btn-danger"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
+                    <button onclick="window.print()" class="btn btn-danger pdf-export-button"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
                 </div>
             </div>
         </div>

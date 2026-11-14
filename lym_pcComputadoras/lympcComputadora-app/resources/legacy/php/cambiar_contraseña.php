@@ -4,7 +4,7 @@ require_once '../includes/db.php';
 
 // 1. Verificar que el administrador tenga la sesión iniciada
 if (!isset($_SESSION['admin_logged_in'])) {
-    header("Location: /php/login_admin.php");
+    header("Location: ../php/login_admin.php");
     exit;
 }
 
@@ -45,8 +45,8 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="/img/logo.webp">
-    <link rel="stylesheet" href="/css/auth.css">
+    <link rel="shortcut icon" href="../img/logo.webp">
+    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/auth.css') : '../../../public/css/auth.css' ?>">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet">
     <title>Cambiar Contraseña - L&M PC Computadoras</title>
 </head>
@@ -76,7 +76,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                 <i class="fas fa-check-circle"></i>
                 <?= htmlspecialchars($success) ?>
                 <br><br>
-                <a href="/php/dashboardadmin.php" style="color: #155724; font-weight: bold; text-decoration: underline;">Volver al Dashboard</a>
+                <a href="../php/dashboardadmin.php" style="color: #155724; font-weight: bold; text-decoration: underline;">Volver al Dashboard</a>
             </div>
             <?php else: ?>
             
@@ -106,7 +106,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             </form>
             
             <div class="register-footer" style="margin-top: 20px; text-align: center;">
-                <a href="/php/perfiladmin.php" style="color:var(--primary-color); text-decoration:none; font-weight: bold;">
+                <a href="../php/perfiladmin.php" style="color:var(--primary-color); text-decoration:none; font-weight: bold;">
                     <i class="fas fa-arrow-left"></i> Cancelar y volver
                 </a>
             </div>

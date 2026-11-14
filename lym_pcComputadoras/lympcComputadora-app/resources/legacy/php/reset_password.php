@@ -60,8 +60,8 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && $token_valido){
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="/img/logo.webp">
-    <link rel="stylesheet" href="/css/auth.css">
+    <link rel="shortcut icon" href="../img/logo.webp">
+    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/auth.css') : '../../../public/css/auth.css' ?>">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet">
     <title>Restablecer Contraseña - L&M PC Computadoras</title>
 </head>
@@ -91,7 +91,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && $token_valido){
                 <i class="fas fa-check-circle"></i>
                 <?= htmlspecialchars($success) ?>
                 <br><br>
-                <a href="/php/login.php" style="color: #155724; font-weight: bold; text-decoration: underline;">Haz clic aquí para iniciar sesión</a>
+                <a href="../php/login.php" style="color: #155724; font-weight: bold; text-decoration: underline;">Haz clic aquí para iniciar sesión</a>
             </div>
             <?php endif; ?>
 
@@ -124,7 +124,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && $token_valido){
 
             <?php if(!$token_valido && !$success): ?>
             <div class="register-footer" style="margin-top: 20px; text-align: center;">
-                <a href="/php/contraseña.php" style="color:var(--primary-color); text-decoration:none; font-weight: bold;">
+                <a href="../php/contraseña.php" style="color:var(--primary-color); text-decoration:none; font-weight: bold;">
                     <i class="fas fa-arrow-left"></i> Volver a intentar
                 </a>
             </div>

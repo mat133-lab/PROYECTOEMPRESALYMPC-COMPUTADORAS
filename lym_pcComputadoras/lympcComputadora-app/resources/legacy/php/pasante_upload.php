@@ -6,7 +6,7 @@ session_start();
 require_once '../includes/db.php';
 
 if (!isset($_SESSION['rol']) || strtolower($_SESSION['rol']) !== 'pasante') {
-    header('Location: /php/login.php');
+    header('Location: ../php/login.php');
     exit;
 }
 
@@ -14,7 +14,7 @@ $id_usuario = $_SESSION['id_usuario'] ?? $_SESSION['id'] ?? null;
 $usuario = $_SESSION['usuario'] ?? 'Pasante';
 
 if (!$id_usuario) {
-    header('Location: /php/dashboard_pasante.php?upload=error&message=' . urlencode('Usuario no identificado'));
+    header('Location: ../php/dashboard_pasante.php?upload=error&message=' . urlencode('Usuario no identificado'));
     exit;
 }
 
@@ -25,7 +25,7 @@ $repoUrl = trim((string) ($_POST['repo_url'] ?? ''));
 $githubBranch = trim((string) ($_POST['github_branch'] ?? ''));
 
 if (strlen($documentTitle) > 180 || strlen($description) > 2000 || strlen($repoUrl) > 500 || strlen($githubBranch) > 255) {
-    header('Location: /php/dashboard_pasante.php?upload=error&message=' . urlencode('Los datos enviados superan el límite permitido'));
+    header('Location: ../php/dashboard_pasante.php?upload=error&message=' . urlencode('Los datos enviados superan el límite permitido'));
     exit;
 }
 
@@ -33,7 +33,7 @@ $allowedProjectExtensions = ['zip', 'rar', 'tar', 'gz', 'pdf', 'docx', 'xlsx', '
 $allowedReportExtensions = ['pdf'];
 
 if (!isset($_FILES['documento']) || !is_array($_FILES['documento'])) {
-    header('Location: /php/dashboard_pasante.php?upload=error&message=' . urlencode('No se cargó ningún archivo'));
+    header('Location: ../php/dashboard_pasante.php?upload=error&message=' . urlencode('No se cargó ningún archivo'));
     exit;
 }
 
@@ -44,7 +44,7 @@ if (($archivo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
         UPLOAD_ERR_NO_FILE => 'Selecciona un archivo para cargar',
         default => 'No se pudo cargar el archivo',
     };
-    header('Location: /php/dashboard_pasante.php?upload=error&message=' . urlencode($mensaje));
+    header('Location: ../php/dashboard_pasante.php?upload=error&message=' . urlencode($mensaje));
     exit;
 }
 
@@ -54,7 +54,7 @@ $githubService = null;
 
 if ($uploadType === 'project') {
     if ($repoUrl === '') {
-        header('Location: /php/dashboard_pasante.php?upload=error&message=' . urlencode('Indica el repositorio de GitHub del proyecto'));
+        header('Location: ../php/dashboard_pasante.php?upload=error&message=' . urlencode('Indica el repositorio de GitHub del proyecto'));
         exit;
     }
 
@@ -66,12 +66,12 @@ if ($uploadType === 'project') {
         $mensaje = $exception instanceof InvalidArgumentException
             ? $exception->getMessage()
             : 'No se pudo validar la conexión con GitHub';
-        header('Location: /php/dashboard_pasante.php?upload=error&message=' . urlencode($mensaje));
+        header('Location: ../php/dashboard_pasante.php?upload=error&message=' . urlencode($mensaje));
         exit;
     }
 
     if (!in_array($extension, $allowedProjectExtensions, true)) {
-        header('Location: /php/dashboard_pasante.php?upload=error&message=' . urlencode('Extensión de proyecto no permitida'));
+        header('Location: ../php/dashboard_pasante.php?upload=error&message=' . urlencode('Extensión de proyecto no permitida'));
         exit;
     }
     if (empty($documentTitle)) {
@@ -79,26 +79,26 @@ if ($uploadType === 'project') {
     }
 } elseif ($uploadType === 'report') {
     if (!in_array($extension, $allowedReportExtensions, true)) {
-        header('Location: /php/dashboard_pasante.php?upload=error&message=' . urlencode('Solo se permiten archivos PDF para reportes'));
+        header('Location: ../php/dashboard_pasante.php?upload=error&message=' . urlencode('Solo se permiten archivos PDF para reportes'));
         exit;
     }
     if (empty($documentTitle)) {
         $documentTitle = 'Reporte sin título';
     }
 } else {
-    header('Location: /php/dashboard_pasante.php?upload=error&message=' . urlencode('Tipo de subida no válido'));
+    header('Location: ../php/dashboard_pasante.php?upload=error&message=' . urlencode('Tipo de subida no válido'));
     exit;
 }
 
 $fileSize = filesize((string) ($archivo['tmp_name'] ?? ''));
 if ($uploadType === 'project' && ($fileSize === false || $fileSize > (int) config('services.github.max_file_bytes', 52428800))) {
-    header('Location: /php/dashboard_pasante.php?upload=error&message=' . urlencode('El archivo supera el tamaño máximo permitido para GitHub'));
+    header('Location: ../php/dashboard_pasante.php?upload=error&message=' . urlencode('El archivo supera el tamaño máximo permitido para GitHub'));
     exit;
 }
 
 $uploadDirectory = storage_path('app/public/uploads/pasante/');
 if (!is_dir($uploadDirectory) && !mkdir($uploadDirectory, 0755, true) && !is_dir($uploadDirectory)) {
-    header('Location: /php/dashboard_pasante.php?upload=error&message=' . urlencode('No se pudo preparar el almacenamiento del archivo'));
+    header('Location: ../php/dashboard_pasante.php?upload=error&message=' . urlencode('No se pudo preparar el almacenamiento del archivo'));
     exit;
 }
 
@@ -111,7 +111,7 @@ $targetName = sprintf('pasante_%s_%s_%s_%s.%s', $id_usuario, $uploadType, date('
 $targetPath = $uploadDirectory . $targetName;
 
 if (!move_uploaded_file($archivo['tmp_name'], $targetPath)) {
-    header('Location: /php/dashboard_pasante.php?upload=error&message=' . urlencode('Error al mover el archivo cargado'));
+    header('Location: ../php/dashboard_pasante.php?upload=error&message=' . urlencode('Error al mover el archivo cargado'));
     exit;
 }
 
@@ -122,7 +122,7 @@ if ($uploadType === 'project') {
     } catch (Throwable $exception) {
         @unlink($targetPath);
         error_log('No se pudo publicar el proyecto en GitHub: ' . $exception->getMessage());
-        header('Location: /php/dashboard_pasante.php?upload=error&message=' . urlencode('No se pudo publicar el proyecto en GitHub. Verifica el repositorio, la rama y los permisos del token.'));
+        header('Location: ../php/dashboard_pasante.php?upload=error&message=' . urlencode('No se pudo publicar el proyecto en GitHub. Verifica el repositorio, la rama y los permisos del token.'));
         exit;
     }
 }
@@ -158,10 +158,10 @@ if ($uploadType === 'project') {
 $entries[] = $entry;
 
 if (file_put_contents($metadataFile, json_encode($entries, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), LOCK_EX) === false) {
-    header('Location: /php/dashboard_pasante.php?upload=error&message=' . urlencode('El archivo se publicó, pero no se pudo actualizar el historial local'));
+    header('Location: ../php/dashboard_pasante.php?upload=error&message=' . urlencode('El archivo se publicó, pero no se pudo actualizar el historial local'));
     exit;
 }
 
-header('Location: /php/dashboard_pasante.php?upload=success&type=' . urlencode($uploadType));
+header('Location: ../php/dashboard_pasante.php?upload=success&type=' . urlencode($uploadType));
 exit;
 

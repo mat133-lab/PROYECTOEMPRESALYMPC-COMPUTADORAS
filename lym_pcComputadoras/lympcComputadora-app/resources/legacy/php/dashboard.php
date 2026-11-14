@@ -4,25 +4,25 @@ session_start();
 // vaya a citas podra ver todas las citas si es otro usuario no podra ver la tabla citas
 include_once '../includes/db.php';
 if (!isset($_SESSION['usuario'])) {
-    header("Location: /php/login.php");
+    header("Location: ../php/login.php");
     exit;
 }
 /*Si el administrador necesita volver al panel administrador le redirija al dashboard correspondiente dependiendo el usuario*/
 if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
-    header("Location: /php/dashboardadmin.php");
+    header("Location: ../php/dashboardadmin.php");
     exit;
 }
 
 if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'tecnico') {
-    header("Location: /php/dashboard_tecnico.php");
+    header("Location: ../php/dashboard_tecnico.php");
     exit;
 }
 if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'pasante') {
-    header("Location: /php/dashboard_pasante.php");
+    header("Location: ../php/dashboard_pasante.php");
     exit;
 }
 if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
-    header("Location: /php/dashboard_asistente.php");
+    header("Location: ../php/dashboard_asistente.php");
     exit;
 }
 ?>
@@ -32,11 +32,12 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" href="/img/logo.webp">
+    <link rel="shortcut icon" href="../img/logo.webp">
     <title>Dashboard - L&M PC Computadoras</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet"
+        href="<?= function_exists('url') ? url('css/style.css') : '../../../public/css/style.css' ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
@@ -50,7 +51,7 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
             if(!$esStf):
             ?>
             <div class="submenu me-3">
-                <img src="/img/canasta.webp" id="img-libro" alt="Canasta">
+                <img src="../img/canasta.webp" id="img-libro" alt="Canasta">
 
                 <div id="libro">
                     <table>
@@ -67,7 +68,9 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
                         <tbody id="lista-libro"></tbody>
                     </table>
 
-                    <div id="carrito-acciones" class="carrito-acciones disabled">
+                    <div id="carrito-acciones" class="carrito-acciones disabled"
+                        data-api-url="paypal_api.php"
+                        data-pdf-url="generar_pedido_pdf.php">
                         <div class="carrito-acciones-izquierda">
                             <button class="carrito-acciones-vaciar" id="carrito-acciones-vaciar">
                                 Vaciar Carrito
@@ -79,9 +82,12 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
                                 <p>Compras Totales:</p>
                                 <p id="total">$0</p>
                             </div>
-                            <button class="carrito-acciones-comprar" id="carrito-acciones-comprar">
-                                Comprar ahora
+                            <button class="carrito-acciones-comprar" id="carrito-acciones-comprar" type="button">
+                                Comprar con PayPal
                             </button>
+                            <div id="paypal-button-container" hidden></div>
+                            <button id="paypal-cancelar" type="button" hidden>Cancelar pago</button>
+                            <p id="paypal-estado" role="status" aria-live="polite"></p>
                         </div>
                     </div>
                 </div>
@@ -89,7 +95,7 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
             <?php endif; ?>
 
             <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
-                href="/php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+                href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
             <div class="d-flex align-items-center gap-2 ms-auto">
                 <form class="d-none d-lg-flex m-0" role="search" onsubmit="event.preventDefault();">
                     <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search"
@@ -112,14 +118,14 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
 
                 <div class="offcanvas-body">
                     <form class="d-flex d-lg-none mb-4" role="search" onsubmit="event.preventDefault();">
-                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search" id="search-input-mobile"/>
+                        <input type="search" class="form-control me-2" placeholder="Buscar..." aria-label="Search"
+                            id="search-input-mobile" />
                         <button class="btn btn-success" type="button">Buscar</button>
                     </form>
                     <ul class="navbar-nav flex-grow-1 pe-3">
 
                         <li class="nav-item">
-                            <a class="nav-link categoria-link active" href="/php/dashboard.php"
-                                data-categoria="todos">
+                            <a class="nav-link categoria-link active" href="../php/dashboard.php" data-categoria="todos">
                                 Home
                             </a>
                         </li>
@@ -129,13 +135,13 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
                                 <li>
-                                    <a class="dropdown-item categoria-link" href="/php/pc.php"
+                                    <a class="dropdown-item categoria-link" href="../php/pc.php"
                                         data-categoria="estructura">
                                         Pc Dell
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item categoria-link" href="/php/hpdell.php"
+                                    <a class="dropdown-item categoria-link" href="../php/hpdell.php"
                                         data-categoria="techos">
                                         Hp Dell
                                     </a>
@@ -148,19 +154,19 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
                                 Laptops
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="/php/asus.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/asus.php"
                                         data-categoria="madera">ASUS</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="/php/lenovo.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/lenovo.php"
                                         data-categoria="pisos">LENOVO</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="/php/omnibook.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/omnibook.php"
                                         data-categoria="armarios">HP
                                         OMNIBOOK </a></li>
-                                <li><a class="dropdown-item categoria-link" href="/php/msi.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/msi.php"
                                         data-categoria="armarios">MSI</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="/php/dell.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/dell.php"
                                         data-categoria="armarios">DELL</a>
                                 </li>
 
@@ -172,21 +178,22 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
                                 Duplicadora
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="/php/duplicadoracd.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/duplicadoracd.php"
                                         data-categoria="electricidad">CD</a></li>
-                                <li><a class="dropdown-item categoria-link" href="/php/duplicadoradvd.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/duplicadoradvd.php"
                                         data-categoria="iluminacion">DVD</a></li>
-                                <li><a class="dropdown-item categoria-link" href="/php/duplicadorablu.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/duplicadorablu.php"
                                         data-categoria="domotica">BLU-RAY</a></li>
                             </ul>
                         </li>
 
-                         <li class="nav-item dropdown">
+                        <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                                 Tablets
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="/php/tablets.php" data-categoria="Tablets">Tablets IPad</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/tablets.php"
+                                        data-categoria="Tablets">Tablets IPad</a>
                                 </li>
                             </ul>
                         </li>
@@ -196,17 +203,18 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
                                 Servicio Tecnico
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="/php/horario.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/horario.php"
                                         data-categoria="bano">Horarios</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="/php/contacto.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/contacto.php"
                                         data-categoria="bano">Contacto</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="/php/gestion_citas.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/gestion_citas.php"
                                         data-categoria="bano">Citas</a></li>
-                                <li><a class="dropdown-item categoria-link" href="/php/ubicacion.php" data-categoria="bano">Ubicacion</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/ubicacion.php"
+                                        data-categoria="bano">Ubicacion</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="/php/chat.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/chat.php"
                                         data-categoria="bano">Chat de Soporte</a></li>
                             </ul>
                         </li>
@@ -216,10 +224,10 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
                                 Impresoras con Tinta Continua
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="/php/epson.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/epson.php"
                                         data-categoria="pintura">EPSON</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="/php/canon.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/canon.php"
                                         data-categoria="pintura">CANON</a>
                                 </li>
                             </ul>
@@ -229,10 +237,10 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
                                 Tintas
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="/php/tinta100.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta100.php"
                                         data-categoria="pintura">Tinta de
                                         100 ML</a></li>
-                                <li><a class="dropdown-item categoria-link" href="/php/tinta1000.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta1000.php"
                                         data-categoria="pintura">Tinta de
                                         1000 ML</a></li>
                             </ul>
@@ -243,7 +251,7 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
                                 <li>
-                                    <a class="dropdown-item categoria-link" href="/php/perfilUsu.php"
+                                    <a class="dropdown-item categoria-link" href="../php/perfilUsu.php"
                                         data-categoria="estructura">
                                         Perfil
                                     </a>
@@ -266,10 +274,10 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
                             <?php if (isset($_SESSION['usuario'])): ?>
                             <span class="text-white me-3">Buen dia,
                                 <b><?php echo $_SESSION['usuario']; ?></b></span>
-                            <a href="/php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
+                            <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
-                            <a href="/php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
-                            <a href="/php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>
@@ -292,7 +300,8 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
                         relacionado a computacion, desde componentes hasta
                         accesorios y mucho mas.
                     </p>
-                    <a href="https://www.facebook.com/LyM010?locale=es_LA" class="btn-2" style="text-decoration:none; font-weight: 700;">Mas Informacion</a>
+                    <a href="https://www.facebook.com/LyM010?locale=es_LA" class="btn-2"
+                        style="text-decoration:none; font-weight: 700;">Mas Informacion</a>
                 </div>
             </div>
 
@@ -300,7 +309,7 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
         <section class="info">
             <div class="info-content container">
                 <div class="info-img">
-                    <img src="/img/promocion.jpg" alt>
+                    <img src="../img/promocion.jpg" alt>
                 </div>
                 <div class="info-txt">
                     <h2>Los mejores en accesorios para el Usuario</h2>
@@ -309,11 +318,12 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
                         gama de productos y accesorios de alta calidad para satisfacer todas tus
                         necesidades tecnológicas.
                     </p>
-                    <a href="https://www.facebook.com/LyM010?locale=es_LA" class="btn-2" style="font-weight: 700; text-decoration:none;">Mas Informacion</a>
+                    <a href="https://www.facebook.com/LyM010?locale=es_LA" class="btn-2"
+                        style="font-weight: 700; text-decoration:none;">Mas Informacion</a>
                 </div>
             </div>
         </section>
-        
+
         <main class="products container">
             <h2>Productos Destacados</h2>
             <p>
@@ -336,33 +346,43 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
             foreach ($productos as $row): 
             ?>
                 <div class="box" data-id="<?= $row['id_producto'] ?>">
-                    <img src="/img/<?= htmlspecialchars($row['imagen']) ?>" alt="<?= htmlspecialchars($row['nombre']) ?>"
+                    <img src="../img/<?= htmlspecialchars($row['imagen']) ?>"
+                        alt="<?= htmlspecialchars($row['nombre']) ?>"
                         style="width: 100%; max-height: 200px; object-fit: contain; padding-top: 10px;">
-                        
+
                     <div class="product-txt d-flex flex-column h-100 w-100">
-                        <h3 class="product-name" style="font-size: 18px; font-weight: 600;"><?= htmlspecialchars($row['nombre']) ?></h3>
-                        
+                        <h3 class="product-name" style="font-size: 18px; font-weight: 600;">
+                            <?= htmlspecialchars($row['nombre']) ?></h3>
+
                         <p style="margin-bottom: 5px;"><span class="product-units"
                                 data-id="<?= $row['id_producto'] ?>"><?= $row['unidades'] ?></span>
                             Unidades</p>
-                        <p class="text-muted" style="font-size: 14px; margin-bottom: 5px;"><?= htmlspecialchars($row['serie']) ?></p>
+                        <p class="text-muted" style="font-size: 14px; margin-bottom: 5px;">
+                            <?= htmlspecialchars($row['serie']) ?></p>
 
                         <?php if (!empty($row['nombre_contacto'])): ?>
-                            <p style="font-size: 13px; color: #198754; margin-bottom: 10px;">
-                                <i class="fas fa-headset"></i> Soporte: <b><?= htmlspecialchars($row['nombre_contacto']) ?></b> (<?= htmlspecialchars($row['Compania']) ?>)
-                            </p>
+                        <p style="font-size: 13px; color: #198754; margin-bottom: 10px;">
+                            <i class="fas fa-headset"></i> Soporte:
+                            <b><?= htmlspecialchars($row['nombre_contacto']) ?></b>
+                            (<?= htmlspecialchars($row['Compania']) ?>)
+                        </p>
                         <?php endif; ?>
 
                         <div class="mt-auto w-100">
-                            <p class="precio" style="font-size: 20px; font-weight: 700; color: #ff9100; margin: 10px 0;">$<?= number_format($row['precio'], 2) ?></p>
-                            <a href="#" class="agregar-libro btn-3 w-100 text-center" data-id="<?= $row['id_producto'] ?>" style="display:block; text-decoration:none;">Agregar al carrito</a>
+                            <p class="precio"
+                                style="font-size: 20px; font-weight: 700; color: #ff9100; margin: 10px 0;">
+                                $<?= number_format($row['precio'], 2) ?></p>
+                            <a href="#" class="agregar-libro btn-3 w-100 text-center"
+                                data-id="<?= $row['id_producto'] ?>"
+                                style="display:block; text-decoration:none;">Agregar al carrito</a>
                         </div>
                     </div>
                 </div>
                 <?php endforeach; ?>
             </div>
 
-            <div class="btn-2" id="load-more" style="text-decoration:none; font-weight: 700; cursor: pointer;">Cargar mas Ofertas</div>
+            <div class="btn-2" id="load-more" style="text-decoration:none; font-weight: 700; cursor: pointer;">Cargar
+                mas Ofertas</div>
         </main>
 
         <footer class="footer">
@@ -392,11 +412,12 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'asistente') {
 
         <?php include '../includes/chat_widget.php'; ?>
 
-        <script src="/js/dashboard.js"></script>
+        <script src="<?= function_exists('url') ? url('js/pasarelaP.js') : '../../../public/js/pasarelaP.js' ?>"></script>
+
+        <script src="<?= function_exists('url') ? url('js/dashboard.js') : '../../../public/js/dashboard.js' ?>"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
         </script>
 </body>
 
 </html>
-

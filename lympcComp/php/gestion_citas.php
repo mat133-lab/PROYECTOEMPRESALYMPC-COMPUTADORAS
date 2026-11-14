@@ -9,7 +9,7 @@ if (!isset($_SESSION['usuario'])) {
 }
 
 if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'admin') {
-    header("Location: /php/gestion_citasU.php");
+    header("Location: ../php/gestion_citasU.php");
     exit();
 } 
 
@@ -48,7 +48,7 @@ if(isset($_POST['enviar'])){
     
     $stmt = $conn -> prepare("INSERT INTO citas (id_usuario, nombre, apellido, cedula, correo, fecha, telefono, motivo, accion_sensible, archivo_ruc, archivo_cedula) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt -> execute ([$id_usuario, $nombre, $apellido, $cedula, $email, $fecha, $telefono, $motivo, $accion_sensible, $ruta_ruc, $ruta_cedula]);
-    header("Location: /php/gestion_citasU.php"); // Recargar para limpiar el POST
+    header("Location: ../php/gestion_citasU.php"); // Recargar para limpiar el POST
     exit();
 }
 ?>
@@ -277,7 +277,7 @@ if(isset($_POST['enviar'])){
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
-                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>
@@ -336,7 +336,7 @@ if(isset($_POST['enviar'])){
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
-                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>

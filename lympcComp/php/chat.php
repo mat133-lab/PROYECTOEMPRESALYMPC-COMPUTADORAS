@@ -4,7 +4,7 @@ require_once '../includes/db.php';
 require_once '../includes/chat_helpers.php';
 
 if (!isset($_SESSION['usuario'])) {
-    header('Location: /php/login.php');
+    header('Location: ../php/login.php');
     exit();
 }
 
@@ -14,6 +14,8 @@ $idUsuario = $_SESSION['id_usuario'] ?? null;
 $nombreUsuario = $_SESSION['usuario'] ?? 'Usuario';
 
 chatEnsureTables($conn);
+$chatError = $_SESSION['chat_error'] ?? '';
+unset($_SESSION['chat_error']);
 
 if (!$esAsistente && isset($_GET['finalizado'])) {
     $idConversacion = 0;
@@ -29,22 +31,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $postConversacion = (int)($_POST['id_conversacion'] ?? $idConversacion);
 
     if ($accion === 'calificar' && !$esAsistente && $postConversacion > 0) {
-        chatRateConversation($conn, $postConversacion, $idUsuario, $_POST['calificacion'] ?? 0, $_POST['comentario_calificacion'] ?? '');
-        header('Location: /php/chat.php?finalizado=1');
+        if (!chatRateConversation($conn, $postConversacion, $idUsuario, $_POST['calificacion'] ?? 0, $_POST['comentario_calificacion'] ?? '')) {
+            $_SESSION['chat_error'] = 'No se pudo calificar la conversacion.';
+            header('Location: ../php/chat.php');
+            exit();
+        }
+        header('Location: ../php/chat.php?finalizado=1');
         exit();
     }
 
     if ($accion === 'mensaje' && $mensaje !== '' && $postConversacion > 0) {
         if ($esAsistente) {
-            chatAddMessage($conn, $postConversacion, 'asistente', $nombreUsuario, $mensaje);
-            $stmt = $conn->prepare("UPDATE chat_conversaciones SET estado = 'atendido' WHERE id_conversacion = ?");
+            $stmt = $conn->prepare("SELECT estado FROM chat_conversaciones WHERE id_conversacion = ?");
             $stmt->execute([$postConversacion]);
+            $estadoActual = $stmt->fetchColumn();
+            $mensajeValido = $estadoActual !== false && $estadoActual !== 'finalizado';
+            if ($mensajeValido) {
+                chatAddMessage($conn, $postConversacion, 'asistente', $nombreUsuario, $mensaje);
+                $stmt = $conn->prepare("UPDATE chat_conversaciones SET estado = 'atendido' WHERE id_conversacion = ?");
+                $stmt->execute([$postConversacion]);
+            }
         } else {
-            chatHandleUserMessage($conn, $postConversacion, $idUsuario, $nombreUsuario, $mensaje);
+            $mensajeValido = chatHandleUserMessage($conn, $postConversacion, $idUsuario, $nombreUsuario, $mensaje);
+        }
+
+        if (!$mensajeValido) {
+            $_SESSION['chat_error'] = 'La conversacion ya no esta disponible para enviar mensajes.';
         }
     }
 
-    header('Location: /php/chat.php' . ($esAsistente ? '?conversacion=' . $postConversacion : ''));
+    header('Location: ../php/chat.php' . ($esAsistente ? '?conversacion=' . $postConversacion : ''));
     exit();
 }
 
@@ -71,7 +87,7 @@ if ($idConversacion > 0) {
     $conversacionActual = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($conversacionActual && (!$esAsistente && (int)$conversacionActual['id_usuario'] !== (int)$idUsuario)) {
-        header('Location: /php/dashboard.php');
+        header('Location: ../php/dashboard.php');
         exit();
     }
 
@@ -129,6 +145,9 @@ if ($idConversacion > 0) {
     </nav>
 
     <main class="container pasante-hero main-content">
+        <?php if ($chatError !== ''): ?>
+        <div class="alert alert-warning" role="alert"><?php echo htmlspecialchars($chatError, ENT_QUOTES, 'UTF-8'); ?></div>
+        <?php endif; ?>
         <div class="row align-items-center">
             <div class="col-lg-8">
                 <h1><?php echo $esAsistente ? 'Chat con Clientes' : 'Soporte por Chat'; ?></h1>

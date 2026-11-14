@@ -4,7 +4,7 @@ require_once '../includes/db.php';
 require_once '../includes/chat_helpers.php';
 
 if (!isset($_SESSION['usuario'])) {
-    header('Location: /php/login.php');
+    header('Location: ../php/login.php');
     exit;
 }
 
@@ -14,6 +14,8 @@ $idUsuario = $_SESSION['id_usuario'] ?? null;
 $nombreUsuario = $_SESSION['usuario'] ?? 'Usuario';
 
 chatEnsureTables($conn);
+$chatError = $_SESSION['chat_error'] ?? '';
+unset($_SESSION['chat_error']);
 
 if (!$esAsistente && isset($_GET['finalizado'])) {
     $idConversacion = 0;
@@ -29,22 +31,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $postConversacion = (int)($_POST['id_conversacion'] ?? $idConversacion);
 
     if ($accion === 'calificar' && !$esAsistente && $postConversacion > 0) {
-        chatRateConversation($conn, $postConversacion, $idUsuario, $_POST['calificacion'] ?? 0, $_POST['comentario_calificacion'] ?? '');
-        header('Location: /php/chat.php?finalizado=1');
+        if (!chatRateConversation($conn, $postConversacion, $idUsuario, $_POST['calificacion'] ?? 0, $_POST['comentario_calificacion'] ?? '')) {
+            $_SESSION['chat_error'] = 'No se pudo calificar la conversación.';
+            header('Location: ../php/chat.php');
+            exit;
+        }
+        header('Location: ../php/chat.php?finalizado=1');
         exit;
     }
 
     if ($accion === 'mensaje' && $mensaje !== '' && $postConversacion > 0) {
         if ($esAsistente) {
-            chatAddMessage($conn, $postConversacion, 'asistente', $nombreUsuario, $mensaje);
-            $stmt = $conn->prepare("UPDATE chat_conversaciones SET estado = 'atendido' WHERE id_conversacion = ?");
+            $stmt = $conn->prepare("SELECT estado FROM chat_conversaciones WHERE id_conversacion = ?");
             $stmt->execute([$postConversacion]);
+            $estadoActual = $stmt->fetchColumn();
+            $mensajeValido = $estadoActual !== false && $estadoActual !== 'finalizado';
+            if ($mensajeValido) {
+                chatAddMessage($conn, $postConversacion, 'asistente', $nombreUsuario, $mensaje);
+                $stmt = $conn->prepare("UPDATE chat_conversaciones SET estado = 'atendido' WHERE id_conversacion = ?");
+                $stmt->execute([$postConversacion]);
+            }
         } else {
-            chatHandleUserMessage($conn, $postConversacion, $idUsuario, $nombreUsuario, $mensaje);
+            $mensajeValido = chatHandleUserMessage($conn, $postConversacion, $idUsuario, $nombreUsuario, $mensaje);
+        }
+
+        if (!$mensajeValido) {
+            $_SESSION['chat_error'] = 'La conversación ya no está disponible para enviar mensajes.';
         }
     }
 
-    header('Location: /php/chat.php' . ($esAsistente ? '?conversacion=' . $postConversacion : ''));
+    header('Location: ../php/chat.php' . ($esAsistente ? '?conversacion=' . $postConversacion : ''));
     exit;
 }
 
@@ -71,7 +87,7 @@ if ($idConversacion > 0) {
     $conversacionActual = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($conversacionActual && (!$esAsistente && (int)$conversacionActual['id_usuario'] !== (int)$idUsuario)) {
-        header('Location: /php/dashboard.php');
+        header('Location: ../php/dashboard.php');
         exit;
     }
 
@@ -86,13 +102,13 @@ if ($idConversacion > 0) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="/img/logo.webp">
+    <link rel="shortcut icon" href="../img/logo.webp">
     <title>Chat con Clientes - L&M PC Computadoras</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/dashboard_pasante.css">
-    <link rel="stylesheet" href="/css/asistente_tools.css">
+    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/style.css') : '../../../public/css/style.css' ?>">
+    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/dashboard_pasante.css') : '../../../public/css/dashboard_pasante.css' ?>">
+    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/asistente_tools.css') : '../../../public/css/asistente_tools.css' ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
@@ -100,7 +116,7 @@ if ($idConversacion > 0) {
     <nav class="navbar navbar-dark bg-warning fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
-                href="<?php echo $esAsistente ? '/php/dashboard_asistente.php' : '/php/dashboard.php'; ?>"
+                href="<?php echo $esAsistente ? '../php/dashboard_asistente.php' : '../php/dashboard.php'; ?>"
                 style="max-width: 45%; text-align: center;">L&M PC Computadoras</a>
             <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="offcanvas"
                 data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
@@ -148,7 +164,7 @@ if ($idConversacion > 0) {
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
-                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>
@@ -160,6 +176,9 @@ if ($idConversacion > 0) {
     </nav>
 
     <main class="container pasante-hero main-content">
+        <?php if ($chatError !== ''): ?>
+        <div class="alert alert-warning" role="alert"><?php echo htmlspecialchars($chatError, ENT_QUOTES, 'UTF-8'); ?></div>
+        <?php endif; ?>
         <div class="row align-items-center">
             <div class="col-lg-8">
                 <h1><?php echo $esAsistente ? 'Chat con Clientes' : 'Soporte por Chat'; ?></h1>
@@ -175,7 +194,7 @@ if ($idConversacion > 0) {
                 <?php endif; ?>
             </div>
             <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
-                <img src="/img/chatCli.webp" alt="Chat con Clientes" class="hero-image">
+                <img src="../img/chatCli.webp" alt="Chat con Clientes" class="hero-image">
             </div>
         </div>
 
@@ -191,7 +210,7 @@ if ($idConversacion > 0) {
                 <?php endif; ?>
                 <?php foreach ($conversaciones as $conv): ?>
                 <a class="conversation-link <?php echo (int)$conv['id_conversacion'] === $idConversacion ? 'active' : ''; ?>"
-                    href="/php/chat.php?conversacion=<?php echo (int)$conv['id_conversacion']; ?>">
+                    href="../php/chat.php?conversacion=<?php echo (int)$conv['id_conversacion']; ?>">
                     <strong><?php echo htmlspecialchars($conv['nombre_usuario']); ?></strong>
                     <small
                         class="d-block tool-muted"><?php echo htmlspecialchars($conv['correo_usuario'] ?? 'Sin correo'); ?></small>
@@ -207,7 +226,7 @@ if ($idConversacion > 0) {
                     <h2 class="tool-title h4">Conversacion finalizada</h2>
                     <p class="tool-muted">Gracias por calificar tu experiencia. Puedes iniciar una nueva consulta cuando
                         lo necesites.</p>
-                    <a class="btn tool-action px-4" href="/php/chat.php?nuevo=1">
+                    <a class="btn tool-action px-4" href="../php/chat.php?nuevo=1">
                         <i class="fas fa-plus"></i> Nueva conversacion
                     </a>
                 </div>
@@ -217,7 +236,7 @@ if ($idConversacion > 0) {
                     <div class="text-center mt-5">
                         <p class="tool-muted mb-2">Selecciona una conversacion para revisar los mensajes.</p>
                         <?php if ($esAsistente): ?>
-                        <a class="btn btn-sm tool-action" href="/php/chat.php"><i class="fas fa-rotate"></i>
+                        <a class="btn btn-sm tool-action" href="../php/chat.php"><i class="fas fa-rotate"></i>
                             Actualizar</a>
                         <?php endif; ?>
                     </div>

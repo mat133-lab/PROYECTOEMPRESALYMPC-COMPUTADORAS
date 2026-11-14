@@ -171,5 +171,6 @@ def responder(mensaje):
 
 
 if __name__ == "__main__":
-    entrada = json.loads(sys.stdin.read() or "{}")
-    print(json.dumps(responder(entrada.get("mensaje", "")), ensure_ascii=False))
+    entrada = json.loads(sys.stdin.buffer.read().decode("utf-8") or "{}")
+    respuesta = json.dumps(responder(entrada.get("mensaje", "")), ensure_ascii=True)
+    sys.stdout.buffer.write((respuesta + "\n").encode("ascii"))

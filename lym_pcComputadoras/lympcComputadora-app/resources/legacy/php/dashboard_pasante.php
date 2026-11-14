@@ -3,7 +3,7 @@ session_start();
 require_once '../includes/db.php';
 
 if (!isset($_SESSION['rol']) || strtolower($_SESSION['rol']) !== 'pasante') {
-    header('Location: /php/login.php');
+    header('Location: ../php/login.php');
     exit;
 }
 
@@ -42,12 +42,12 @@ if (isset($_GET['upload'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="/img/logo.webp">
+    <link rel="shortcut icon" href="../img/logo.webp">
     <title>Dashboard Pasante - L&M PC Computadoras</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/dashboard_pasante.css">
+    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/style.css') : '../../../public/css/style.css' ?>">
+    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/dashboard_pasante.css') : '../../../public/css/dashboard_pasante.css' ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
@@ -61,7 +61,7 @@ if (isset($_GET['upload'])) {
             if(!$esStf):
             ?>
             <div class="submenu me-3">
-                <img src="/img/canasta.webp" id="img-libro" alt="Canasta">
+                <img src="../img/canasta.webp" id="img-libro" alt="Canasta">
 
                 <div id="libro">
                     <table>
@@ -105,7 +105,7 @@ if (isset($_GET['upload'])) {
             if(!$esStf):
             ?>
             <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
-                href="/php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+                href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
             <div class="d-flex align-items-center gap-2 ms-auto">
                 <form class="d-none d-lg-flex m-0" role="search" onsubmit="event.preventDefault();">
                     <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search"
@@ -136,7 +136,7 @@ if (isset($_GET['upload'])) {
                     <ul class="navbar-nav flex-grow-1 pe-3">
 
                         <li class="nav-item">
-                            <a class="nav-link categoria-link active" href="/php/dashboard.php"
+                            <a class="nav-link categoria-link active" href="../php/dashboard.php"
                                 data-categoria="todos">
                                 Home
                             </a>
@@ -147,13 +147,13 @@ if (isset($_GET['upload'])) {
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
                                 <li>
-                                    <a class="dropdown-item categoria-link" href="/php/pc.php"
+                                    <a class="dropdown-item categoria-link" href="../php/pc.php"
                                         data-categoria="estructura">
                                         Pc Dell
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item categoria-link" href="/php/hpdell.php"
+                                    <a class="dropdown-item categoria-link" href="../php/hpdell.php"
                                         data-categoria="techos">
                                         Hp Dell
                                     </a>
@@ -166,19 +166,19 @@ if (isset($_GET['upload'])) {
                                 Laptops
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="/php/asus.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/asus.php"
                                         data-categoria="madera">ASUS</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="/php/lenovo.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/lenovo.php"
                                         data-categoria="pisos">LENOVO</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="/php/omnibook.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/omnibook.php"
                                         data-categoria="armarios">HP
                                         OMNIBOOK </a></li>
-                                <li><a class="dropdown-item categoria-link" href="/php/msi.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/msi.php"
                                         data-categoria="armarios">MSI</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="/php/dell.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/dell.php"
                                         data-categoria="armarios">DELL</a>
                                 </li>
 
@@ -190,11 +190,11 @@ if (isset($_GET['upload'])) {
                                 Duplicadora
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="/php/duplicadoracd.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/duplicadoracd.php"
                                         data-categoria="electricidad">CD</a></li>
-                                <li><a class="dropdown-item categoria-link" href="/php/duplicadoradvd.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/duplicadoradvd.php"
                                         data-categoria="iluminacion">DVD</a></li>
-                                <li><a class="dropdown-item categoria-link" href="/php/duplicadorablu.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/duplicadorablu.php"
                                         data-categoria="domotica">BLU-RAY</a></li>
                             </ul>
                         </li>
@@ -204,7 +204,7 @@ if (isset($_GET['upload'])) {
                                 Tablets
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="/php/tablets.php" data-categoria="Tablets">Tablets IPad</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/tablets.php" data-categoria="Tablets">Tablets IPad</a>
                                 </li>
                             </ul>
                         </li>
@@ -214,15 +214,15 @@ if (isset($_GET['upload'])) {
                                 Servicio Tecnico
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="/php/horario.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/horario.php"
                                         data-categoria="bano">Horarios</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="/php/contacto.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/contacto.php"
                                         data-categoria="bano">Contacto</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="/php/gestion_citas.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/gestion_citas.php"
                                         data-categoria="bano">Citas</a></li>
-                                <li><a class="dropdown-item categoria-link" href="/php/ubicacion.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/ubicacion.php"
                                         data-categoria="bano">Ubicacion</a>
                                 </li>
                             </ul>
@@ -233,10 +233,10 @@ if (isset($_GET['upload'])) {
                                 Impresoras con Tinta Continua
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="/php/epson.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/epson.php"
                                         data-categoria="pintura">EPSON</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="/php/canon.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/canon.php"
                                         data-categoria="pintura">CANON</a>
                                 </li>
                             </ul>
@@ -246,10 +246,10 @@ if (isset($_GET['upload'])) {
                                 Tintas
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="/php/tinta100.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta100.php"
                                         data-categoria="pintura">Tinta de
                                         100 ML</a></li>
-                                <li><a class="dropdown-item categoria-link" href="/php/tinta1000.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta1000.php"
                                         data-categoria="pintura">Tinta de
                                         1000 ML</a></li>
                             </ul>
@@ -258,10 +258,10 @@ if (isset($_GET['upload'])) {
 
                             <?php if (isset($_SESSION['rol'])): ?> 
                             <span class="text-white me-3">Buen dia, <b><?php echo $_SESSION['usuario']; ?></b></span>
-                            <a href="/php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesi�n</a>
+                            <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesi�n</a>
                             <?php else: ?>
-                            <a href="/php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesi�n</a>
-                            <a href="/php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesi�n</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>
@@ -272,16 +272,16 @@ if (isset($_GET['upload'])) {
                 <!-- Si el usuario es parte del personal lo redirigimo a su dashboard correspondiente si es tecnico, administrador, encargado o pasante lo redirigimos al dashboard correspondiente -->
             <?php if(strtolower($_SESSION['rol']) === 'admin'): ?>
                 <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
-                href="/php/dashboardadmin.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+                href="../php/dashboardadmin.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
             <?php elseif(strtolower($_SESSION['rol']) === 'tecnico'): ?>
                 <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
-                href="/php/dashboard_tecnico.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+                href="../php/dashboard_tecnico.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
             <?php elseif(strtolower($_SESSION['rol']) === 'encargado'): ?>
                 <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
-                href="/php/dashboard_encargado.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+                href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
             <?php elseif(strtolower($_SESSION['rol']) === 'pasante'): ?>
                 <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
-                href="/php/dashboard_pasante.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+                href="../php/dashboard_pasante.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
             <?php endif; ?>
             <div class="d-flex align-items-center gap-2 ms-auto">
                 <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
@@ -306,7 +306,7 @@ if (isset($_GET['upload'])) {
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
                                 <li>
-                                    <a class="dropdown-item categoria-link" href="/php/perfilpasante.php"
+                                    <a class="dropdown-item categoria-link" href="../php/perfilpasante.php"
                                         data-categoria="estructura">
                                         Perfil
                                     </a>
@@ -329,10 +329,10 @@ if (isset($_GET['upload'])) {
                             <?php if (isset($_SESSION['rol'])): ?>
                             <span class="text-white me-3">Buen dia,
                                 <b><?php echo $_SESSION['usuario']; ?></b></span>
-                            <a href="/php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesion</a>
+                            <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesion</a>
                             <?php else: ?>
-                            <a href="/php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesion</a>
-                            <a href="/php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesion</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>
@@ -357,7 +357,7 @@ if (isset($_GET['upload'])) {
             </div>
 
             <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
-                <img src="/img/logo.webp" alt="Dashboard Pasante" class="hero-image">
+                <img src="../img/logo.webp" alt="Dashboard Pasante" class="hero-image">
             </div>
         </div>
 
@@ -367,40 +367,40 @@ if (isset($_GET['upload'])) {
 
         <section class="products">
             <div class="box-container">
-                <a href="/php/ubicacion.php" class="box text-decoration-none text-dark">
-                    <img src="/img/ubicacion.webp" alt="Ubicacion" onerror="this.style.display='none'">
+                <a href="../php/ubicacion.php" class="box text-decoration-none text-dark">
+                    <img src="../img/ubicacion.webp" alt="Ubicacion" onerror="this.style.display='none'">
                     <div class="product-txt">
                         <h3>Ubicacion</h3>
                         <p>Consulta la ubicacion de la tienda, rutas y zonas de atencion.</p>
                         <span class="precio">Ver Ubicacion</span>
                     </div>
                 </a>
-                <a href="/php/horario.php" class="box text-decoration-none text-dark">
-                    <img src="/img/calendar.webp" alt="Calendario" onerror="this.style.display='none'">
+                <a href="../php/horario.php" class="box text-decoration-none text-dark">
+                    <img src="../img/calendar.webp" alt="Calendario" onerror="this.style.display='none'">
                     <div class="product-txt">
                         <h3>Calendario</h3>
                         <p>Revisa tu agenda, citas programadas y dias disponibles.</p>
                         <span class="precio">Ver Calendario</span>
                     </div>
                 </a>
-                <a href="/php/perfilpasante.php" class="box text-decoration-none text-dark">
-                    <img src="/img/users.png" alt="Perfil" onerror="this.style.display='none'">
+                <a href="../php/perfilpasante.php" class="box text-decoration-none text-dark">
+                    <img src="../img/users.png" alt="Perfil" onerror="this.style.display='none'">
                     <div class="product-txt">
                         <h3>Perfil</h3>
                         <p>Actualiza tus datos, credenciales y tu informacion personal.</p>
                         <span class="precio">Ir al Perfil</span>
                     </div>
                 </a>
-                <a href="/php/subirpasante.php" class="box text-decoration-none text-dark">
-                    <img src="/img/upload.webp" alt="Perfil" onerror="this.style.display='none'">
+                <a href="../php/subirpasante.php" class="box text-decoration-none text-dark">
+                    <img src="../img/upload.webp" alt="Perfil" onerror="this.style.display='none'">
                     <div class="product-txt">
                         <h3>Upload para Proyectos</h3>
                         <p>Sube y gestiona tus archivos de proyecto con referencia a tu repositorio GitHub.</p>
                         <span class="precio">Subir Proyecto</span>
                     </div>
                 </a>
-                <a href="/php/subireport.php" class="box text-decoration-none text-dark">
-                    <img src="/img/report.webp" alt="Perfil" onerror="this.style.display='none'">
+                <a href="../php/subireport.php" class="box text-decoration-none text-dark">
+                    <img src="../img/report.webp" alt="Perfil" onerror="this.style.display='none'">
                     <div class="product-txt">
                         <h3>Upload para Reportes</h3>
                         <p>Sube y gestiona tus reportes con referencia a tu repositorio GitHub.</p>
@@ -425,7 +425,7 @@ if (isset($_GET['upload'])) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-    <script src="/js/dashboard_pasante.js"></script>
+    <script src="<?= function_exists('url') ? url('js/dashboard_pasante.js') : '../../../public/js/dashboard_pasante.js' ?>"></script>
 </body>
 
 </html>

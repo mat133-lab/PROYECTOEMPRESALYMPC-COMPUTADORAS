@@ -81,7 +81,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                     $success = "Registro creado correctamente, pero no pudimos enviar el correo de verificación. Revisa la configuración SMTP o contacta al administrador.";
                 }
 
-                header("Refresh: 4; url=/php/login.php");
+                header("Refresh: 4; url=../php/login.php");
             }
             catch(PDOException $e){
                 $error = "Error al registrar: " . $e->getMessage();
@@ -96,8 +96,8 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="/img/logo.webp">
-    <link rel="stylesheet" href="/css/auth.css">
+    <link rel="shortcut icon" href="../img/logo.webp">
+    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/auth.css') : '../../../public/css/auth.css' ?>">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <title>Registro - L&M PC Computadoras</title>
 </head>
@@ -217,7 +217,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                 </div>
 
                 <div style="margin-top:12px; text-align:center;">
-                    <a href="/php/login.php" id="showLogin"
+                    <a href="../php/login.php" id="showLogin"
                         style="font-size:14px; color:#2b6cb0; text-decoration:none; display:flex; justify-content: center; gap:8px; align-items:center;">
                         <span>¿Ya tienes Cuenta? Inicia Sesion Aqui</span>
                         <i class="fas fa-arrow-right"></i>

@@ -3,8 +3,8 @@ document.addEventListener('DOMContentLoaded', function () {
         compras: {
             tipo: 'compras',
             api: 'Grafica_venta_usu',
-            labelGrafica: 'Compras recientes por usuarios',
-            etiquetaLinea: 'Tendencia de ventas',
+            labelGrafica: 'Top 20 de productos más vendidos',
+            etiquetaLinea: 'Comparación de ventas',
             etiquetaBarra: 'Unidades vendidas',
             colorLinea: '#007bff',
             colorFondo: 'rgba(0, 123, 255, 0.1)',
@@ -12,27 +12,27 @@ document.addEventListener('DOMContentLoaded', function () {
             bordeBarra: 'rgba(255, 123, 0, 1)',
             hoverBarra: 'rgba(255, 145, 0, 1)',
             unidad: 'unidades vendidas',
-            top: 'producto líder'
+            top: 'producto más vendido'
         },
         inventario: {
             tipo: 'inventario',
             api: 'Grafica_venta_pro',
-            labelGrafica: 'Productos llegados al local',
-            etiquetaLinea: 'Tendencia de inventario',
+            labelGrafica: 'Top 20 de productos por unidades en inventario',
+            etiquetaLinea: 'Comparación de existencias',
             etiquetaBarra: 'Unidades en bodega',
             colorLinea: '#28a745',
             colorFondo: 'rgba(40, 167, 69, 0.1)',
             colorBarra: 'rgba(40, 167, 69, 0.7)',
             bordeBarra: '#28a745',
             hoverBarra: 'rgba(40, 167, 69, 1)',
-            unidad: 'unidades registradas',
-            top: 'producto con mayor ingreso'
+            unidad: 'unidades en inventario',
+            top: 'producto con mayor existencia'
         },
         contacto: {
             tipo: 'contacto',
             api: 'Grafica_contacto',
-            labelGrafica: 'Datos enviados por contacto',
-            etiquetaLinea: 'Tendencia de mensajes',
+            labelGrafica: 'Top 20 de contactos por mensajes recibidos',
+            etiquetaLinea: 'Comparación de mensajes',
             etiquetaBarra: 'Mensajes enviados',
             colorLinea: '#dc3545',
             colorFondo: 'rgba(220, 53, 69, 0.1)',
@@ -40,13 +40,13 @@ document.addEventListener('DOMContentLoaded', function () {
             bordeBarra: '#dc3545',
             hoverBarra: 'rgba(220, 53, 69, 1)',
             unidad: 'mensajes recibidos',
-            top: 'usuario con mayor actividad'
+            top: 'contacto con más mensajes'
         },
         citas: {
             tipo: 'citas',
             api: 'Grafica_citas',
-            labelGrafica: 'Datos enviados por citas',
-            etiquetaLinea: 'Tendencia de citas',
+            labelGrafica: 'Top 20 de usuarios por citas registradas',
+            etiquetaLinea: 'Comparación de citas',
             etiquetaBarra: 'Citas registradas',
             colorLinea: '#00adfd',
             colorFondo: 'rgba(0, 162, 255, 0.37)',
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function () {
             bordeBarra: '#00aeff',
             hoverBarra: 'rgb(1, 161, 254)',
             unidad: 'citas registradas',
-            top: 'usuario con mayor demanda'
+            top: 'usuario con más citas'
         }
     };
 
@@ -156,19 +156,19 @@ document.addEventListener('DOMContentLoaded', function () {
         const tercero = estadisticas.pares[2];
 
         if (metrica.tipo === 'compras') {
-            return `Priorizar disponibilidad, exhibición y seguimiento comercial de ${escapeHtml(top.label)}, porque concentra la mayor parte de las ventas. Si ${segundo ? escapeHtml(segundo.label) : 'el segundo lugar'} y ${tercero ? escapeHtml(tercero.label) : 'el tercer lugar'} están cerca del promedio, conviene activar promociones cruzadas para equilibrar la demanda y aumentar el ticket promedio.`;
+            return `Priorizar disponibilidad y seguimiento comercial de ${escapeHtml(top.label)}, que registra más unidades vendidas entre los productos mostrados. Comparar los productos siguientes (${segundo ? escapeHtml(segundo.label) : 'sin segundo producto'} y ${tercero ? escapeHtml(tercero.label) : 'sin tercer producto'}) para decidir si conviene diversificar promociones. Este gráfico cuenta unidades y no calcula ingresos ni ticket promedio.`;
         }
 
         if (metrica.tipo === 'inventario') {
-            return `Mantener control estricto de ${escapeHtml(top.label)} para evitar quiebres de stock, pero validar su rotación real antes de seguir incrementando bodega. Revisar productos con baja participación para detectar exceso de inventario, productos lentos o necesidad de reasignación comercial.`;
+            return `Revisar la disponibilidad actual de ${escapeHtml(top.label)} y contrastarla con sus ventas antes de reponer o redistribuir existencias. Este gráfico muestra unidades registradas en inventario; por sí solo no mide rotación ni demanda.`;
         }
 
         if (metrica.tipo === 'contacto') {
-            return `Reforzar tiempos de respuesta para ${escapeHtml(top.label)} y preparar plantillas de atención para los temas más repetidos. La concentración de mensajes permite ordenar prioridades, asignar responsables y medir si la comunicación está generando conversión o solo consultas sin cierre.`;
+            return `Priorizar la revisión de los mensajes asociados a ${escapeHtml(top.label)}. Este gráfico cuenta registros por contacto, pero no clasifica su contenido ni permite medir conversiones; revisa los mensajes antes de asignar responsables o cambiar procesos.`;
         }
 
         if (metrica.tipo === 'citas') {
-            return `Ajustar agenda y capacidad operativa alrededor de ${escapeHtml(top.label)}, asegurando confirmaciones, recordatorios y seguimiento posterior. Si la concentración es alta, conviene reservar cupos estratégicos y prevenir saturación en los horarios de mayor demanda.`;
+            return `Revisar el historial de citas de ${escapeHtml(top.label)} para entender la recurrencia y el seguimiento requerido. El gráfico cuenta citas por usuario, pero no muestra fechas ni horas; contrasta la agenda antes de ajustar horarios o capacidad.`;
         }
 
         return `Monitorear ${escapeHtml(top.label)} como prioridad principal y comparar su evolución contra el promedio general.`;
@@ -179,18 +179,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (estadisticas.total <= 0) {
             return `
-                <p class="mb-0"><strong>Resumen analítico:</strong> No hay datos suficientes para generar un análisis confiable en <strong>${escapeHtml(metrica.labelGrafica)}</strong>. Se recomienda verificar la carga de registros, periodos consultados y filtros activos antes de tomar decisiones operativas.</p>
+                <p class="mb-0"><strong>Resumen estadístico:</strong> No hay datos suficientes para generar un análisis confiable en <strong>${escapeHtml(metrica.labelGrafica)}</strong>. Se recomienda verificar la carga de registros antes de tomar decisiones operativas.</p>
             `;
         }
 
         const top = estadisticas.max;
         const concentracion = nivelConcentracion(estadisticas.topShare);
         const diferenciaPromedio = top.valor - estadisticas.average;
-        const resumen = `Total acumulado: <strong>${formatNumber(estadisticas.total)} ${metrica.unidad}</strong>; promedio por categoría: <strong>${formatNumber(estadisticas.average)}</strong>. El ${metrica.top} es <strong>${escapeHtml(top.label)}</strong> con ${formatNumber(top.valor)} registros (${formatPercent(estadisticas.topShare)}), con distribución ${concentracion}. La diferencia contra el promedio es de <strong>${formatNumber(diferenciaPromedio)}</strong>, lo que confirma su peso operativo en la lectura actual.`;
+        const resumen = `Total de las categorías mostradas: <strong>${formatNumber(estadisticas.total)} ${metrica.unidad}</strong>; promedio por categoría mostrada: <strong>${formatNumber(estadisticas.average)}</strong>. El ${metrica.top} es <strong>${escapeHtml(top.label)}</strong> con ${formatNumber(top.valor)} registros (${formatPercent(estadisticas.topShare)} del total mostrado); la distribución entre categorías visibles es ${concentracion}. La diferencia contra el promedio visible es de <strong>${formatNumber(diferenciaPromedio)}</strong>.`;
         const recomendacion = recomendacionPorTipo(metrica, estadisticas);
 
         return `
-            <p class="mb-1"><strong>Resumen analítico:</strong> ${resumen}</p>
+            <p class="mb-1"><strong>Resumen estadístico:</strong> ${resumen}</p>
             <p class="mb-0"><strong>Acción recomendada:</strong> ${recomendacion}</p>
         `;
     }
@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (contenedorLocal) {
             contenedorLocal.classList.add('ia-analisis-vacio');
             contenedorLocal.innerHTML = `
-                <p class="mb-0"><strong>Resumen analítico:</strong> ${escapeHtml(mensaje)} Verifique la conexión con el endpoint, la disponibilidad de registros y los filtros activos antes de tomar decisiones operativas.</p>
+                <p class="mb-0"><strong>Resumen estadístico:</strong> ${escapeHtml(mensaje)} Verifique la conexión con el endpoint y la disponibilidad de registros antes de tomar decisiones operativas.</p>
             `;
         }
     }
@@ -320,7 +320,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const result = await obtenerDatosGraficos();
 
             if (!result || !result.success) {
-                mostrarAnalisisVacio(1, METRICAS.inventario, 'No se pudo cargar la información de productos llegados al local.');
+                mostrarAnalisisVacio(1, METRICAS.inventario, 'No se pudo cargar la información del inventario.');
                 return;
             }
 
@@ -331,7 +331,7 @@ document.addEventListener('DOMContentLoaded', function () {
             mostrarAnalisis(1, METRICAS.inventario, datos.nombres, datos.cantidades);
         } catch (error) {
             console.error('Error al cargar la gráfica de inventario:', error);
-            mostrarAnalisisVacio(1, METRICAS.inventario, 'Error al procesar la gráfica de productos llegados al local.');
+            mostrarAnalisisVacio(1, METRICAS.inventario, 'Error al procesar la gráfica de inventario.');
         }
     }
 

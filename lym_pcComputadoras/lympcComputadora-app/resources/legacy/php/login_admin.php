@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_admin'])) {
                 $_SESSION['admin_logged_in'] = true;
                 $_SESSION['admin_name'] = $usuario['usuario'];
 
-                header("Location: /php/dashboardadmin.php");
+                header("Location: ../php/dashboardadmin.php");
                 exit;
             } else {
                 $mensaje = 'Este usuario no tiene permisos de administrador';
@@ -67,8 +67,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_admin'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="/img/logo.webp">
-    <link rel="stylesheet" href="/css/estiloadmin.css">
+    <link rel="shortcut icon" href="../img/logo.webp">
+    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/estiloadmin.css') : '../../../public/css/estiloadmin.css' ?>">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <title>Iniciar Sesión Administrador - L&M PC Computadoras</title>
 </head>
@@ -127,14 +127,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_admin'])) {
                 </div>
             </div>
 
-            <button type="submit" name="login_admin" class="login-btn" href="/php/dashboardadmin.php">
+            <button type="submit" name="login_admin" class="login-btn" href="../php/dashboardadmin.php">
                 Iniciar Sesión
                 <i class="fas fa-sign-in-alt btn-icon"></i>
             </button>
 
         </form>
         <div style="margin-top:12px; text-align:center;">
-            <a href="/php/registro_admin.php" id="showRegister"
+            <a href="../php/registro_admin.php" id="showRegister"
                 style="font-size:14px; color:#2b6cb0; text-decoration:none; display:inline-flex; gap:8px; align-items:center;">
                 <span>¿No tienes Cuenta Administrador? Haz click aqui</span>
                 <i class="fas fa-arrow-right"></i>
@@ -143,7 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_admin'])) {
 
         <div class="login-footer">
             <div class="login-link-container">
-                <a href="/php/login.php">
+                <a href="../php/login.php">
                     <i class="fas fa-arrow-left"></i> Volver al inicio
                 </a>
             </div>
@@ -153,7 +153,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_admin'])) {
             </div>
 
     </div>
-    <script src="/js/admin.js"></script>
+    <script src="<?= function_exists('url') ? url('js/admin.js') : '../../../public/js/admin.js' ?>"></script>
 </body>
 
 </html>

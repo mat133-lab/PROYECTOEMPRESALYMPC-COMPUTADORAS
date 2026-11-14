@@ -26,12 +26,15 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body,
         });
-        return response.json();
+        return await response.json();
     };
 
     const render = (payload) => {
         if (!payload.ok) {
-            messages.innerHTML = `<div class="floating-chat__bubble floating-chat__bubble--ai">${payload.message || 'No se pudo cargar el chat.'}</div>`;
+            const errorBubble = document.createElement('div');
+            errorBubble.className = 'floating-chat__bubble floating-chat__bubble--ai';
+            errorBubble.textContent = payload.message || 'No se pudo cargar el chat.';
+            messages.replaceChildren(errorBubble);
             return;
         }
 
@@ -57,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             render(await post({ action }));
         } catch (error) {
+            console.error('Error al cargar la conversación del chat:', error);
             messages.innerHTML = '<div class="floating-chat__bubble floating-chat__bubble--ai">No se pudo conectar con el chat.</div>';
         }
     };
@@ -87,7 +91,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const message = input.value.trim();
         if (!message) return;
         input.value = '';
-        render(await post({ action: 'send', message }));
+        try {
+            const result = await post({ action: 'send', message });
+            render(result);
+            if (!result.ok) input.value = message;
+        } catch (error) {
+            console.error('Error al enviar el mensaje del chat:', error);
+            input.value = message;
+            status.textContent = 'No se pudo enviar el mensaje';
+            render({ ok: false, message: 'No se pudo enviar el mensaje. Revisa tu conexión e inténtalo nuevamente.' });
+        }
     });
 
     finish.addEventListener('click', () => {
@@ -99,14 +112,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     sendRating.addEventListener('click', async () => {
-        render(await post({
-            action: 'rate',
-            rating: ratingValue.value,
-            comment: ratingComment.value,
-        }));
-        rating.hidden = true;
-        form.hidden = true;
-        finish.hidden = true;
-        status.textContent = 'Conversacion finalizada';
+        sendRating.disabled = true;
+        try {
+            const result = await post({
+                action: 'rate',
+                rating: ratingValue.value,
+                comment: ratingComment.value,
+            });
+            render(result);
+            if (result.ok) {
+                rating.hidden = true;
+                form.hidden = true;
+                finish.hidden = true;
+                status.textContent = 'Conversacion finalizada';
+                clearInterval(pollTimer);
+            }
+        } catch (error) {
+            console.error('Error al calificar la conversación:', error);
+            status.textContent = 'No se pudo enviar la calificación';
+            render({ ok: false, message: 'No se pudo enviar la calificación. Inténtalo nuevamente.' });
+        } finally {
+            sendRating.disabled = false;
+        }
     });
 });

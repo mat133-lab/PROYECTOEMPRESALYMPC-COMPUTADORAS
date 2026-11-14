@@ -3,7 +3,7 @@ session_start();
 require_once '../includes/db.php';
 
 if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), ['asistente', 'admin'], true)) {
-    header('Location: /php/login.php');
+    header('Location: ../php/login.php');
     exit();
 }
 

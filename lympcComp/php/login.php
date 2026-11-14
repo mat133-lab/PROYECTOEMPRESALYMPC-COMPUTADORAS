@@ -34,9 +34,9 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         $_SESSION['usuario'] = !empty($row['usuario']) ? $row['usuario'] : 'Usuario';
 
         if (strtolower($row['rol']) === 'tecnico') {
-            header("Location: /php/dashboard_tecnico.php");
+            header("Location: ../php/dashboard_tecnico.php");
         } else {
-header("Location: /php/dashboard.php");
+header("Location: ../php/dashboard.php");
         }
         exit;
         }

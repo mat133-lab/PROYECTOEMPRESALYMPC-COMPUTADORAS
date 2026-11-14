@@ -5,7 +5,7 @@
     // Verificar rol
     $rolesConAcceso = ['admin', 'tecnico', 'encargado', 'pasante'];
     if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $rolesConAcceso)) {
-        header('Location: /php/login.php');
+        header('Location: ../php/login.php');
         exit();
     }
 ?>
@@ -232,7 +232,7 @@
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
-                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>
@@ -249,7 +249,7 @@
                 href="../php/dashboard_tecnico.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
             <?php elseif(strtolower($_SESSION['rol']) === 'encargado'): ?>
                 <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
-                href="../php/dashboard_encargado.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+                href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
             <?php elseif(strtolower($_SESSION['rol']) === 'pasante'): ?>
                 <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
                 href="../php/dashboard_pasante.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
@@ -303,7 +303,7 @@
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
-                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>

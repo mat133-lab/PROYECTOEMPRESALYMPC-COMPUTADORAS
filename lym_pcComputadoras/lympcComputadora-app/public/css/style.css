@@ -182,6 +182,10 @@ th {
     font-size: 14px;
 }
 
+#carrito-acciones [hidden] {
+    display: none !important;
+}
+
 .carrito-acciones-total p {
     margin: 0;
     font-weight: bold;

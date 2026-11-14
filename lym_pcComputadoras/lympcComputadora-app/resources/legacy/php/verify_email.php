@@ -26,8 +26,8 @@ if ($token !== '') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verificación de correo</title>
-    <link rel="shortcut icon" href="/img/logo.webp">
-    <link rel="stylesheet" href="/css/auth.css">
+    <link rel="shortcut icon" href="../img/logo.webp">
+    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/auth.css') : '../../../public/css/auth.css' ?>">
 </head>
 <body>
     <div class="login-background">

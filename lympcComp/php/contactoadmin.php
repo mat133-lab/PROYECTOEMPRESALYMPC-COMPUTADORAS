@@ -9,7 +9,7 @@ if (!isset($_SESSION['usuario'])) {
 
 // Si el usuario NO es admin, lo enviamos a contacto.php (vista normal)
 if (!isset($_SESSION['rol']) || strtolower($_SESSION['rol']) !== 'admin') {
-    header("Location: /php/contacto.php");
+    header("Location: ../php/contacto.php");
     exit();
 }
 
@@ -44,7 +44,7 @@ if (isset($_POST['enviar'])) {
         $stmt = $conn->prepare("INSERT INTO contacto (id_usuario, nombre, correo, compania, mensaje, cedula, archivo_ruc, archivo_cedula) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([$id_usuario, $nombre, $correo, $compania, $mensaje, $cedula, $ruta_ruc, $ruta_cedula]);
         
-        header("Location: /php/contactoadmin.php?status=success");
+        header("Location: ../php/contactoadmin.php?status=success");
         exit();
     }
 }
@@ -60,10 +60,13 @@ if (isset($_POST['enviar'])) {
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="../css/stylecitas.css">
     <link rel="stylesheet" href="../css/footer.css">
+    <link rel="stylesheet" href="../css/pdf_print_branding.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body>
+    <div class="pdf-branding-header"><img src="../img/headerlym.png" alt="L&M PC Computadoras"></div>
+    <div class="pdf-branding-footer"><img src="../img/footerlym.png" alt="Información de contacto"></div>
     <nav class="navbar navbar-dark bg-warning fixed-top">
         <div class="container-fluid">
             <?php 
@@ -273,7 +276,7 @@ if (isset($_POST['enviar'])) {
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
-                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>
@@ -332,7 +335,7 @@ if (isset($_POST['enviar'])) {
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
-                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>
@@ -456,7 +459,7 @@ if (isset($_POST['enviar'])) {
                 </table>
             </div>
             <div style="margin-top:1rem; text-align:right;">
-                <button onclick="window.print()" class="btn btn-danger"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
+                <button onclick="window.print()" class="btn btn-danger pdf-export-button"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
             </div>
         </div>
     </div>

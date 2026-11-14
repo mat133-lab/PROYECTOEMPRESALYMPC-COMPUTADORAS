@@ -5,7 +5,7 @@ include_once '../includes/db.php';
 // 1. Validar que el usuario sea administrador
 if (!isset($_SESSION['usuario']) || $_SESSION['rol'] !== 'admin') {
     // Si no es admin, lo mandamos de vuelta o le mostramos error
-    header("Location: /php/dashboard.php?error=acceso_denegado");
+    header("Location: ../php/dashboard.php?error=acceso_denegado");
     exit;
 }
 
@@ -62,7 +62,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Ejecutar la consulta
         if ($stmt->execute()) {
             // Si todo salió bien, redirigir al dashboard con un mensaje de éxito
-header("Location: /php/dashboard.php?mensaje=guardado_exito");
+header("Location: ../php/dashboard.php?mensaje=guardado_exito");
              exit;
         } else {
             echo "Error al guardar en la base de datos.";
@@ -75,7 +75,7 @@ header("Location: /php/dashboard.php?mensaje=guardado_exito");
 
 } else {
     // Si alguien intenta entrar directo a la URL sin mandar datos
-    header("Location: /php/dashboard.php");
+    header("Location: ../php/dashboard.php");
     exit;
 }
 ?>

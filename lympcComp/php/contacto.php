@@ -9,7 +9,7 @@ if (!isset($_SESSION['usuario'])) {
 
 // Si el usuario es admin, lo enviamos a contactoadmin.php
 if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'admin') {
-    header("Location: /php/contactoadmin.php");
+    header("Location: ../php/contactoadmin.php");
     exit();
 }
 
@@ -48,7 +48,7 @@ if (isset($_POST['enviar'])) {
         $stmt = $conn->prepare("INSERT INTO contacto (id_usuario, nombre, correo, compania, mensaje, cedula, archivo_ruc, archivo_cedula) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([$id_usuario, $nombre, $correo, $compania, $mensaje, $cedula, $ruta_ruc, $ruta_cedula]);
         
-        header("Location: /php/contacto.php?status=success");
+        header("Location: ../php/contacto.php?status=success");
         exit();
     }
 }
@@ -276,7 +276,7 @@ if (isset($_POST['enviar'])) {
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
-                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>
@@ -335,7 +335,7 @@ if (isset($_POST['enviar'])) {
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
-                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>

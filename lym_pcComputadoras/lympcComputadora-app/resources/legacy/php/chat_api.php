@@ -8,7 +8,7 @@ header('Content-Type: application/json; charset=utf-8');
 function chatJson($data, $status = 200) {
     http_response_code($status);
     echo json_encode($data, JSON_UNESCAPED_UNICODE);
-    return;
+    exit;
 }
 
 if (!isset($_SESSION['usuario'], $_SESSION['id_usuario'])) {
@@ -23,7 +23,13 @@ if (in_array($rol, ['admin', 'tecnico', 'encargado', 'pasante', 'asistente'], tr
 chatEnsureTables($conn);
 
 $action = $_POST['action'] ?? $_GET['action'] ?? 'bootstrap';
-$idUsuario = (int)$_SESSION['id_usuario'];
+if ($action === 'send' && trim($_POST['message'] ?? '') === '') {
+    chatJson(['ok' => false, 'message' => 'Escribe un mensaje para enviarlo.'], 422);
+}
+$idUsuario = (int) ($_SESSION['id_usuario'] ?? 0);
+if ($idUsuario < 1) {
+    chatJson(['ok' => false, 'message' => 'La sesión del usuario no es válida.'], 401);
+}
 $nombreUsuario = $_SESSION['usuario'] ?? 'Usuario';
 $correoUsuario = $_SESSION['correo'] ?? null;
 
@@ -39,17 +45,21 @@ if ($action === 'send') {
         chatJson(['ok' => false, 'message' => 'Escribe un mensaje para enviarlo.'], 422);
     }
 
-    chatHandleUserMessage($conn, $idConversacion, $idUsuario, $nombreUsuario, $mensaje);
+    if (!chatHandleUserMessage($conn, $idConversacion, $idUsuario, $nombreUsuario, $mensaje)) {
+        chatJson(['ok' => false, 'message' => 'La conversación ya no está disponible.'], 409);
+    }
 }
 
 if ($action === 'rate') {
-    chatRateConversation(
+    if (!chatRateConversation(
         $conn,
         $idConversacion,
         $idUsuario,
         $_POST['rating'] ?? 0,
         $_POST['comment'] ?? ''
-    );
+    )) {
+        chatJson(['ok' => false, 'message' => 'No se pudo calificar la conversación.'], 409);
+    }
 
     chatJson([
         'ok' => true,
@@ -68,4 +78,3 @@ chatJson([
     'conversation' => $conversacion,
     'messages' => chatGetMessages($conn, $idConversacion),
 ]);
-

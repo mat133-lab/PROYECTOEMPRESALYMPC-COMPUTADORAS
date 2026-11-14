@@ -170,11 +170,15 @@ function chatBotResponse($mensaje) {
 }
 
 function chatHandleUserMessage(PDO $conn, $idConversacion, $idUsuario, $nombreUsuario, $mensaje) {
-    chatAddMessage($conn, $idConversacion, 'user', $nombreUsuario, $mensaje);
-
     $stmt = $conn->prepare("SELECT estado FROM chat_conversaciones WHERE id_conversacion = ? AND id_usuario = ?");
     $stmt->execute([$idConversacion, $idUsuario]);
     $estadoActual = $stmt->fetchColumn();
+
+    if ($estadoActual === false || $estadoActual === 'finalizado') {
+        return false;
+    }
+
+    chatAddMessage($conn, $idConversacion, 'user', $nombreUsuario, $mensaje);
 
     if ($estadoActual === 'ia') {
         [$respuesta, $necesitaHumano, $tema] = chatBotResponse($mensaje);
@@ -187,10 +191,13 @@ function chatHandleUserMessage(PDO $conn, $idConversacion, $idUsuario, $nombreUs
         $stmt = $conn->prepare("UPDATE chat_conversaciones SET estado = 'pendiente_asistente' WHERE id_conversacion = ?");
         $stmt->execute([$idConversacion]);
     }
+
+    return true;
 }
 
 function chatRateConversation(PDO $conn, $idConversacion, $idUsuario, $calificacion, $comentario) {
     $calificacion = max(1, min(10, (int)$calificacion));
-    $stmt = $conn->prepare("UPDATE chat_conversaciones SET estado = 'finalizado', calificacion = ?, comentario_calificacion = ?, fecha_cierre = NOW() WHERE id_conversacion = ? AND id_usuario = ?");
+    $stmt = $conn->prepare("UPDATE chat_conversaciones SET estado = 'finalizado', calificacion = ?, comentario_calificacion = ?, fecha_cierre = NOW() WHERE id_conversacion = ? AND id_usuario = ? AND estado <> 'finalizado'");
     $stmt->execute([$calificacion, trim($comentario), $idConversacion, $idUsuario]);
+    return $stmt->rowCount() > 0;
 }

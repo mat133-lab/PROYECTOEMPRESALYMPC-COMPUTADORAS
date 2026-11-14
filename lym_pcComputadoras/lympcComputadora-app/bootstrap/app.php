@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'php/api_grafico_asistente.php',
             'php/chat_api.php',
             'php/cart_action.php',
+            'php/paypal_api.php',
             'php/eliminar_cita.php',
             'php/guardar_cita.php',
             'php/buscar_cita.php',

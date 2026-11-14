@@ -490,11 +490,21 @@ document.addEventListener('DOMContentLoaded', () => {
         //Diseños para el pdf
         const logo = new Image();
         logo.src = '../img/headerlym.png';
+        logo.onerror = function () {
+            console.error('No se pudo cargar el encabezado del comprobante de cita.');
+            window.alert('No se pudo cargar la imagen del encabezado del comprobante.');
+        };
         logo.onload = function () {
             const footer = new Image();
             footer.src = '../img/footerlym.png';
+            footer.onerror = function () {
+                console.error('No se pudo cargar el pie del comprobante de cita.');
+                window.alert('No se pudo cargar la imagen del pie de página del comprobante.');
+            };
             footer.onload = function () {
-                doc.addImage(logo, 'PNG', 0, 0, pageWidth, 35);
+                const headerHeight = pageWidth * logo.height / logo.width;
+                const footerHeight = pageWidth * footer.height / footer.width;
+                doc.addImage(logo, 'PNG', 0, 0, pageWidth, headerHeight);
                 doc.setFontSize(14);
                 doc.setFont(undefined, 'bold');
                 doc.text("Comprobante de Cita", pageWidth / 2, 50, { align: 'center' });
@@ -518,7 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const textoMotivo = doc.splitTextToSize("Motivo de la Cita: " + descripcion, pageWidth - 30);
                     doc.text(textoMotivo, 15, 105);
                 }
-                doc.addImage(footer, 'PNG', 0, pageHeight - 30, pageWidth, 30);
+                doc.addImage(footer, 'PNG', 0, pageHeight - footerHeight, pageWidth, footerHeight);
                 const nombreAr = nombre !== 'N/A' ? nombre.replace(/\s+/g, '_') : 'Usuario';
                 doc.save('comprobante_cita_horario_usuarios_' + nombreAr + '.pdf');
             }

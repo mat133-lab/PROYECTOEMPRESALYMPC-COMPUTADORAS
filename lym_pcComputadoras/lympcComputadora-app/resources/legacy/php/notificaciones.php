@@ -5,7 +5,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../includes/mail_config.php';
 
 if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), ['asistente', 'admin'], true)) {
-    header('Location: /php/login.php');
+    header('Location: ../php/login.php');
     exit;
 }
 
@@ -117,13 +117,13 @@ $historial = $historialStmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="/img/logo.webp">
+    <link rel="shortcut icon" href="../img/logo.webp">
     <title>Crear Notificaciones - L&M PC Computadoras</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/dashboard_pasante.css">
-    <link rel="stylesheet" href="/css/asistente_tools.css">
+    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/style.css') : '../../../public/css/style.css' ?>">
+    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/dashboard_pasante.css') : '../../../public/css/dashboard_pasante.css' ?>">
+    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/asistente_tools.css') : '../../../public/css/asistente_tools.css' ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
@@ -131,7 +131,7 @@ $historial = $historialStmt->fetchAll(PDO::FETCH_ASSOC);
     <nav class="navbar navbar-dark bg-warning fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
-                href="/php/dashboard_asistente.php" style="max-width: 45%; text-align: center;">L&M PC Computadoras</a>
+                href="../php/dashboard_asistente.php" style="max-width: 45%; text-align: center;">L&M PC Computadoras</a>
             <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="offcanvas"
                 data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
                 <span class="navbar-toggler-icon"></span>
@@ -143,13 +143,13 @@ $historial = $historialStmt->fetchAll(PDO::FETCH_ASSOC);
                 </div>
                 <div class="offcanvas-body">
                     <ul class="navbar-nav flex-grow-1 pe-3">
-                        <li class="nav-item"><a class="nav-link" href="/php/dashboard_asistente.php">Panel de Asistente</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/php/lecturadoc.php">Documentos de Pasante</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/php/chat.php">Chat con Clientes</a></li>
+                        <li class="nav-item"><a class="nav-link" href="../php/dashboard_asistente.php">Panel de Asistente</a></li>
+                        <li class="nav-item"><a class="nav-link" href="../php/lecturadoc.php">Documentos de Pasante</a></li>
+                        <li class="nav-item"><a class="nav-link" href="../php/chat.php">Chat con Clientes</a></li>
                     </ul>
                     <div class="d-flex align-items-center mt-3">
                         <span class="text-white me-3">Buen dia, <b><?php echo htmlspecialchars($_SESSION['usuario'] ?? 'Asistente'); ?></b></span>
-                        <a href="/php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesion</a>
+                        <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesion</a>
                     </div>
                 </div>
             </div>
@@ -164,7 +164,7 @@ $historial = $historialStmt->fetchAll(PDO::FETCH_ASSOC);
                 <span class="summary-badge"><i class="fas fa-envelope"></i> Usuarios: <?php echo count($usuarios); ?></span>
             </div>
             <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
-                <img src="/img/notifiUsu.webp" alt="Notificaciones" class="hero-image">
+                <img src="../img/notifiUsu.webp" alt="Notificaciones" class="hero-image">
             </div>
         </div>
 

@@ -4,7 +4,7 @@ session_start();
 require_once '../includes/db.php'; 
 
 if (!isset($_SESSION['admin_logged_in'])) {
-    header("Location: /php/login_admin.php");
+    header("Location: ../php/login_admin.php");
     exit;
 }
 
@@ -50,11 +50,11 @@ if ($adminId) {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" href="/img/logo.webp">
+    <link rel="shortcut icon" href="../img/logo.webp">
     <title>Dashboard - L&M PC Computadoras</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/style.css') : '../../../public/css/style.css' ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
@@ -68,7 +68,7 @@ if ($adminId) {
             if(!$esStf):
             ?>
             <div class="submenu me-3">
-                <img src="/img/canasta.webp" id="img-libro" alt="Canasta">
+                <img src="../img/canasta.webp" id="img-libro" alt="Canasta">
 
                 <div id="libro">
                     <table>
@@ -112,7 +112,7 @@ if ($adminId) {
             if(!$esStf):
             ?>
             <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
-                href="/php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+                href="../php/dashboard.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
             <div class="d-flex align-items-center gap-2 ms-auto">
                 <form class="d-none d-lg-flex m-0" role="search" onsubmit="event.preventDefault();">
                     <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search"
@@ -143,7 +143,7 @@ if ($adminId) {
                     <ul class="navbar-nav flex-grow-1 pe-3">
 
                         <li class="nav-item">
-                            <a class="nav-link categoria-link active" href="/php/dashboard.php"
+                            <a class="nav-link categoria-link active" href="../php/dashboard.php"
                                 data-categoria="todos">
                                 Home
                             </a>
@@ -154,7 +154,7 @@ if ($adminId) {
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
                                 <li>
-                                    <a class="dropdown-item categoria-link" href="/php/pc.php"
+                                    <a class="dropdown-item categoria-link" href="../php/pc.php"
                                         data-categoria="estructura">
                                         Pc Dell
                                     </a>
@@ -169,7 +169,7 @@ if ($adminId) {
                                 Laptops
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="/php/laptops.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/hpdell.php"
                                         data-categoria="bano">Laptops</a></li>
                                 <li><a class="dropdown-item categoria-link" href="#" data-categoria="seguridad"></a>
                                 </li>
@@ -183,7 +183,7 @@ if ($adminId) {
                                 Tablets
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="/php/tablets.php" data-categoria="Tablets">Tablets IPad</a>
+                                <li><a class="dropdown-item categoria-link" href="../php/tablets.php" data-categoria="Tablets">Tablets IPad</a>
                                 </li>
                             </ul>
                         </li>
@@ -193,15 +193,15 @@ if ($adminId) {
                                 Servicio Tecnico
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="/php/horario.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/horario.php"
                                         data-categoria="bano">Horarios</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="/php/contacto.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/contacto.php"
                                         data-categoria="bano">Contacto</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="/php/gestion_citas.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/gestion_citas.php"
                                         data-categoria="bano">Citas</a></li>
-                                <li><a class="dropdown-item categoria-link" href="/php/ubicacion.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/ubicacion.php"
                                         data-categoria="bano">Ubicacion</a>
                                 </li>
                             </ul>
@@ -212,10 +212,10 @@ if ($adminId) {
                                 Impresoras con Tinta Continua
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="/php/epson.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/epson.php"
                                         data-categoria="pintura">EPSON</a>
                                 </li>
-                                <li><a class="dropdown-item categoria-link" href="/php/canon.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/canon.php"
                                         data-categoria="pintura">CANON</a>
                                 </li>
                             </ul>
@@ -225,10 +225,10 @@ if ($adminId) {
                                 Tintas
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="/php/tinta100.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta100.php"
                                         data-categoria="pintura">Tinta de
                                         100 ML</a></li>
-                                <li><a class="dropdown-item categoria-link" href="/php/tinta1000.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/tinta1000.php"
                                         data-categoria="pintura">Tinta de
                                         1000 ML</a></li>
                             </ul>
@@ -237,10 +237,10 @@ if ($adminId) {
 
                             <?php if (isset($_SESSION['usuario'])): ?>
                             <span class="text-white me-3">Buen dia, <b><?php echo $_SESSION['usuario']; ?></b></span>
-                            <a href="/php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
+                            <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
-                            <a href="/php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
-                            <a href="/php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>
@@ -249,7 +249,7 @@ if ($adminId) {
             </div>
             <?php elseif($esStf): ?>
             <a class="navbar-brand position-absolute top-50 start-50 translate-middle m-0 text-truncate"
-                href="/php/dashboardadmin.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
+                href="../php/dashboardadmin.php" style="max-width: 45%; text-align: center;"> L&M PC Computadoras</a>
             <div class="d-flex align-items-center gap-2 ms-auto">
                 <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas"
                     data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar">
@@ -273,7 +273,7 @@ if ($adminId) {
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
                                 <li>
-                                    <a class="dropdown-item categoria-link" href="/php/perfiladmin.php"
+                                    <a class="dropdown-item categoria-link" href="../php/perfiladmin.php"
                                         data-categoria="estructura">
                                         Perfil
                                     </a>
@@ -291,10 +291,10 @@ if ($adminId) {
                             <?php if (isset($_SESSION['admin_name'])): ?>
                             <span class="text-white me-3">Buen dia,
                                 <b><?php echo $_SESSION['admin_name']; ?></b></span>
-                            <a href="/php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
+                            <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
-                            <a href="/php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
-                            <a href="/php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>
@@ -358,7 +358,7 @@ if ($adminId) {
                                 <i class="fas fa-user" style="font-size: 3rem; color: #adb5bd;"></i>
                                 <?php endif; ?>
                             </div>
-                            <form action="/php/subir_foto.php" method="POST" enctype="multipart/form-data"
+                            <form action="../php/subir_foto.php" method="POST" enctype="multipart/form-data"
                                 class="mt-3 mb-2">
                                 <div class="submit-photo">
                                     <input type="file" id="foto-perfil" name="foto-perfil" accept="image/*"
@@ -511,7 +511,7 @@ if ($adminId) {
     window.gaugeLoginTime = <?php echo $login_timestamp; ?> * 1000;
     </script>
 
-    <script src="/js/admin.js"></script>
+    <script src="<?= function_exists('url') ? url('js/admin.js') : '../../../public/js/admin.js' ?>"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
     </script>

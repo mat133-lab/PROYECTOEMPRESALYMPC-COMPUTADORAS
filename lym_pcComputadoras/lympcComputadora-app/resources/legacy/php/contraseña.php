@@ -77,8 +77,8 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="/img/logo.webp">
-    <link rel="stylesheet" href="/css/auth.css">
+    <link rel="shortcut icon" href="../img/logo.webp">
+    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/auth.css') : '../../../public/css/auth.css' ?>">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet">
     <title>Recuperar Contraseña - L&M PC Computadoras</title>
 </head>
@@ -127,7 +127,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                     </button>
 
                     <div class="register-footer">
-                        <a href="/php/login.php" id="showRegister"
+                        <a href="../php/login.php" id="showRegister"
                             style="font-size:14px; color:#2b6cb0; text-decoration:none; display:block; gap:8px; align-items:center;">
                             <span>¿Volver al Login?</span>
                             <i class="fas fa-arrow-right"></i>

@@ -3,7 +3,7 @@ session_start();
 require_once '../includes/db.php';
 
 if(!isset($_SESSION['id_usuario']) && !isset($_SESSION['id'])) {
-    header("Location: /php/login.php");
+    header("Location: ../php/login.php");
     exit;
 }
 
@@ -21,11 +21,11 @@ if(isset($_FILES['foto-perfil']) && $_FILES['foto-perfil']['error'] == 0) {
     if(move_uploaded_file($_FILES['foto-perfil']['tmp_name'], $ruta_final)){
         $stmt = $conn->prepare("UPDATE usuarios SET foto_perfil = ? WHERE id_usuario = ?");
         if($stmt->execute([$nuevo_nombre, $id_usuario])){
-            header("Location: /php/perfilUsu.php?upload=success");
+            header("Location: ../php/perfilUsu.php?upload=success");
             exit;
         }
     }
 }
-header("Location: /php/perfilUsu.php?error=subida_fallida");
+header("Location: ../php/perfilUsu.php?error=subida_fallida");
 exit;
 ?>

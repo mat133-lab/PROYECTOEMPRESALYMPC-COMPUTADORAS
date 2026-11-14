@@ -3,6 +3,15 @@ session_start();
 require_once '../includes/db.php';
 header('Content-Type: application/json; charset=UTF-8');
 
+if (!isset($_SESSION['usuario'], $_SESSION['rol']) || strtolower($_SESSION['rol']) !== 'asistente') {
+    http_response_code(isset($_SESSION['usuario']) ? 403 : 401);
+    echo json_encode([
+        'success' => false,
+        'error' => 'No tienes permiso para consultar estas gráficas.',
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 try {
     $sql = "
         SELECT p.nombre, SUM(dp.cantidad) as total_vendido

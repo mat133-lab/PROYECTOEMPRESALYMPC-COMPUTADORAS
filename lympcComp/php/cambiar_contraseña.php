@@ -4,7 +4,7 @@ require_once '../includes/db.php';
 
 // 1. Verificar que el administrador tenga la sesión iniciada
 if (!isset($_SESSION['admin_logged_in'])) {
-    header("Location: /php/login_admin.php");
+    header("Location: ../php/login_admin.php");
     exit();
 }
 

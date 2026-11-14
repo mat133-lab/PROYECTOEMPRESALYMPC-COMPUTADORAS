@@ -4,7 +4,7 @@ session_start();
 require_once '../includes/db.php'; 
 
 if (!isset($_SESSION['rol']) || strtolower($_SESSION['rol']) !== 'asistente') {
-    header("Location: /php/login_admin.php");
+    header("Location: ../php/login_admin.php");
     exit();
 }
 
@@ -169,7 +169,7 @@ if ($asistenteId) {
                                 Laptops
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark">
-                                <li><a class="dropdown-item categoria-link" href="../php/laptops.php"
+                                <li><a class="dropdown-item categoria-link" href="../php/hpdell.php"
                                         data-categoria="bano">Laptops</a></li>
                                 <li><a class="dropdown-item categoria-link" href="#" data-categoria="seguridad"></a>
                                 </li>
@@ -240,7 +240,7 @@ if ($asistenteId) {
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
-                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>
@@ -294,7 +294,7 @@ if ($asistenteId) {
                             <a href="../php/logout.php" class="btn btn-danger btn-sm">Cerrar Sesión</a>
                             <?php else: ?>
                             <a href="../php/login.php" class="btn btn-light btn-sm me-2">Iniciar Sesión</a>
-                            <a href="../php/register.php" class="btn btn-outline-light btn-sm">Registrarse</a>
+                            <a href="../php/registro.php" class="btn btn-outline-light btn-sm">Registrarse</a>
                             <?php endif; ?>
 
                         </div>

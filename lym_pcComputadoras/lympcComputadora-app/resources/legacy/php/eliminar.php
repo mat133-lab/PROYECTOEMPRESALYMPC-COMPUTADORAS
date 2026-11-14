@@ -3,7 +3,7 @@ session_start();
 include_once '../includes/db.php';
 
 if (!isset($_SESSION['usuario'])) {
-    header("Location: /php/login.php");
+    header("Location: ../php/login.php");
     exit;
 }
 
@@ -16,7 +16,7 @@ if(isset($_GET['id'])){
         $stmt->bindParam(':id', $id_producto);
         //Ejecucion
         if ($stmt->execute()){
-            header("Location: /php/productos.php?mensaje=borrado_exito");
+            header("Location: ../php/productos.php?mensaje=borrado_exito");
             exit;
         }else{
             echo "No se pudo borrar el producto";
@@ -26,7 +26,7 @@ if(isset($_GET['id'])){
     }
 }else {
     // Si entran al archivo sin un ID, los regresamos
-    header("Location: /php/dashboard.php");
+    header("Location: ../php/dashboard.php");
     exit;
 }
 ?>

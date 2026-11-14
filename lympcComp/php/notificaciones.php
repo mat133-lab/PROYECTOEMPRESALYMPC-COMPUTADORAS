@@ -5,7 +5,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../includes/mail_config.php';
 
 if (!isset($_SESSION['rol']) || !in_array(strtolower($_SESSION['rol']), ['asistente', 'admin'], true)) {
-    header('Location: /php/login.php');
+    header('Location: ../php/login.php');
     exit();
 }
 

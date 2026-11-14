@@ -3,7 +3,7 @@ session_start();
 require_once '../includes/db.php';
 
 if (!isset($_SESSION['rol']) || strtolower($_SESSION['rol']) !== 'pasante') {
-    header('Location: /php/login.php');
+    header('Location: ../php/login.php');
     exit();
 }
 
@@ -11,7 +11,7 @@ $id_usuario = $_SESSION['id_usuario'] ?? $_SESSION['id'] ?? null;
 $usuario = $_SESSION['usuario'] ?? 'Pasante';
 
 if (!$id_usuario) {
-    header('Location: /php/dashboard_pasante.php?upload=error&message=' . urlencode('Usuario no identificado'));
+    header('Location: ../php/dashboard_pasante.php?upload=error&message=' . urlencode('Usuario no identificado'));
     exit();
 }
 
@@ -24,7 +24,7 @@ $allowedProjectExtensions = ['zip', 'rar', 'tar', 'gz', 'pdf', 'docx', 'xlsx', '
 $allowedReportExtensions = ['pdf'];
 
 if (!isset($_FILES['documento']) || $_FILES['documento']['error'] !== UPLOAD_ERR_OK) {
-    header('Location: /php/dashboard_pasante.php?upload=error&message=' . urlencode('No se cargó ningún archivo válido'));
+    header('Location: ../php/dashboard_pasante.php?upload=error&message=' . urlencode('No se cargó ningún archivo válido'));
     exit();
 }
 
@@ -34,7 +34,7 @@ $extension = strtolower(pathinfo($nombreOriginal, PATHINFO_EXTENSION));
 
 if ($uploadType === 'project') {
     if (!in_array($extension, $allowedProjectExtensions, true)) {
-        header('Location: /php/dashboard_pasante.php?upload=error&message=' . urlencode('Extensión de proyecto no permitida'));
+        header('Location: ../php/dashboard_pasante.php?upload=error&message=' . urlencode('Extensión de proyecto no permitida'));
         exit();
     }
     if (empty($documentTitle)) {
@@ -42,14 +42,14 @@ if ($uploadType === 'project') {
     }
 } elseif ($uploadType === 'report') {
     if (!in_array($extension, $allowedReportExtensions, true)) {
-        header('Location: /php/dashboard_pasante.php?upload=error&message=' . urlencode('Solo se permiten archivos PDF para reportes'));
+        header('Location: ../php/dashboard_pasante.php?upload=error&message=' . urlencode('Solo se permiten archivos PDF para reportes'));
         exit();
     }
     if (empty($documentTitle)) {
         $documentTitle = 'Reporte sin título';
     }
 } else {
-    header('Location: /php/dashboard_pasante.php?upload=error&message=' . urlencode('Tipo de subida no válido'));
+    header('Location: ../php/dashboard_pasante.php?upload=error&message=' . urlencode('Tipo de subida no válido'));
     exit();
 }
 
@@ -63,7 +63,7 @@ $targetName = sprintf('pasante_%s_%s_%s.%s', $id_usuario, $uploadType, time(), $
 $targetPath = $uploadDirectory . $targetName;
 
 if (!move_uploaded_file($archivo['tmp_name'], $targetPath)) {
-    header('Location: /php/dashboard_pasante.php?upload=error&message=' . urlencode('Error al mover el archivo cargado'));
+    header('Location: ../php/dashboard_pasante.php?upload=error&message=' . urlencode('Error al mover el archivo cargado'));
     exit();
 }
 
@@ -90,5 +90,5 @@ $entries[] = [
 
 file_put_contents($metadataFile, json_encode($entries, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
-header('Location: /php/dashboard_pasante.php?upload=success&type=' . urlencode($uploadType));
+header('Location: ../php/dashboard_pasante.php?upload=success&type=' . urlencode($uploadType));
 exit();
