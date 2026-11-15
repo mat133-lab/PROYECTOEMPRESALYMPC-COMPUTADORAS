@@ -23,5 +23,6 @@ class ExampleTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Login - L&M PC Computadoras');
+        $response->assertSee('name="_token"', false);
     }
 }

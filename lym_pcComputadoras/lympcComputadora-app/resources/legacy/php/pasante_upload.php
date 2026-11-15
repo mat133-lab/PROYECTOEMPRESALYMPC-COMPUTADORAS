@@ -144,7 +144,7 @@ $entry = [
     'repo_url' => $repoUrl,
     'original_name' => $nombreOriginal,
     'filename' => $targetName,
-    'path' => legacy_file_url('uploads/pasante/' . $targetName),
+    'path' => 'uploads/pasante/' . $targetName,
     'uploaded_at' => date('Y-m-d H:i:s'),
 ];
 

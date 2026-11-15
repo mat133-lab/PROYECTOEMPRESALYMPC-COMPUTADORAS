@@ -14,6 +14,11 @@ import {
     adminFieldNombre,
     adminFieldApellido,
     adminFieldCorreo,
+    adminFieldCedula,
+    adminFieldArchivoRuc,
+    adminFieldArchivoCedula,
+    adminCurrentRuc,
+    adminCurrentArchivoCedula,
     adminFieldTelefono,
     adminFieldFecha, // Asegúrate de que en tu HTML este input sea type="date" o "datetime-local"
     adminFieldMotivo,
@@ -32,6 +37,42 @@ import {
 } from './funciones-horario.js';
 
 const currentDate = new Date();
+let calendarRequestId = 0;
+
+function showCalendarFeedback(message, type = 'danger') {
+    let feedback = document.getElementById('calendar-feedback-admin');
+    if (!feedback && calendarDaysAdmin?.parentElement) {
+        feedback = document.createElement('div');
+        feedback.id = 'calendar-feedback-admin';
+        feedback.setAttribute('role', 'status');
+        calendarDaysAdmin.parentElement.insertBefore(feedback, calendarDaysAdmin);
+    }
+    if (!feedback) return;
+    feedback.className = message ? `alert alert-${type} py-2` : '';
+    feedback.textContent = message;
+    feedback.hidden = !message;
+}
+
+function showCurrentDocument(container, url, label) {
+    if (!container) return;
+    container.replaceChildren();
+
+    if (!url) {
+        container.textContent = 'Sin archivo actual.';
+        return;
+    }
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.textContent = `Ver ${label} actual`;
+    container.appendChild(link);
+}
+
+function clearCalendarAppointments() {
+    document.querySelectorAll('.calendar__day').forEach(day => UI.cleanCalendarDayContent(day));
+}
 
 
 
@@ -51,7 +92,12 @@ class UI {
     static updateCalendarDayContent(dayElement, appointment) {
         let stored = [];
         if (dayElement.dataset.appointments) {
-            stored = JSON.parse(dayElement.dataset.appointments);
+            try {
+                const parsed = JSON.parse(dayElement.dataset.appointments);
+                stored = Array.isArray(parsed) ? parsed : [];
+            } catch (error) {
+                console.error('No se pudieron leer las citas guardadas en el calendario.', error);
+            }
         }
 
         const exists = stored.some(app => app.id === appointment.id);
@@ -86,34 +132,46 @@ class UI {
 
     // Crear item en la lista del modal (con opción de click para editar)
     static createAdminModalItem(appointment) {
-    const li = document.createElement('li');
-    li.className = 'modal__item';
-    li.style.cursor = 'pointer';
-    li.innerHTML = `
-        <div class="modal__item__info">
-            <h4 class="modal__item__title" style="margin-left: 115px; margin-bottom:15px;">${appointment.nombre} ${appointment.apellido}</h4>
-            <p class="modal__item__description">${appointment.motivo}</p>
-            <p class="modal__item__time" style="margin-top: -20px;">${appointment.telefono} | ${appointment.correo}</p>
-            <button style="font-size:1.1em; 
-                color:#ffffff; background: #FFC107; border-radius: 5px; 
-                border-style: outset; border: none; padding: 5px 5px;">Editar</button>
-            <button style="font-size:1.1em; 
-                color:#ffffff; background: #355cdc; border-radius: 5px; 
-                border-style: outset; border: none; padding: 5px 5px;" id="btn-generar-appointment-modal">Generar Cita</button>
-        </div>
-    `;
+        const li = document.createElement('li');
+        li.className = 'modal__item';
 
-    li.addEventListener('click', () => {
-        listModal.close();
-        openAdminForm(appointment);
-    });
+        const info = document.createElement('div');
+        info.className = 'modal__item__info';
 
-    modalCalendarList.appendChild(li);
-}
+        const title = document.createElement('h4');
+        title.className = 'modal__item__title';
+        title.textContent = `${appointment.nombre || ''} ${appointment.apellido || ''}`.trim();
+
+        const reason = document.createElement('p');
+        reason.className = 'modal__item__description';
+        reason.textContent = appointment.motivo || '';
+
+        const contact = document.createElement('p');
+        contact.className = 'modal__item__time';
+        contact.textContent = `${appointment.telefono || ''} | ${appointment.correo || ''}`;
+
+        const identity = document.createElement('p');
+        identity.className = 'modal__item__time';
+        identity.textContent = `Cédula: ${appointment.cedula || 'No proporcionada'}`;
+
+        const editButton = document.createElement('button');
+        editButton.type = 'button';
+        editButton.className = 'btn btn-warning text-white';
+        editButton.textContent = 'Editar';
+        editButton.addEventListener('click', () => {
+            listModal.close();
+            openAdminForm(appointment);
+        });
+
+        info.append(title, reason, contact, identity, editButton);
+        li.appendChild(info);
+        modalCalendarList.appendChild(li);
+    }
 }
 
 // --- RENDERIZAR CALENDARIO ---
 export async function renderCalendar() {
+    const requestId = ++calendarRequestId;
     const month = currentDate.getMonth();
     const year = currentDate.getFullYear();
 
@@ -165,10 +223,12 @@ export async function renderCalendar() {
     const fechaInicio = `${year}-${String(month + 1).padStart(2, '0')}-01`;
     const fechaFin = `${year}-${String(month + 1).padStart(2, '0')}-${lastMonthDay}`;
 
-    await getMonthlyAppointments([fechaInicio, fechaFin]);
+    clearCalendarAppointments();
+    showCalendarFeedback('Cargando citas…', 'info');
+    await getMonthlyAppointments([fechaInicio, fechaFin], requestId);
 }
 
-async function getMonthlyAppointments(dateRange) {
+async function getMonthlyAppointments(dateRange, requestId) {
     try {
         const [desde, hasta] = dateRange;
         // Usamos ruta relativa segura y el archivo PHP de admin (si es el mismo, usa api_horarios.php)
@@ -176,12 +236,79 @@ async function getMonthlyAppointments(dateRange) {
             `../php/api_horarios_admin.php?desde=${desde}&hasta=${hasta}`
         );
 
-        if (!response.ok) throw new Error('Error al obtener citas admin');
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            throw new Error(error.error || 'No se pudieron cargar las citas.');
+        }
 
         const appointments = await response.json();
+        if (!Array.isArray(appointments)) throw new Error('La respuesta de citas no tiene el formato esperado.');
+        if (requestId !== calendarRequestId) return;
         displayAppointmentsInCalendar(appointments);
+        showCalendarFeedback(appointments.length ? '' : 'No hay citas registradas para este mes.', appointments.length ? 'info' : 'secondary');
     } catch (error) {
-        console.error('Error:', error);
+        if (requestId !== calendarRequestId) return;
+        clearCalendarAppointments();
+        showCalendarFeedback(error.message || 'No se pudieron cargar las citas.');
+        console.error('Error al cargar el calendario:', error);
+    }
+}
+
+async function refreshUpcomingAppointments() {
+    if (!appointmentsTable) return;
+
+    try {
+        const response = await fetch('../php/api_horarios_admin.php?upcoming=1');
+        if (!response.ok) throw new Error('No se pudieron actualizar las próximas citas.');
+        const appointments = await response.json();
+        if (!Array.isArray(appointments)) throw new Error('La lista de citas tiene un formato no válido.');
+
+        const rows = appointments.map(appointment => {
+            const row = document.createElement('tr');
+            const descriptionCell = document.createElement('td');
+            const customerName = document.createElement('div');
+            customerName.className = 'cita-item-nombre';
+            customerName.textContent = `${appointment.nombre || ''} ${appointment.apellido || ''}`.trim();
+            const date = String(appointment.fecha || '').slice(0, 10).split('-').map(Number);
+            const dateLabel = document.createElement('div');
+            dateLabel.className = 'cita-item-fecha';
+            dateLabel.textContent = date.length === 3 && date.every(Number.isFinite)
+                ? new Date(date[0], date[1] - 1, date[2], 12).toLocaleDateString('es-EC', { day: '2-digit', month: 'short' })
+                : 'Fecha no disponible';
+            descriptionCell.append(customerName, dateLabel);
+
+            const actionsCell = document.createElement('td');
+            actionsCell.className = 'text-end';
+            const editButton = document.createElement('button');
+            editButton.type = 'button';
+            editButton.className = 'btn-icon btn-edit-custom btn-edit';
+            editButton.dataset.id = String(appointment.id);
+            editButton.title = 'Editar';
+            editButton.textContent = '✏️';
+            const deleteButton = document.createElement('button');
+            deleteButton.type = 'button';
+            deleteButton.className = 'btn-icon btn-delete-custom btn-delete';
+            deleteButton.dataset.id = String(appointment.id);
+            deleteButton.title = 'Eliminar';
+            deleteButton.textContent = '🗑️';
+            actionsCell.append(editButton, deleteButton);
+            row.append(descriptionCell, actionsCell);
+            return row;
+        });
+
+        if (rows.length === 0) {
+            const emptyRow = document.createElement('tr');
+            const emptyCell = document.createElement('td');
+            emptyCell.colSpan = 2;
+            emptyCell.className = 'text-center text-muted py-3';
+            emptyCell.textContent = 'No hay citas próximas.';
+            emptyRow.appendChild(emptyCell);
+            rows.push(emptyRow);
+        }
+
+        appointmentsTable.replaceChildren(...rows);
+    } catch (error) {
+        console.error('Error al actualizar la lista de próximas citas:', error);
     }
 }
 
@@ -215,8 +342,8 @@ function displayAppointmentsInCalendar(appointments) {
 }
 // --- NAVEGACIÓN ---
 export function setMonth(step) {
-    const currentMonth = currentDate.getMonth();
-    currentDate.setMonth(currentMonth + step);
+    currentDate.setDate(1);
+    currentDate.setMonth(currentDate.getMonth() + step);
     renderCalendar();
 }
 
@@ -259,8 +386,18 @@ function loadAppointmentsListModal(calendarDay) {
     modalCalendarList.appendChild(btnAddInList);
 
     if (storedAppointments) {
-        const appointments = JSON.parse(storedAppointments);
-        appointments.forEach(app => UI.createAdminModalItem(app));
+        try {
+            const appointments = JSON.parse(storedAppointments);
+            if (Array.isArray(appointments)) {
+                appointments.forEach(app => UI.createAdminModalItem(app));
+            }
+        } catch (error) {
+            console.error('No se pudieron abrir las citas de este día.', error);
+            const notice = document.createElement('li');
+            notice.textContent = 'No se pudieron cargar las citas de este día. Actualiza el calendario e inténtalo de nuevo.';
+            notice.className = 'text-danger text-center small my-3';
+            modalCalendarList.appendChild(notice);
+        }
     } else {
         // Mensaje si no hay citas
         const noCitas = document.createElement('li');
@@ -273,9 +410,12 @@ function loadAppointmentsListModal(calendarDay) {
 }
 // 2. Abrir Formulario (Crear o Editar)
 function openAdminForm(cita = null, fechaPreseleccionada = null) {
-    if (!adminModal) return;
+    if (!adminModal || !adminFieldFecha || !adminFieldNombre || !adminFieldApellido || !adminFieldCorreo
+        || !adminFieldCedula || !adminFieldArchivoRuc || !adminFieldArchivoCedula
+        || !adminFieldTelefono || !adminFieldMotivo) return;
 
     const modalTitle = adminModal.querySelector('.modal__heading');
+    if (!modalTitle) return;
     const modalHeaderContainer = modalTitle.parentElement;
 
     if (cita) {
@@ -287,16 +427,20 @@ function openAdminForm(cita = null, fechaPreseleccionada = null) {
         adminFieldNombre.value = cita.nombre || '';
         adminFieldApellido.value = cita.apellido || '';
         adminFieldCorreo.value = cita.correo || '';
-        adminFieldFecha.value = cita.fecha || '';
+        adminFieldCedula.value = cita.cedula || '';
+        adminFieldArchivoRuc.value = '';
+        adminFieldArchivoCedula.value = '';
+        showCurrentDocument(adminCurrentRuc, cita.archivo_ruc, 'RUC');
+        showCurrentDocument(adminCurrentArchivoCedula, cita.archivo_cedula, 'copia de cédula');
+        adminFieldFecha.value = cita.fecha ? String(cita.fecha).slice(0, 10) : '';
         adminFieldTelefono.value = cita.telefono || '';
         adminFieldMotivo.value = cita.motivo || '';
 
         if (cita.fecha) {
-            // Convierte "2024-05-20 14:30:00" a "2024-05-20T14:30"
-            const fechaFormateada = cita.fecha.replace(' ', 'T').substring(0, 16);
-            adminFieldFecha.value = fechaFormateada;
+            adminFieldFecha.value = String(cita.fecha).slice(0, 10);
         }
 
+        modalTitle.textContent = 'Editar cita';
         if (btnDeleteAppointment) btnDeleteAppointment.style.display = 'block'; // Mostrar botón borrar
     } else {
         // MODO CREACIÓN
@@ -308,13 +452,18 @@ function openAdminForm(cita = null, fechaPreseleccionada = null) {
         adminFieldNombre.value = '';
         adminFieldApellido.value = '';
         adminFieldCorreo.value = '';
+        adminFieldCedula.value = '';
+        adminFieldArchivoRuc.value = '';
+        adminFieldArchivoCedula.value = '';
+        showCurrentDocument(adminCurrentRuc, null, 'RUC');
+        showCurrentDocument(adminCurrentArchivoCedula, null, 'copia de cédula');
         adminFieldTelefono.value = '';
         adminFieldMotivo.value = '';
         adminFieldFecha.value = '';
         
 
         if (fechaPreseleccionada) {
-            adminFieldFecha.value = `${fechaPreseleccionada}T09:00`;
+            adminFieldFecha.value = fechaPreseleccionada;
         }
 
         if (btnDeleteAppointment) btnDeleteAppointment.style.display = 'none'; // Ocultar botón borrar
@@ -332,35 +481,46 @@ async function saveAppointment(e) {
         nombre: adminFieldNombre.value.trim(),
         apellido: adminFieldApellido.value.trim(),
         correo: adminFieldCorreo.value.trim(),
+        cedula: adminFieldCedula.value.trim(),
         telefono: adminFieldTelefono.value.trim(),
         fecha: adminFieldFecha.value,
         motivo: adminFieldMotivo.value.trim()
     };
 
     // Validar
-    if (!payload.fecha || !payload.nombre || !payload.motivo) {
-        alert("Por favor completa los campos obligatorios");
+    if (!payload.nombre || !payload.apellido || !payload.correo || !payload.telefono || !payload.fecha || !payload.motivo || !adminFieldCorreo.checkValidity()) {
+        alert('Completa nombre, apellido, correo válido, fecha, teléfono y motivo.');
+        return;
+    }
+    if (payload.cedula && !/^\d{6,20}$/.test(payload.cedula)) {
+        alert('La cédula debe contener entre 6 y 20 dígitos.');
         return;
     }
 
     try {
-        const method = payload.id ? 'PUT' : 'POST';
-        const url = '../php/api_horarios_admin.php'; // Misma URL, el método define la acción
+        const url = '../php/api_horarios_admin.php';
+        const formData = new FormData();
+        Object.entries(payload).forEach(([key, value]) => formData.append(key, value ?? ''));
+        if (adminFieldArchivoRuc.files[0]) {
+            formData.append('archivo_ruc', adminFieldArchivoRuc.files[0]);
+        }
+        if (adminFieldArchivoCedula.files[0]) {
+            formData.append('archivo_cedula', adminFieldArchivoCedula.files[0]);
+        }
 
         const response = await fetch(url, {
-            method: method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            method: 'POST',
+            body: formData
         });
 
         const result = await response.json();
 
-        if (result.success || response.ok) {
+        if (response.ok && result.success) {
             adminModal.close();
-            renderCalendar(); // Recargar calendario
-            // alert('Guardado correctamente'); // Opcional
+            await renderCalendar();
+            await refreshUpcomingAppointments();
         } else {
-            alert('Error al guardar: ' + (result.message || 'Desconocido'));
+            alert('Error al guardar: ' + (result.error || result.message || 'No se pudo guardar la cita.'));
         }
     } catch (error) {
         console.error(error);
@@ -376,15 +536,17 @@ async function deleteAppointment() {
     if (!confirm('¿Estás seguro de eliminar esta cita permanentemente?')) return;
 
     try {
-        const response = await fetch(`../php/api_horarios_admin.php?id=${id}`, {
+        const response = await fetch(`../php/api_horarios_admin.php?id=${encodeURIComponent(id)}`, {
             method: 'DELETE'
         });
 
         if (response.ok) {
             adminModal.close();
-            renderCalendar();
+            await renderCalendar();
+            await refreshUpcomingAppointments();
         } else {
-            alert('No se pudo eliminar');
+            const result = await response.json().catch(() => ({}));
+            alert(result.error || 'No se pudo eliminar la cita.');
         }
     } catch (error) {
         console.error(error);
@@ -395,6 +557,7 @@ async function deleteAppointment() {
 // --- EVENT LISTENERS ---
 document.addEventListener('DOMContentLoaded', () => {
     renderCalendar();
+    refreshUpcomingAppointments();
 
     // Navegación
     previousMonthBtnAdmin?.addEventListener('click', () => setMonth(-1));
@@ -448,14 +611,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 try {
                     // Busca los datos de la cita en la base de datos
-                    const response = await fetch(`../php/api_horarios_admin.php?id=${id}`);
+                    const response = await fetch(`../php/api_horarios_admin.php?id=${encodeURIComponent(id)}`);
 
                     if (response.ok) {
                         const cita = await response.json();
                         // ¡MAGIA! Esta línea es la que abre tu ventana emergente con los datos
                         openAdminForm(cita);
                     } else {
-                        alert("No se pudo cargar los datos");
+                        const result = await response.json().catch(() => ({}));
+                        alert(result.error || 'No se pudieron cargar los datos de la cita.');
                     }
                 } catch (error) {
                     console.error(error);
@@ -474,7 +638,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const modalSaveBtn = document.getElementById('btn-generar-appointment');
-    modalSaveBtn.addEventListener('click', () => {
+    modalSaveBtn?.addEventListener('click', () => {
+        if (!window.jspdf?.jsPDF) {
+            alert('No se pudo cargar el generador de comprobantes.');
+            return;
+        }
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         // Ocuparemos del documento el tamaño y ancho y lo guardaremos en variables

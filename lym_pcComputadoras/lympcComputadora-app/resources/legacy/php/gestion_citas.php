@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../includes/db.php';
+require_once '../includes/appointment_submission.php';
 
 // Verificar si el usuario está logueado
 if (!isset($_SESSION['usuario'])) {
@@ -13,50 +14,14 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'admin') {
     exit;
 } 
 
-if(isset($_POST['enviar'])){
-    $nombre = $_POST['name'];
-    $apellido = $_POST['lastname'];
-    $email = $_POST['email'];
-    $fecha = $_POST['date'];
-    $telefono = $_POST['cell'];
-    $motivo = $_POST['reason'];
-    $cedula = $_POST['cedula'];
-    $accion_sensible = 0;
-    $id_usuario = isset($_SESSION['id_usuario']) ? $_SESSION['id_usuario']: null;
-
-    $ruta_ruc = null;
-    $ruta_cedula = null;
-    $directorio_subida = storage_path('app/public/docs/');
-    if (!is_dir($directorio_subida)) {
-        mkdir($directorio_subida, 0755, true);
-    }
-
-    if (isset($_FILES['archivo_ruc']) && $_FILES['archivo_ruc']['error'] === UPLOAD_ERR_OK){
-        $nombre_archivo_ruc = time() . "_ruc_" . preg_replace('/[^A-Za-z0-9._-]/', '_', basename($_FILES['archivo_ruc']['name']));
-        $destino_ruc = $directorio_subida . $nombre_archivo_ruc;
-
-        if (move_uploaded_file($_FILES['archivo_ruc']['tmp_name'], $destino_ruc)){
-            $ruta_ruc = 'docs/' . $nombre_archivo_ruc;
-        }
-    }
-
-    if (isset($_FILES['archivo_cedula']) && $_FILES['archivo_cedula']['error'] === UPLOAD_ERR_OK){
-        $nombre_archivo_cedula = time() . "_cedula_" . preg_replace('/[^A-Za-z0-9._-]/', '_', basename($_FILES['archivo_cedula']['name']));
-        $destino_cedula = $directorio_subida . $nombre_archivo_cedula;
-
-        if (move_uploaded_file($_FILES['archivo_cedula']['tmp_name'], $destino_cedula)){
-            $ruta_cedula = 'docs/' . $nombre_archivo_cedula;
-        }
-    }
-    
-    $stmt = $conn -> prepare("INSERT INTO citas (id_usuario, nombre, apellido, cedula, correo, fecha, telefono, motivo, accion_sensible, archivo_ruc, archivo_cedula) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt -> execute ([$id_usuario, $nombre, $apellido, $cedula, $email, $fecha, $telefono, $motivo, $accion_sensible, $ruta_ruc, $ruta_cedula]);
-    header("Location: ../php/gestion_citasU.php"); // Recargar para limpiar el POST
-    exit;
+if (isset($_POST['enviar'])) {
+    legacyHandleManualAppointment($conn, '../php/gestion_citas.php');
 }
+
+
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
@@ -65,8 +30,8 @@ if(isset($_POST['enviar'])){
     <title>Gestion de Citas - Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/stylecitas.css') : '../../../public/css/stylecitas.css' ?>">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/footer.css') : '../../../public/css/footer.css' ?>">
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/stylecitas.css') ?>">
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/footer.css') ?>">
 
 </head>
 
@@ -355,6 +320,17 @@ if(isset($_POST['enviar'])){
         <h1>
             Ingresar Cita
         </h1>
+        <?php if (($_GET['status'] ?? '') === 'success'): ?>
+        <div class="alert alert-success" role="status">La cita se guardó correctamente.</div>
+        <?php elseif (($_GET['status'] ?? '') === 'error'): ?>
+        <div class="alert alert-danger" role="alert">
+            <?php echo match ($_GET['reason'] ?? '') {
+                'data' => 'Revisa los datos ingresados; la fecha, correo o identificación no son válidos.',
+                'file' => 'No se pudo adjuntar el archivo. Usa PDF, JPG, PNG o WebP de hasta 10 MB.',
+                default => 'No se pudo guardar la cita. Inténtalo de nuevo.',
+            }; ?>
+        </div>
+        <?php endif; ?>
         <div class="text-center">
             <p>
                 Si necesitas agendar una cita para soporte tecnico, por favor llena los siguientes campos:
@@ -382,13 +358,13 @@ if(isset($_POST['enviar'])){
                     <div class="mb-3">
                         <label for="archivo_ruc" class="form-label">Subir RUC (Opcional si no es empresa)</label>
                         <input class="form-control" type="file" name="archivo_ruc" id="archivo_ruc"
-                            accept=".pdf, .jpg, .png .webp">
+                            accept=".pdf,.jpg,.jpeg,.png,.webp">
                     </div>
 
                     <div class="mb-3">
                         <label for="archivo_cedula" class="form-label">Subir Copia de Cédula</label>
                         <input class="form-control" type="file" name="archivo_cedula" id="archivo_cedula"
-                            accept=".pdf, .jpg, .png .webp">
+                            accept=".pdf,.jpg,.jpeg,.png,.webp">
                     </div>
                 </div>
 
@@ -448,7 +424,7 @@ if(isset($_POST['enviar'])){
             </div>
         </div>
     </footer>
-    <script src="<?= function_exists('url') ? url('js/citas.js') : '../../../public/js/citas.js' ?>"></script>
+    <script src="<?= legacy_asset_url('js/citas.js') ?>"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">

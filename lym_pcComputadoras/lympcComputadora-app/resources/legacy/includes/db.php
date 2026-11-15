@@ -8,7 +8,7 @@ if (!function_exists('env')) {
 
         if ($vars === null) {
             $vars = [];
-            $envPath = dirname(__DIR__, 2) . '/.env';
+            $envPath = dirname(__DIR__, 3) . '/.env';
 
             if (is_file($envPath)) {
                 $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);

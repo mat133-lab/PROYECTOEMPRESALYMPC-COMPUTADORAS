@@ -106,7 +106,8 @@
 .storefront-page .beta-hero-copy .header-description {
     margin: 0;
     padding-left: 24px;
-    border-left: 6px solid #0d3254; /* Línea divisoria gruesa */
+    border-left: 6px solid 
+    #f09206; /* Línea divisoria gruesa */
     display: flex;
     align-items: center;
 }

@@ -1,6 +1,7 @@
 <?php 
 session_start();
 require_once '../includes/db.php';
+require_once '../includes/email_verification.php';
 
 // Si el usuario ya tiene sesión iniciada, redirigir al dashboard
 if(isset($_SESSION['usuario'])){
@@ -8,21 +9,24 @@ if(isset($_SESSION['usuario'])){
     exit;
 }
 
-if($_SERVER['REQUEST_METHOD'] === 'POST'){
-    $user = trim($_POST['correo']); 
-    $pass = $_POST['contrasena'];
-    $cedula = trim($_POST['cedula']);
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+    $user = trim((string) ($_POST['correo'] ?? ''));
+    $pass = (string) ($_POST['contrasena'] ?? '');
+    $cedula = trim((string) ($_POST['cedula'] ?? ''));
 
-    // Consulta segura de las sentencias
-    $stmt = $conn->prepare("SELECT * FROM usuarios WHERE correo = ?");
-    $stmt->execute([$user]);
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    try {
+        $stmt = $conn->prepare('SELECT * FROM usuarios WHERE correo = ? LIMIT 1');
+        $stmt->execute([$user]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Verificar credenciales con hash seguro
-    if($row && password_verify($pass, $row['contraseña'])){
-        if ((int)($row['email_verified'] ?? 0) !== 1) {
-            $error = "Debes verificar tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada.";
-        } else {
+        if ($row && password_verify($pass, (string) $row['contraseña'])
+            && hash_equals((string) ($row['cedula'] ?? ''), $cedula)) {
+            if ((int) ($row['email_verified'] ?? 0) !== 1) {
+                $error = 'Debes verificar tu correo antes de iniciar sesión.';
+                $canResendVerification = true;
+                $unverifiedEmail = $user;
+            } else {
+                session_regenerate_id(true);
         // GUARDAMOS LOS DATOS CORRECTAMENTE EN LA SESIÓN
         $_SESSION['id_usuario'] = $row['id_usuario']; 
         $_SESSION['correo'] = $row['correo'];
@@ -39,9 +43,13 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             header("Location: ../php/dashboard.php");
         }
         exit;
+            }
+        } else {
+            $error = 'Credenciales inválidas.';
         }
-    } else {
-        $error = "Credenciales Inválidas";
+    } catch (Throwable $exception) {
+        error_log('No se pudo completar el inicio de sesión.');
+        $error = 'No se pudo iniciar sesión ahora. Inténtalo de nuevo.';
     }
 }
 ?>
@@ -52,9 +60,9 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="../img/logo.webp">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/auth.css') : '../../../public/css/auth.css' ?>">
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/auth.css') ?>">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <title>Login - L&M PC Computadoras</title>
+ <title>Login - L&amp;M PC Computadoras</title>
 </head>
 
 <body>
@@ -72,6 +80,10 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                     <i class="fas fa-exclamation-circle"></i>
                     <?php echo htmlspecialchars($error); ?>
                 </div>
+            <?php endif; ?>
+
+            <?php if (!empty($canResendVerification)): ?>
+                <p style="text-align:center;margin:12px 0;"><a href="../php/reenviar_verificacion.php">Reenviar correo de verificación</a></p>
             <?php endif; ?>
 
             <form id="loginForm" class="login-form" method="POST">

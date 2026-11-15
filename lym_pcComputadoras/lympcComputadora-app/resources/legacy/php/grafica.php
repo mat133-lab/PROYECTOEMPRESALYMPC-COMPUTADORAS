@@ -22,8 +22,8 @@ $alertMessage = '';
     <link rel="shortcut icon" href="../img/logo.webp">
     <title>Grafica Asistente - L&M PC Computadoras</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/style.css') : '../../../public/css/style.css' ?>">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/carrusell_graficas.css') : '../../../public/css/carrusell_graficas.css' ?>">
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/style.css') ?>">
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/carrusell_graficas.css') ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
@@ -401,7 +401,7 @@ $alertMessage = '';
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <script src="<?= function_exists('url') ? url('js/grafico_asistente.js') : '../../../public/js/grafico_asistente.js' ?>"></script>
+    <script src="<?= legacy_asset_url('js/grafico_asistente.js') ?>"></script>
 
 </body>
 

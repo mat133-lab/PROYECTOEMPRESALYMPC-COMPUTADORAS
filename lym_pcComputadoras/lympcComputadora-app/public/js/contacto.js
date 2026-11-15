@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
         checkSensible.addEventListener('change', function () {
             const divDocs = document.getElementById('div_documentos');
             const rucInput = document.getElementById('archivo_ruc');
+            if (!divDocs || !rucInput) return;
             if (this.checked) {
                 divDocs.style.display = 'block';
                 rucInput.setAttribute('required', 'required');
@@ -14,7 +15,15 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     // Funcion para imprimir el comprobante de contacto
-    document.getElementById('boton').addEventListener('click', function () {
+    const receiptButton = document.getElementById('boton');
+    if (!receiptButton) return;
+
+    receiptButton.addEventListener('click', function () {
+
+        if (!window.jspdf?.jsPDF) {
+            window.alert('No se pudo cargar el generador de comprobantes. Recarga la página e inténtalo de nuevo.');
+            return;
+        }
 
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();

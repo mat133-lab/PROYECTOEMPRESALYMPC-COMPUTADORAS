@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Services\TelegramBotService;
 use Illuminate\Console\Command;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
@@ -32,13 +33,27 @@ class PollTelegramUpdates extends Command
 
                     if (isset($update['callback_query'])) {
                         $bot->handleCallback($update['callback_query']);
+                        $updateType = 'callback_query';
                     } elseif (isset($update['message'])) {
                         $bot->handle($update['message']);
+                        $updateType = 'message';
+                    } else {
+                        $updateType = 'desconocida';
                     }
+                    $this->info("Actualización {$updateId} procesada ({$updateType}).");
                     $offset = $updateId + 1;
                 }
             } catch (\Throwable $e) {
-                report($e); $this->warn('No se pudo consultar Telegram; reintentando en 5 segundos.'); sleep(5);
+                $detail = str_replace($token, '[TOKEN_REDACTADO]', $e->getMessage());
+                if ($e instanceof RequestException && $e->response->status() === 409) {
+                    $this->error('Telegram respondió 409: ya hay otra instancia consultando getUpdates o hay un webhook activo. Deja un solo proceso de polling.');
+                    return self::FAILURE;
+                }
+                $this->warn('No se pudo consultar Telegram: '.$detail);
+                if (! $this->option('daemon')) {
+                    return self::FAILURE;
+                }
+                sleep(5);
             }
         } while ($this->option('daemon'));
 

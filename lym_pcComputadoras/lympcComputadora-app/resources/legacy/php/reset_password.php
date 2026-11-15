@@ -3,139 +3,81 @@ session_start();
 require_once '../includes/db.php';
 
 $error = '';
-$success = '';
-$token_valido = false;
-$email_usuario = '';
+$success = false;
+$token = (string) ($_POST['token'] ?? $_GET['token'] ?? '');
+$tokenIsValid = false;
+$tokenHash = '';
 
-// 1. Verificar si viene un token en la URL
-if(isset($_GET['token'])){
-    $token = $_GET['token'];
-    
-    // Buscar si el token existe y si NO ha expirado
-    $stmt = $conn->prepare("SELECT correo FROM usuarios WHERE reset_token = ? AND reset_expiration > NOW()");
-    $stmt->execute([$token]);
-    
-    if($stmt->rowCount() > 0){
-        $token_valido = true;
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        $email_usuario = $row['correo'];
-    } else {
-        $error = "El enlace de recuperación es inválido o ha expirado. Por favor, solicita uno nuevo.";
+if (preg_match('/^[a-f0-9]{64}$/i', $token)) {
+    try {
+        $tokenHash = hash('sha256', $token);
+        $stmt = $conn->prepare('SELECT id_usuario FROM usuarios WHERE reset_token IN (?, ?) AND reset_expiration > NOW() LIMIT 1');
+        $stmt->execute([$tokenHash, $token]);
+        $tokenIsValid = (bool) $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (Throwable $exception) {
+        error_log('No se pudo validar el token de recuperación.');
+        $error = 'No se pudo validar el enlace ahora. Inténtalo más tarde.';
     }
 } else {
-    $error = "No se proporcionó ningún token de seguridad.";
+    $error = 'El enlace de recuperación no es válido o expiró. Solicita uno nuevo.';
 }
 
-// 2. Procesar el formulario cuando se envía la nueva contraseña
-if($_SERVER['REQUEST_METHOD'] === 'POST' && $token_valido){
-    $password = $_POST['password'];
-    $confirm_password = $_POST['confirm_password'];
-    
-    if(empty($password) || empty($confirm_password)){
-        $error = "Por favor, llena todos los campos.";
-    } elseif($password !== $confirm_password){
-        $error = "Las contraseñas no coinciden.";
-    } elseif(strlen($password) < 6){
-        $error = "La contraseña debe tener al menos 6 caracteres.";
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && $tokenIsValid) {
+    $password = (string) ($_POST['password'] ?? '');
+    $confirmPassword = (string) ($_POST['confirm_password'] ?? '');
+
+    if (strlen($password) < 8) {
+        $error = 'La contraseña debe tener al menos 8 caracteres.';
+    } elseif ($password !== $confirmPassword) {
+        $error = 'Las contraseñas no coinciden.';
     } else {
         try {
-            // Encriptar la nueva contraseña
-            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-            
-            // Actualizar la contraseña en la base de datos y limpiar los tokens
-            $stmt = $conn->prepare("UPDATE usuarios SET contraseña = ?, reset_token = NULL, reset_expiration = NULL WHERE correo = ?");
-            $stmt->execute([$hashed_password, $email_usuario]);
-            
-            $success = "¡Tu contraseña ha sido actualizada con éxito!";
-            $token_valido = false; // Ocultamos el formulario para que inicie sesión
-        } catch(PDOException $e) {
-            $error = "Error al actualizar la contraseña: " . $e->getMessage();
+            $stmt = $conn->prepare('UPDATE usuarios SET `contraseña` = ?, reset_token = NULL, reset_expiration = NULL WHERE reset_token IN (?, ?) AND reset_expiration > NOW()');
+            $stmt->execute([password_hash($password, PASSWORD_DEFAULT), $tokenHash, $token]);
+            $success = $stmt->rowCount() === 1;
+            if (! $success) {
+                $tokenIsValid = false;
+                $error = 'El enlace ya fue utilizado o expiró. Solicita uno nuevo.';
+            }
+        } catch (Throwable $exception) {
+            error_log('No se pudo actualizar la contraseña desde recuperación.');
+            $error = 'No se pudo actualizar la contraseña ahora. Inténtalo más tarde.';
         }
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="../img/logo.webp">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/auth.css') : '../../../public/css/auth.css' ?>">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet">
-    <title>Restablecer Contraseña - L&M PC Computadoras</title>
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/auth.css') ?>">
+    <title>Restablecer contraseña - L&amp;M PC Computadoras</title>
 </head>
 <body>
-    <div class="login-background">
-        <div class="login-container">
-
-            <div class="login-header">
-                <div style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;">
-                    <i class="fas fa-user-lock"></i>
-                </div>
-                <h2>Nueva Contraseña</h2>
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">
-                    Ingresa tu nueva contraseña para acceder al sistema.
-                </p>
-            </div>
-
-            <?php if($error): ?>
-            <div class="alert alert-error">
-                <i class="fas fa-exclamation-circle"></i>
-                <?= htmlspecialchars($error) ?>
-            </div>
+    <main class="login-background">
+        <section class="login-container" style="max-width:520px;">
+            <header class="login-header">
+                <i class="fas fa-user-lock" style="font-size:3rem;color:#ff7700;"></i>
+                <h1>Nueva contraseña</h1>
+                <p>Elige una contraseña de al menos 8 caracteres.</p>
+            </header>
+            <?php if ($error): ?><div class="alert alert-error" role="alert"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
+            <?php if ($success): ?>
+                <div class="alert alert-success" role="status">Tu contraseña se actualizó correctamente. <a href="../php/login.php">Inicia sesión</a>.</div>
+            <?php elseif ($tokenIsValid): ?>
+                <form class="login-form" method="POST">
+                    <input type="hidden" name="token" value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">
+                    <div class="input-group"><label for="password">Nueva contraseña</label><div class="input-container"><i class="fas fa-lock input-icon"></i><input type="password" id="password" name="password" minlength="8" autocomplete="new-password" required></div></div>
+                    <div class="input-group"><label for="confirm_password">Confirmar contraseña</label><div class="input-container"><i class="fas fa-lock input-icon"></i><input type="password" id="confirm_password" name="confirm_password" minlength="8" autocomplete="new-password" required></div></div>
+                    <button type="submit" class="login-btn"><span class="btn-text">Guardar contraseña</span></button>
+                </form>
+            <?php else: ?>
+                <p style="text-align:center"><a href="../php/contraseña.php">Solicitar otro enlace</a></p>
             <?php endif; ?>
-
-            <?php if($success): ?>
-            <div class="alert alert-success">
-                <i class="fas fa-check-circle"></i>
-                <?= htmlspecialchars($success) ?>
-                <br><br>
-                <a href="../php/login.php" style="color: #155724; font-weight: bold; text-decoration: underline;">Haz clic aquí para iniciar sesión</a>
-            </div>
-            <?php endif; ?>
-
-            <?php if($token_valido && !$success): ?>
-            <form id="resetForm" class="login-form" method="POST">
-                <div class="input-group">
-                    <label for="password">Nueva Contraseña:</label>
-                    <div class="input-container">
-                        <i class="fas fa-lock input-icon"></i>
-                        <input type="password" id="password" name="password" placeholder="Mínimo 6 caracteres" required>
-                    </div>
-                </div>
-
-                <div class="input-group">
-                    <label for="confirm_password">Confirmar Contraseña:</label>
-                    <div class="input-container">
-                        <i class="fas fa-lock input-icon"></i>
-                        <input type="password" id="confirm_password" name="confirm_password" placeholder="Repite tu contraseña" required>
-                    </div>
-                </div>
-
-                <div class="register-footer">
-                    <button type="submit" class="login-btn">
-                        <span class="btn-text">Guardar Contraseña</span>
-                        <i class="fas fa-save btn-icon"></i>
-                    </button>
-                </div>
-            </form>
-            <?php endif; ?>
-
-            <?php if(!$token_valido && !$success): ?>
-            <div class="register-footer" style="margin-top: 20px; text-align: center;">
-                <a href="../php/contraseña.php" style="color:var(--primary-color); text-decoration:none; font-weight: bold;">
-                    <i class="fas fa-arrow-left"></i> Volver a intentar
-                </a>
-            </div>
-            <?php endif; ?>
-
-            <div class="login-footer">
-                <p>2026 - L&M PC COMPUTADORAS ©</p>
-            </div>
-        </div>
-    </div>
+            <p class="register-footer" style="text-align:center"><a href="../php/login.php">Volver al inicio de sesión</a></p>
+        </section>
+    </main>
 </body>
 </html>
-
-

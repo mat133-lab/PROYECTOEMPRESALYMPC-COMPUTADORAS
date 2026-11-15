@@ -106,9 +106,9 @@ if ($idConversacion > 0) {
     <title>Chat con Clientes - L&M PC Computadoras</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/style.css') : '../../../public/css/style.css' ?>">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/dashboard_pasante.css') : '../../../public/css/dashboard_pasante.css' ?>">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/asistente_tools.css') : '../../../public/css/asistente_tools.css' ?>">
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/style.css') ?>">
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/dashboard_pasante.css') ?>">
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/asistente_tools.css') ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
@@ -328,17 +328,15 @@ if ($idConversacion > 0) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
     </script>
-    <?php if ($esAsistente): ?>
     <script>
     setInterval(() => {
         const active = document.activeElement;
         const isTyping = active && (active.tagName === 'TEXTAREA' || active.tagName === 'INPUT');
-        if (!isTyping) {
+        if (document.visibilityState === 'visible' && !isTyping) {
             window.location.reload();
         }
-    }, 15000);
+    }, <?php echo $esAsistente ? 12000 : 6000; ?>);
     </script>
-    <?php endif; ?>
 </body>
 
 </html>

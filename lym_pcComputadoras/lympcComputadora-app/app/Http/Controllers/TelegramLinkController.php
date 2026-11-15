@@ -15,7 +15,7 @@ class TelegramLinkController extends Controller
     public function show(Request $request): View|RedirectResponse
     {
         [$user, $csrf] = $this->legacyUser($request);
-        if (! $user) return redirect('/php/login.php');
+        if (! $user) return redirect()->route('legacy.php', ['script' => 'login.php']);
 
         return view('telegram.link', ['user' => $user, 'account' => TelegramAccount::where('id_usuario', $user->id_usuario)->first(), 'csrf' => $csrf]);
     }
@@ -24,7 +24,7 @@ class TelegramLinkController extends Controller
     {
         [$user, $csrf] = $this->legacyUser($request);
         $this->assertTrustedRequest($request, $csrf);
-        if (! $user) return redirect('/php/login.php');
+        if (! $user) return redirect()->route('legacy.php', ['script' => 'login.php']);
 
         TelegramLinkCode::where('id_usuario', $user->id_usuario)->whereNull('usado_en')->delete();
         $code = Str::upper(Str::random(20));
@@ -42,7 +42,7 @@ class TelegramLinkController extends Controller
     {
         [$user, $csrf] = $this->legacyUser($request);
         $this->assertTrustedRequest($request, $csrf);
-        if (! $user) return redirect('/php/login.php');
+        if (! $user) return redirect()->route('legacy.php', ['script' => 'login.php']);
         TelegramAccount::where('id_usuario', $user->id_usuario)->delete();
 
         return redirect()->route('telegram.link')->with('status', 'La cuenta de Telegram fue desvinculada.');
@@ -55,7 +55,13 @@ class TelegramLinkController extends Controller
         if (session_status() === PHP_SESSION_ACTIVE) session_write_close();
         session_name('LEGACYSESSID');
         $id = $request->cookie('LEGACYSESSID');
-        if (! is_string($id) || ! preg_match('/^[A-Za-z0-9,-]{1,48}$/', $id)) return [null, null];
+        if (! is_string($id) || ! preg_match('/^[A-Za-z0-9,-]{1,48}$/', $id)) {
+            $id = $request->cookie('PHPSESSID');
+        }
+        if (! is_string($id) || ! preg_match('/^[A-Za-z0-9,-]{1,48}$/', $id)) {
+            session_name($originalName);
+            return [null, null];
+        }
         session_id($id); session_start();
         $userId = filter_var($_SESSION['id_usuario'] ?? null, FILTER_VALIDATE_INT);
         $_SESSION['_telegram_csrf'] ??= bin2hex(random_bytes(32));

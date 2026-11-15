@@ -18,6 +18,8 @@ class TelegramActionService
 {
     private const STAFF = ['admin', 'tecnico'];
 
+    public function __construct(private TelegramAdvisorNotificationService $advisorNotifications) {}
+
     public function createPending(User $user, string $chatId, array $intent): TelegramActionRequest
     {
         $action = (string) ($intent['accion'] ?? '');
@@ -40,19 +42,43 @@ class TelegramActionService
         $pending = TelegramActionRequest::where('id_usuario', $user->id_usuario)->where('telegram_chat_id', $chatId)
             ->where('confirmacion_hash', hash('sha256', Str::upper($token)))->where('estado', 'pendiente')->first();
         if (! $pending || $pending->expira_en->isPast()) { if ($pending) $pending->update(['estado' => 'expirada']); return 'La confirmación no existe o venció. Solicita nuevamente la acción.'; }
+        $contact = null;
         try {
-            DB::transaction(function () use ($user, $pending) {
-                $this->execute($user, $pending->accion, $pending->datos);
+            DB::transaction(function () use ($user, $pending, &$contact) {
+                $contact = $this->execute($user, $pending->accion, $pending->datos);
                 $pending->update(['estado' => 'ejecutada', 'confirmada_en' => now()]);
             });
+            $advisorNotified = $contact ? $this->advisorNotifications->send($contact) : null;
             $this->notify($user, $pending->accion, $pending->resumen);
             $this->audit($user, $chatId, $pending->accion, 'ejecutada', $pending->datos);
-            return 'Acción realizada: '.$pending->resumen.'. También enviamos un correo a tu cuenta registrada.';
+            $advisorNote = $contact
+                ? ($advisorNotified
+                    ? ' Se avisó a los asesores; pueden responderte al correo de tu cuenta.'
+                    : ' La solicitud quedó guardada, pero no se pudo enviar el aviso al asesor; debe revisar la bandeja del portal.')
+                : '';
+            return 'Acción realizada: '.$pending->resumen.'.'.$advisorNote.' También enviamos un correo a tu cuenta registrada.';
         } catch (\Throwable $e) {
             report($e); $pending->update(['estado' => 'fallida', 'error' => 'No se pudo ejecutar la acción.']);
             $this->audit($user, $chatId, $pending->accion, 'fallida', []);
             return 'No fue posible realizar la acción. No se aplicaron cambios; intenta más tarde.';
         }
+    }
+
+    public function cancel(User $user, string $chatId, string $token): string
+    {
+        $pending = TelegramActionRequest::where('id_usuario', $user->id_usuario)->where('telegram_chat_id', $chatId)
+            ->where('confirmacion_hash', hash('sha256', Str::upper($token)))->where('estado', 'pendiente')->first();
+        if (! $pending || $pending->expira_en->isPast()) {
+            if ($pending) {
+                $pending->update(['estado' => 'expirada']);
+            }
+            return 'La acción ya no está pendiente o el código venció.';
+        }
+
+        $pending->update(['estado' => 'cancelada']);
+        $this->audit($user, $chatId, $pending->accion, 'cancelada', []);
+
+        return 'Acción cancelada. No se realizaron cambios.';
     }
 
     private function validateIntent(User $user, string $action, array &$data): void
@@ -76,13 +102,14 @@ class TelegramActionService
         throw new \InvalidArgumentException('Esta acción no está disponible aún en el sistema.');
     }
 
-    private function execute(User $user, string $action, array $data): void
+    private function execute(User $user, string $action, array $data): ?Contacto
     {
-        if ($action === 'crear_cita') { Cita::create(['id_usuario' => $user->id_usuario, 'nombre' => $user->usuario, 'apellido' => '-', 'correo' => $user->correo, 'fecha' => $data['fecha'], 'telefono' => $data['telefono'] ?? 'No registrado', 'motivo' => $data['motivo']]); return; }
-        if ($action === 'crear_contacto') { Contacto::create(['id_usuario' => $user->id_usuario, 'nombre' => $user->usuario, 'correo' => $user->correo, 'compania' => $data['compania'] ?? 'Particular', 'mensaje' => $data['mensaje']]); return; }
-        if ($action === 'crear_producto') { Producto::create(['nombre' => $data['nombre'], 'serie' => $data['serie'] ?? Str::upper(Str::random(12)), 'fecha' => today(), 'unidades' => max(0, (int) ($data['unidades'] ?? 0)), 'precio' => $data['precio'], 'imagen' => $data['imagen'] ?? 'sin-imagen.webp', 'categoria' => $data['categoria'] ?? 'General']); return; }
-        if ($action === 'actualizar_producto') { Producto::findOrFail($data['id_producto'])->update(['nombre' => $data['nombre'], 'unidades' => max(0, (int) ($data['unidades'] ?? 0)), 'precio' => $data['precio'], 'categoria' => $data['categoria'] ?? 'General']); return; }
+        if ($action === 'crear_cita') { Cita::create(['id_usuario' => $user->id_usuario, 'nombre' => $user->usuario, 'apellido' => '-', 'correo' => $user->correo, 'fecha' => $data['fecha'], 'telefono' => $data['telefono'] ?? 'No registrado', 'motivo' => $data['motivo']]); return null; }
+        if ($action === 'crear_contacto') { return Contacto::create(['id_usuario' => $user->id_usuario, 'nombre' => $user->usuario, 'correo' => $user->correo, 'compania' => $data['compania'] ?? 'Particular', 'mensaje' => $data['mensaje']]); }
+        if ($action === 'crear_producto') { Producto::create(['nombre' => $data['nombre'], 'serie' => $data['serie'] ?? Str::upper(Str::random(12)), 'fecha' => today(), 'unidades' => max(0, (int) ($data['unidades'] ?? 0)), 'precio' => $data['precio'], 'imagen' => $data['imagen'] ?? 'sin-imagen.webp', 'categoria' => $data['categoria'] ?? 'General']); return null; }
+        if ($action === 'actualizar_producto') { Producto::findOrFail($data['id_producto'])->update(['nombre' => $data['nombre'], 'unidades' => max(0, (int) ($data['unidades'] ?? 0)), 'precio' => $data['precio'], 'categoria' => $data['categoria'] ?? 'General']); return null; }
         if ($action === 'eliminar_producto') { Producto::findOrFail($data['id_producto'])->delete(); }
+        return null;
     }
 
     private function summary(string $action, array $data): string

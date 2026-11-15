@@ -40,7 +40,7 @@ $pedidos = $stmtPedidos->fetchAll(PDO::FETCH_ASSOC);
     <title>Pedidos - L&M PC Computadoras</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/pedidos.css') : '../../../public/css/pedidos.css' ?>">
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/pedidos.css') ?>">
 </head>
 <body>
 <nav class="navbar navbar-dark bg-warning fixed-top">

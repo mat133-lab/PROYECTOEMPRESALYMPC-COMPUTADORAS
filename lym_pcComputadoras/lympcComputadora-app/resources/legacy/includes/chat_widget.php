@@ -3,7 +3,7 @@ $rolChatWidget = strtolower($_SESSION['rol'] ?? 'usuario');
 $mostrarChatWidget = isset($_SESSION['usuario']) && !in_array($rolChatWidget, ['admin', 'tecnico', 'encargado', 'pasante', 'asistente'], true);
 ?>
 <?php if ($mostrarChatWidget): ?>
-<link rel="stylesheet" href="<?= function_exists('url') ? url('css/chat_widget.css') : '../../../public/css/chat_widget.css' ?>">
+<link rel="stylesheet" href="<?= legacy_asset_url('css/chat_widget.css') ?>">
 
 <div class="floating-chat" id="floatingChat" data-api="../php/chat_api.php">
     <button class="floating-chat__button" type="button" id="floatingChatButton" aria-label="Abrir chat de soporte">
@@ -45,5 +45,5 @@ $mostrarChatWidget = isset($_SESSION['usuario']) && !in_array($rolChatWidget, ['
     </section>
 </div>
 
-<script src="<?= function_exists('url') ? url('js/chat_widget.js') : '../../../public/js/chat_widget.js' ?>"></script>
+<script src="<?= legacy_asset_url('js/chat_widget.js') ?>"></script>
 <?php endif; ?>

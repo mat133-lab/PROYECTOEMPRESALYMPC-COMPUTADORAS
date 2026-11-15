@@ -5,7 +5,11 @@ export function formatTitle(title) {
 }
 
 export function formatDateString(date) {
-    const dateString = new Date(date).toLocaleDateString("es-CO", {
+    const dateParts = String(date).slice(0, 10).split('-').map(Number);
+    const parsedDate = dateParts.length === 3 && dateParts.every(Number.isFinite)
+        ? new Date(dateParts[0], dateParts[1] - 1, dateParts[2], 12)
+        : new Date(date);
+    const dateString = parsedDate.toLocaleDateString("es-CO", {
         month: 'long',
         day: 'numeric',
     });
@@ -25,7 +29,12 @@ export function formatTime(date) {
 }
 
 export function formatDateRange(range) {
-    const ISODates = range.map(date => date.toISOString().split("T")[0]);
+    const ISODates = range.map(date => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    });
     const startDate = ISODates[0] + "T00:00";
     const endDate = ISODates[1] + "T23:59";
     return [startDate, endDate];

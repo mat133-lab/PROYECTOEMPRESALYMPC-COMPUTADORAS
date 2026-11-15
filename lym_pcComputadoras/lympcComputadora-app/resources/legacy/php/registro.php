@@ -5,33 +5,39 @@ require_once '../includes/email_verification.php';
 
 $error = '';
 $success = '';
+$registeredEmail = '';
+$verificationEmailSent = false;
 
 if($_SERVER['REQUEST_METHOD'] === 'POST'){
-    $username = trim($_POST['username']);
-    $email = trim($_POST['email']);
-    $password = $_POST['password'];
-    $confirmPassword = $_POST['confirmPassword'];
-    $role = $_POST['role'];
-    $cedula = trim($_POST['cedula']);
+    $username = trim((string) ($_POST['username'] ?? ''));
+    $email = trim((string) ($_POST['email'] ?? ''));
+    $password = (string) ($_POST['password'] ?? '');
+    $confirmPassword = (string) ($_POST['confirmPassword'] ?? '');
+    // El registro público solo puede crear cuentas de cliente.
+    $role = 'usuario';
+    $cedula = trim((string) ($_POST['cedula'] ?? ''));
 
     // Validaciones
-    if(empty($username) || empty($email) || empty($password) || empty($confirmPassword) || empty($role) || empty($cedula)){
+    if(empty($username) || empty($email) || empty($password) || empty($confirmPassword) || empty($cedula)){
         $error = "Todos los campos obligatorios deben estar llenos.";
     }
     elseif(strlen($username) < 3){
         $error = "El nombre de usuario debe tener al menos 3 caracteres";
     }
+    elseif(strlen($username) > 255 || strlen($email) > 255){
+        $error = "El nombre o el correo exceden el límite permitido.";
+    }
     elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)){
         $error = "El formato del correo electrónico no es válido";
     }
-    elseif(strlen($password) < 6){
-        $error = "La contraseña debe tener al menos 6 caracteres";
+    elseif(strlen($password) < 8){
+        $error = "La contraseña debe tener al menos 8 caracteres";
     }
     elseif($password !== $confirmPassword){
         $error = "Las contraseñas no coinciden";
     }
-    elseif(strlen($cedula) < 10){
-        $error = "El número de cédula debe tener al menos 10 caracteres";
+    elseif(!preg_match('/^[0-9]{10,20}$/', $cedula)){
+        $error = "Ingresa un número de identificación de 10 a 20 dígitos.";
     }
     else{
         // Verificar si el correo ya existe
@@ -47,44 +53,38 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 
             $ruta_ruc = null;
             $ruta_cedula = null;
-            $directorio_subida = storage_path('app/public/uploads/');
-            if (!is_dir($directorio_subida)) {
-                mkdir($directorio_subida, 0755, true);
+            $uploadedPaths = [];
+            $allowedTypes = ['application/pdf' => 'pdf', 'image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+            try {
+                $ruta_ruc = legacy_store_upload($_FILES['archivo_ruc'] ?? [], 'uploads', 'ruc', $allowedTypes);
+                if ($ruta_ruc !== null) $uploadedPaths[] = storage_path('app/public/'.$ruta_ruc);
+                $ruta_cedula = legacy_store_upload($_FILES['archivo_cedula'] ?? [], 'uploads', 'cedula', $allowedTypes);
+                if ($ruta_cedula !== null) $uploadedPaths[] = storage_path('app/public/'.$ruta_cedula);
+            } catch (Throwable $exception) {
+                foreach ($uploadedPaths as $path) { if (is_file($path)) @unlink($path); }
+                $error = 'No se pudieron validar los documentos. Usa PDF, JPG, PNG o WebP de hasta 10 MB.';
             }
-
-            // Subir RUC
-            if (isset($_FILES['archivo_ruc']) && $_FILES['archivo_ruc']['error'] === UPLOAD_ERR_OK){
-                $nombre_ruc = time() . "_ruc_" . preg_replace('/[^A-Za-z0-9._-]/', '_', basename($_FILES['archivo_ruc']['name']));
-                $destino_ruc = $directorio_subida . $nombre_ruc;
-                if (move_uploaded_file($_FILES['archivo_ruc']['tmp_name'], $destino_ruc)) {
-                    $ruta_ruc = 'uploads/' . $nombre_ruc;
-                }
-            }
-
-            // Subir Cédula
-            if (isset($_FILES['archivo_cedula']) && $_FILES['archivo_cedula']['error'] === UPLOAD_ERR_OK){
-                $nombre_cedula = time() . "_cedula_" . preg_replace('/[^A-Za-z0-9._-]/', '_', basename($_FILES['archivo_cedula']['name']));
-                $destino_cedula = $directorio_subida . $nombre_cedula;
-                if (move_uploaded_file($_FILES['archivo_cedula']['tmp_name'], $destino_cedula)) {
-                    $ruta_cedula = 'uploads/' . $nombre_cedula;
-                }
-            }
-
             // Insertar nuevo usuario (Ahora con los campos de archivos)
+            if ($error === '') {
             try{
                 $stmt = $conn->prepare("INSERT INTO usuarios (usuario, correo, contraseña, rol, archivo_ruc, archivo_cedula, cedula, email_verified, email_verification_token, email_verification_expires) VALUES (?, ?, ?, ?, ?, ?, ?, 0, NULL, NULL)");
                 $stmt->execute([$username, $email, $hashed_password, $role, $ruta_ruc, $ruta_cedula, $cedula]);
 
-                if (sendEmailVerification($conn, $email, $username)) {
+                $registeredEmail = $email;
+                $verificationEmailSent = sendEmailVerification($conn, $email, $username);
+                if ($verificationEmailSent) {
                     $success = "Registro recibido. Revisa tu correo para confirmar tu cuenta antes de iniciar sesión.";
                 } else {
-                    $success = "Registro creado correctamente, pero no pudimos enviar el correo de verificación. Revisa la configuración SMTP o contacta al administrador.";
+                    $success = "Tu cuenta fue creada, pero no se pudo enviar el correo ahora. Solicita un nuevo enlace de verificación.";
                 }
-
-                header("Refresh: 4; url=../php/login.php");
             }
-            catch(PDOException $e){
-                $error = "Error al registrar: " . $e->getMessage();
+            catch(Throwable $e){
+                foreach ($uploadedPaths as $path) {
+                    if (is_file($path)) @unlink($path);
+                }
+                error_log('No se pudo completar el registro: '.$e->getMessage());
+                $error = 'No se pudo completar el registro. Verifica tus datos e inténtalo de nuevo.';
+            }
             }
         }
     }
@@ -97,7 +97,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="../img/logo.webp">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/auth.css') : '../../../public/css/auth.css' ?>">
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/auth.css') ?>">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <title>Registro - L&M PC Computadoras</title>
 </head>
@@ -129,6 +129,14 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             </div>
             <?php endif; ?>
 
+            <?php if($success): ?>
+            <div style="text-align:center;margin:12px 0;">
+                <?php if(!$verificationEmailSent): ?><a href="../php/reenviar_verificacion.php">Reenviar correo de verificación</a><br><?php endif; ?>
+                <a href="../php/login.php">Ir al inicio de sesión</a>
+            </div>
+            <?php endif; ?>
+
+            <?php if(!$success): ?>
             <form id="registerForm" class="login-form" method="POST" enctype="multipart/form-data">
 
                 <div class="input-group">
@@ -180,7 +188,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                     <label for="regPassword">Contraseña: </label>
                     <div class="input-container">
                         <i class="fas fa-lock input-icon"></i>
-                        <input type="password" id="regPassword" name="password" placeholder="Crear contraseña" required>
+                        <input type="password" id="regPassword" name="password" placeholder="Crear contraseña" minlength="8" autocomplete="new-password" required>
                     </div>
                 </div>
 
@@ -188,24 +196,15 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                     <label for="regConfirm">Confirmar Contraseña: </label>
                     <div class="input-container">
                         <i class="fas fa-check-circle input-icon"></i>
-                        <input type="password" id="regConfirm" name="confirmPassword" placeholder="Repetir contraseña"
-                            required>
+                        <input type="password" id="regConfirm" name="confirmPassword" placeholder="Repetir contraseña" minlength="8" autocomplete="new-password" required>
                     </div>
                 </div>
 
                 <div class="input-group">
-                    <label for="regRole">Tipo de Usuario</label>
+                    <label for="regRole">Tipo de cuenta</label>
                     <div class="input-container">
                         <i class="fas fa-users-cog input-icon"></i>
-                        <select id="regRole" name="role" class="tech-select" required
-                            style="width: 100%; padding: 10px 10px 10px 40px; border: 1px solid #ccc; border-radius: 5px; outline: none;">
-                            <option value="" disabled selected>Seleccione un rol...</option>
-                            <option value="usuario">Usuario Común</option>
-                            <option value="tecnico">Técnico</option>
-                            <option value="encargado">Encargado</option>
-                            <option value="asistente">Asistente</option>
-                            <option value="pasante">Pasante</option>
-                        </select>
+                        <input id="regRole" type="text" value="Usuario cliente" readonly aria-readonly="true">
                     </div>
                 </div>
 
@@ -224,6 +223,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                     </a>
                 </div>
             </form>
+            <?php endif; ?>
 
             <div class="login-footer">
                 <p>2026 - L&M PC COMPUTADORAS ©</p>

@@ -23,9 +23,9 @@ $alertMessage = '';
     <title>Dashboard Asistente - L&M PC Computadoras</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/style.css') : '../../../public/css/style.css' ?>">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/dashboard_pasante.css') : '../../../public/css/dashboard_pasante.css' ?>">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/asistente_tools.css') : '../../../public/css/asistente_tools.css' ?>">
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/style.css') ?>">
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/dashboard_pasante.css') ?>">
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/asistente_tools.css') ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
@@ -361,6 +361,14 @@ $alertMessage = '';
                         <span class="precio">Ver Documentos</span>
                     </div>
                 </a>
+                <a href="../php/contacto_asistente.php" class="box text-decoration-none text-dark">
+                    <img src="../img/soli.png" alt="Solicitudes de clientes" onerror="this.style.display='none'">
+                    <div class="product-txt">
+                        <h3>Solicitudes de clientes</h3>
+                        <p>Revisa las consultas y pedidos recibidos por Telegram y responde al correo del cliente.</p>
+                        <span class="precio">Ver solicitudes</span>
+                    </div>
+                </a>
                 <a href="../php/notificaciones.php" class="box text-decoration-none text-dark">
                     <img src="../img/notifiUsu.webp" alt="Ubicación" onerror="this.style.display='none'">
                     <div class="product-txt">
@@ -395,7 +403,7 @@ $alertMessage = '';
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
     </script>
-    <script src="<?= function_exists('url') ? url('js/dashboard_asistente.js') : '../../../public/js/dashboard_asistente.js' ?>"></script>
+    <script src="<?= legacy_asset_url('js/dashboard_asistente.js') ?>"></script>
 
 </body>
 

@@ -4,7 +4,8 @@
 
     // Verificar rol
     $rolesConAcceso = ['admin', 'tecnico', 'encargado', 'pasante'];
-    if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $rolesConAcceso)) {
+    $rolActual = strtolower(trim((string) ($_SESSION['rol'] ?? '')));
+    if (!in_array($rolActual, $rolesConAcceso, true)) {
         header('Location: ../php/login.php');
         exit;
     }
@@ -17,8 +18,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Horario Administrador - L&M PC Computadoras</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/horariostyleadmin.css') : '../../../public/css/horariostyleadmin.css' ?>">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/style.css') : '../../../public/css/style.css' ?>">
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/horariostyleadmin.css') ?>">
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/style.css') ?>">
 </head>
 
 <body>
@@ -373,7 +374,7 @@
                             <tbody id="admin-appointments-table">
                                 <?php
                                 // Consulta segura a la base de datos
-                                $stmt = $conn->query("SELECT id_cita, nombre, apellido, fecha FROM citas ORDER BY fecha DESC LIMIT 15");
+                                $stmt = $conn->query("SELECT id_cita, nombre, apellido, fecha FROM citas WHERE fecha >= CURDATE() ORDER BY fecha ASC, id_cita ASC LIMIT 15");
                                 
                                 foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
                                     $id = htmlspecialchars($row['id_cita']);
@@ -396,7 +397,7 @@
     </div>
 
     <dialog class="dialog-nativo" id="admin-appointment-modal">
-        <div class="modal__card p-4 rounded-3 shadow bg-white" style="max-width: 500px; width: 100%; margin: auto; ">
+        <div class="modal__card p-4 rounded-3 shadow bg-white" style="max-width: 500px; width: 100%; max-height: 85vh; overflow-y: auto; margin: auto; ">
             <header class="modal__header d-flex justify-content-between align-items-center mb-3">
                 <h3 class="modal__heading m-0 fw-bold text-white">Gestionar Cita</h3>
                 <button type="button" class="btn-close" id="admin-modal-close-icon"></button>
@@ -419,6 +420,23 @@
                 <div class="mb-2">
                     <label class="form-label small fw-bold text-muted">Correo</label>
                     <input id="appointment-correo" class="form-control form-control-sm" type="email">
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label small fw-bold text-muted" for="appointment-cedula">Número de cédula (opcional)</label>
+                    <input id="appointment-cedula" class="form-control form-control-sm" inputmode="numeric" maxlength="20">
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label small fw-bold text-muted" for="appointment-archivo-ruc">RUC (opcional)</label>
+                    <input id="appointment-archivo-ruc" class="form-control form-control-sm" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp">
+                    <small id="appointment-ruc-actual" class="form-text">Sin archivo actual.</small>
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label small fw-bold text-muted" for="appointment-archivo-cedula">Copia de cédula (opcional)</label>
+                    <input id="appointment-archivo-cedula" class="form-control form-control-sm" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp">
+                    <small id="appointment-cedula-archivo-actual" class="form-text">Sin archivo actual.</small>
                 </div>
 
                 <div class="row g-2 mb-2">
@@ -478,7 +496,7 @@
     </dialog>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="module" src="<?= function_exists('url') ? url('js/horario-calendario-admin.js') : '../../../public/js/horario-calendario-admin.js' ?>"></script>
+    <script type="module" src="<?= legacy_asset_url('js/horario-calendario-admin.js') ?>"></script>
 </body>
 
 </html>

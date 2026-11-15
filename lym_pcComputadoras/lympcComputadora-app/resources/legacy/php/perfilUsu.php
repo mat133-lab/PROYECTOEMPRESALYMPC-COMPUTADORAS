@@ -18,6 +18,9 @@ $UsuName = isset($_SESSION['usuario']) ? htmlspecialchars($_SESSION['usuario']) 
 $UsuEmail = $_SESSION['correo'] ?? 'Correo no proporcionado';
 $UsuType = $_SESSION['rol'] ?? 'No especificado';
 $UsusCedula = $_SESSION['cedula'] ?? 'No proporcionada';
+$telegramConfigUrl = str_contains((string) ($_SERVER['REQUEST_URI'] ?? ''), '/resources/legacy/php/')
+    ? '../../../public/telegram'
+    : '../telegram';
 
 // Buscar los archivos en la base de datos usando el ID del usuario
 $UsuId = null;
@@ -54,7 +57,7 @@ if ($UsuId) {
     <title>Dashboard - L&M PC Computadoras</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/style.css') : '../../../public/css/style.css' ?>">
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/style.css') ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
@@ -293,6 +296,15 @@ if ($UsuId) {
         <div class="dashboard-header text-left">
             <h1 style="color: #0caeff;">Hola, </h1>
             <h1 class="title"><?php echo $UsuName ?>🧑‍💼</h1>
+            <?php if (($_GET['upload'] ?? '') === 'success'): ?>
+            <div class="alert alert-success" role="status">La foto de perfil se actualizó correctamente.</div>
+            <?php elseif (isset($_GET['error'])): ?>
+            <div class="alert alert-danger" role="alert">
+                <?php echo ($_GET['error'] ?? '') === 'archivo'
+                    ? 'Selecciona una imagen JPG, PNG o WebP de hasta 5 MB.'
+                    : 'No se pudo guardar la foto. Inténtalo de nuevo.'; ?>
+            </div>
+            <?php endif; ?>
             <label class="switch">
             <input type="checkbox" id="toggle">
             <span class="slider"></span>
@@ -341,7 +353,7 @@ if ($UsuId) {
                             <form action="../php/subir_foto.php" method="POST" enctype="multipart/form-data"
                                 class="mt-3 mb-2">
                                 <div class="submit-photo">
-                                    <input type="file" id="foto-perfil" name="foto-perfil" accept="image/*"
+                                    <input type="file" id="foto-perfil" name="foto-perfil" accept="image/jpeg,image/png,image/webp"
                                         class="d-none" onchange="this.form.submit()">
                                     <label for="foto-perfil" class="for"
                                         style="cursor: pointer; padding: 10px 20px; border: 2px solid none; border-radius: 5px; background-color: rgb(255, 144, 8); color: #ffff">Subir
@@ -470,7 +482,7 @@ if ($UsuId) {
                                     <div class="p-3 rounded" style="background:#eef7ff; border:1px solid #b8ddf5;">
                                         <div class="fw-bold mb-1"><i class="fa-brands fa-telegram"></i> Telegram</div>
                                         <div class="text-muted small mb-2">Vincula tu celular al bot para consultar acciones permitidas según tu rol.</div>
-                                        <a class="btn btn-sm btn-primary" href="../telegram">Configurar Telegram</a>
+                                        <a class="btn btn-sm btn-primary" href="<?php echo htmlspecialchars($telegramConfigUrl, ENT_QUOTES, 'UTF-8'); ?>">Configurar Telegram</a>
                                     </div>
                                 </div>
                             </div>
@@ -513,7 +525,7 @@ if ($UsuId) {
     window.gaugeLoginTime = <?php echo $login_timestamp; ?> * 1000;
     </script>
 
-    <script src="<?= function_exists('url') ? url('js/admin.js') : '../../../public/js/admin.js' ?>"></script>
+    <script src="<?= legacy_asset_url('js/admin.js') ?>"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
     </script>

@@ -1,31 +1,55 @@
 <?php
 session_start();
 require_once '../includes/db.php';
+require_once '../includes/file_helpers.php';
 
-if(!isset($_SESSION['id_usuario']) && !isset($_SESSION['id'])) {
-    header("Location: ../php/login.php");
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+    header('Allow: POST');
+    header('Location: ../php/perfilUsu.php?error=metodo');
     exit;
 }
 
-$id_usuario = $_SESSION['id_usuario'] ?? $_SESSION['id'];
+if (! isset($_SESSION['usuario']) || ! isset($_SESSION['id_usuario'])) {
+    header('Location: ../php/login.php');
+    exit;
+}
 
-if(isset($_FILES['foto-perfil']) && $_FILES['foto-perfil']['error'] == 0) {
-    $directorio_destino = storage_path('app/public/uploads/profile/');
-    if(!file_exists($directorio_destino)) {
-        mkdir($directorio_destino, 0755, true);
+$file = $_FILES['foto-perfil'] ?? [];
+$storedPath = null;
+$allowedTypes = [
+    'image/jpeg' => 'jpg',
+    'image/png' => 'png',
+    'image/webp' => 'webp',
+];
+
+try {
+    $storedPath = legacy_store_upload($file, 'uploads/profile', 'perfil_'.(int) $_SESSION['id_usuario'], $allowedTypes, 5 * 1024 * 1024);
+    if ($storedPath === null) {
+        throw new RuntimeException('Selecciona una imagen para continuar.');
     }
-    $nombre_archivo = $_FILES['foto-perfil']['name'];
-    $extension = pathinfo($nombre_archivo, PATHINFO_EXTENSION);
-    $nuevo_nombre = "perfil_" . $id_usuario . "_" . time() . "." . $extension;
-    $ruta_final = $directorio_destino . $nuevo_nombre;
-    if(move_uploaded_file($_FILES['foto-perfil']['tmp_name'], $ruta_final)){
-        $stmt = $conn->prepare("UPDATE usuarios SET foto_perfil = ? WHERE id_usuario = ?");
-        if($stmt->execute([$nuevo_nombre, $id_usuario])){
-            header("Location: ../php/perfilUsu.php?upload=success");
-            exit;
+
+    $stmt = $conn->prepare('UPDATE usuarios SET foto_perfil = ? WHERE id_usuario = ?');
+    $stmt->execute([basename($storedPath), (int) $_SESSION['id_usuario']]);
+    if ($stmt->rowCount() === 0) {
+        $check = $conn->prepare('SELECT 1 FROM usuarios WHERE id_usuario = ?');
+        $check->execute([(int) $_SESSION['id_usuario']]);
+        if (! $check->fetchColumn()) {
+            throw new RuntimeException('No se encontró el perfil que deseas actualizar.');
         }
     }
+
+    header('Location: ../php/perfilUsu.php?upload=success');
+    exit;
+} catch (Throwable $exception) {
+    if ($storedPath !== null) {
+        $fullPath = storage_path('app/public/'.$storedPath);
+        if (is_file($fullPath)) {
+            @unlink($fullPath);
+        }
+    }
+
+    error_log('No se pudo actualizar la foto de perfil: '.$exception->getMessage());
+    $reason = $exception instanceof RuntimeException ? 'archivo' : 'guardar';
+    header('Location: ../php/perfilUsu.php?error='.$reason);
+    exit;
 }
-header("Location: ../php/perfilUsu.php?error=subida_fallida");
-exit;
-?>

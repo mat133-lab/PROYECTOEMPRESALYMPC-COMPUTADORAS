@@ -19,8 +19,8 @@ $usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Técnico');
     <title>Administrar Citas - Técnico</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/style.css') : '../../../public/css/style.css' ?>">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/pdf_print_branding.css') : '../../../public/css/pdf_print_branding.css' ?>">
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/style.css') ?>">
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/pdf_print_branding.css') ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
@@ -362,7 +362,7 @@ $usuario = htmlspecialchars($_SESSION['usuario'] ?? 'Técnico');
                                         echo "<tr>
                                             <td>#{$row['id_cita']}</td>
                                             <td>{$nombreCompleto}</td>
-                                            <td>" . htmlspecialchars($row['cedula']) . "</td>
+                                            <td>" . htmlspecialchars($row['cedula'] ?? 'N/A', ENT_QUOTES, 'UTF-8') . "</td>
                                             <td>" . htmlspecialchars($row['correo']) . "</td>
                                             <td>{$row['fecha']}</td>
                                             <td>" . htmlspecialchars($row['telefono']) . "</td>

@@ -11,6 +11,14 @@ if (!isset($_SESSION['usuario'])) {
 // Obtener datos del usuario
 $usuario = isset($_SESSION['usuario']) ? htmlspecialchars($_SESSION['usuario']) : 'Usuario';
 $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
+$calendarNotice = match ($_GET['ok'] ?? $_GET['error'] ?? '') {
+    '1' => ['success', 'Tu cita se guardó correctamente.'],
+    'datos' => ['warning', 'Revisa los campos requeridos y vuelve a intentarlo.'],
+    'archivo' => ['warning', 'No se pudo adjuntar el archivo. Usa PDF, JPG, PNG o WebP de hasta 10 MB.'],
+    'guardar' => ['danger', 'No se pudo guardar la cita. Inténtalo de nuevo.'],
+    'metodo' => ['warning', 'La solicitud no es válida.'],
+    default => null,
+};
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -27,8 +35,8 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- Styles -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/stylehorario.css') : '../../../public/css/stylehorario.css' ?>">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/style.css') : '../../../public/css/style.css' ?>">
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/stylehorario.css') ?>">
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/style.css') ?>">
 
 </head>
 
@@ -317,6 +325,11 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
     <div class="wrapper">
 
         <main class="container main">
+            <?php if ($calendarNotice): ?>
+            <div class="alert alert-<?php echo $calendarNotice[0]; ?>" role="status">
+                <?php echo htmlspecialchars($calendarNotice[1], ENT_QUOTES, 'UTF-8'); ?>
+            </div>
+            <?php endif; ?>
             <section class="calendar">
                 <header class="calendar__header">
                     <div class="header__container">
@@ -577,10 +590,11 @@ $rol = isset($_SESSION['rol']) ? htmlspecialchars($_SESSION['rol']) : 'usuario';
 
     <script>
     // Pasar correo de sesión a JS para el formulario
-    window.currentUserEmail = "<?php echo isset($_SESSION['correo']) ? $_SESSION['correo'] : ''; ?>";
+    window.currentUserEmail = <?php echo json_encode((string) ($_SESSION['correo'] ?? ''), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
+    window.currentUserName = <?php echo json_encode((string) ($_SESSION['usuario'] ?? ''), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
     </script>
     <!-- Calendar Module -->
-    <script src="<?= function_exists('url') ? url('js/horario-calendario.js') : '../../../public/js/horario-calendario.js' ?>" type="module"></script>
+    <script src="<?= legacy_asset_url('js/horario-calendario.js') ?>" type="module"></script>
 </body>
 
 </html>

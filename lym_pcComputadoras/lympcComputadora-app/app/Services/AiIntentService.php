@@ -14,6 +14,7 @@ class AiIntentService
         $raw = match ($provider) {
             'qwen' => $this->qwen($prompt),
             'groq' => $this->groq($prompt),
+            'nvidia' => $this->nvidia($prompt),
             default => $this->gemini($prompt),
         };
         $json = json_decode(trim(preg_replace('/^```json\s*|\s*```$/i', '', $raw)), true);
@@ -52,6 +53,22 @@ class AiIntentService
             'model' => config('services.assistant_ai.groq_model'),
             'messages' => [['role' => 'system', 'content' => 'Responde únicamente JSON válido.'], ['role' => 'user', 'content' => $prompt]],
             'temperature' => 0, 'response_format' => ['type' => 'json_object'],
+        ])->throw()->json();
+        return (string) data_get($response, 'choices.0.message.content', '');
+    }
+
+    private function nvidia(string $prompt): string
+    {
+        $key = config('services.assistant_ai.nvidia_key'); if (! $key) throw new \RuntimeException('Falta configurar NVIDIA_API_KEY.');
+        $base = rtrim((string) config('services.assistant_ai.nvidia_base_url'), '/');
+        $response = Http::timeout(30)->withToken($key)->post("{$base}/chat/completions", [
+            'model' => config('services.assistant_ai.nvidia_model'),
+            'messages' => [['role' => 'system', 'content' => 'Responde únicamente JSON válido.'], ['role' => 'user', 'content' => $prompt]],
+            'temperature' => 0,
+            'top_p' => 1,
+            'max_tokens' => 4096,
+            'stream' => false,
+            'response_format' => ['type' => 'json_object'],
         ])->throw()->json();
         return (string) data_get($response, 'choices.0.message.content', '');
     }

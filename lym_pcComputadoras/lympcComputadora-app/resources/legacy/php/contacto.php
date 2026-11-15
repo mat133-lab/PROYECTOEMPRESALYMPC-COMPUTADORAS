@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../includes/db.php';
+require_once '../includes/contact_submission.php';
 
 if (!isset($_SESSION['usuario'])) {
     header("Location: ../php/login.php");
@@ -14,58 +15,13 @@ if (isset($_SESSION['rol']) && strtolower($_SESSION['rol']) === 'admin') {
 }
 
 if (isset($_POST['enviar'])) {
-    $nombre = trim($_POST['name']);
-    $correo = trim($_POST['email']);
-    $compania = trim($_POST['company']);
-    $mensaje = trim($_POST['message']);
-    $cedula = trim($_POST['cedula']); // Nuevo campo capturado
-    
-    $id_usuario = isset($_SESSION['id_usuario']) ? $_SESSION['id_usuario'] : null;
-    
-    if(!empty($nombre) && !empty($correo) && !empty($mensaje)){
-        
-        $ruta_ruc = null;
-        $ruta_cedula = null;
-        $directorio_subida = storage_path('app/public/docs/');
-    if (!is_dir($directorio_subida)) {
-        mkdir($directorio_subida, 0755, true);
-    }
-
-        // Procesar subida de RUC
-        if (isset($_FILES['archivo_ruc']) && $_FILES['archivo_ruc']['error'] === UPLOAD_ERR_OK){
-            $nombre_ruc = time() . "_ruc_" . preg_replace('/[^A-Za-z0-9._-]/', '_', basename($_FILES['archivo_ruc']['name']));
-
-            $destino_ruc = $directorio_subida . $nombre_ruc;
-
-            if (move_uploaded_file($_FILES['archivo_ruc']['tmp_name'], $destino_ruc)) {
-
-                $ruta_ruc = 'docs/' . $nombre_ruc;
-            }
-        }
-
-        // Procesar subida de Cédula
-        if (isset($_FILES['archivo_cedula']) && $_FILES['archivo_cedula']['error'] === UPLOAD_ERR_OK){
-            $nombre_cedula = time() . "_cedula_" . preg_replace('/[^A-Za-z0-9._-]/', '_', basename($_FILES['archivo_cedula']['name']));
-
-            $destino_cedula = $directorio_subida . $nombre_cedula;
-
-            if (move_uploaded_file($_FILES['archivo_cedula']['tmp_name'], $destino_cedula)) {
-
-                $ruta_cedula = 'docs/' . $nombre_cedula;
-            }
-        }
-
-        // INSERT actualizado con 8 campos y 8 signos de interrogación
-        $stmt = $conn->prepare("INSERT INTO contacto (id_usuario, nombre, correo, compania, mensaje, cedula, archivo_ruc, archivo_cedula) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$id_usuario, $nombre, $correo, $compania, $mensaje, $cedula, $ruta_ruc, $ruta_cedula]);
-        
-        header("Location: ../php/contacto.php?status=success");
-        exit;
-    }
+    legacyHandleContactSubmission($conn, '../php/contacto.php');
 }
+
+
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
@@ -73,8 +29,8 @@ if (isset($_POST['enviar'])) {
     <title>Contactanos - Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/stylecitas.css') : '../../../public/css/stylecitas.css' ?>">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/footer.css') : '../../../public/css/footer.css' ?>">
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/stylecitas.css') ?>">
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/footer.css') ?>">
 </head>
 
 <body>
@@ -360,8 +316,19 @@ if (isset($_POST['enviar'])) {
     </nav>
     <div class="main-content">
         <h1>Contactanos</h1>
+        <?php if (($_GET['status'] ?? '') === 'success'): ?>
+        <div class="alert alert-success" role="status">Tu mensaje fue enviado correctamente.</div>
+        <?php elseif (($_GET['status'] ?? '') === 'error'): ?>
+        <div class="alert alert-danger" role="alert">
+            <?php echo match ($_GET['reason'] ?? '') {
+                'data' => 'Revisa nombre, cédula, correo y mensaje. Algunos campos no son válidos.',
+                'file' => 'No se pudo adjuntar el archivo. Usa PDF, JPG, PNG o WebP de hasta 10 MB.',
+                default => 'No se pudo guardar el mensaje. Inténtalo de nuevo.',
+            }; ?>
+        </div>
+        <?php endif; ?>
         <div class="text-center">
-            <p>Hola <strong><?php echo $_SESSION['usuario']; ?></strong>, Bienvenido puede enviarnos un mensaje por
+            <p>Hola <strong><?php echo htmlspecialchars((string) $_SESSION['usuario'], ENT_QUOTES, 'UTF-8'); ?></strong>, Bienvenido puede enviarnos un mensaje por
                 cualquier asunto que tenga con la empresa
             </p>
         </div>
@@ -442,8 +409,8 @@ if (isset($_POST['enviar'])) {
         </div>
     </footer>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="<?= function_exists('url') ? url('js/dashboard.js') : '../../../public/js/dashboard.js' ?>"></script>
-    <script src="<?= function_exists('url') ? url('js/contacto.js') : '../../../public/js/contacto.js' ?>"></script>
+    <script src="<?= legacy_asset_url('js/dashboard.js') ?>"></script>
+    <script src="<?= legacy_asset_url('js/contacto.js') ?>"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
     </script>

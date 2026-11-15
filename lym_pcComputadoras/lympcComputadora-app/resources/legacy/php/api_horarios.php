@@ -2,22 +2,44 @@
 session_start();
 require_once '../includes/db.php';
 
-// Verificar que el usuario está logueado
-if (!isset($_SESSION['usuario'])) {
-    http_response_code(401);
-    echo json_encode(['error' => 'No autorizado']);
-    return;
+header('Content-Type: application/json; charset=utf-8');
+
+function horariosUserJson(array $payload, int $status = 200): never
+{
+    http_response_code($status);
+    echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+    exit;
 }
 
-// Obtener parámetros de fecha
-$desde = isset($_GET['desde']) ? $_GET['desde'] : date('Y-m-01');
-$hasta = isset($_GET['hasta']) ? $_GET['hasta'] . ' 23:59:59' : date('Y-m-t');
+function horariosUserDate(mixed $value): ?string
+{
+    if (! is_string($value) || ! preg_match('/^\d{4}-\d{2}-\d{2}$/', trim($value))) {
+        return null;
+    }
+
+    [$year, $month, $day] = array_map('intval', explode('-', trim($value)));
+
+    return checkdate($month, $day, $year) ? trim($value) : null;
+}
+
+if (! isset($_SESSION['usuario'], $_SESSION['id_usuario'])) {
+    horariosUserJson(['error' => 'Inicia sesión para consultar tus citas.'], 401);
+}
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+    header('Allow: GET');
+    horariosUserJson(['error' => 'Método no permitido.'], 405);
+}
+
+$desde = horariosUserDate($_GET['desde'] ?? date('Y-m-01'));
+$hasta = horariosUserDate($_GET['hasta'] ?? date('Y-m-t'));
+if ($desde === null || $hasta === null || $desde > $hasta) {
+    horariosUserJson(['error' => 'El rango de fechas no es válido.'], 422);
+}
 
 try {
-    // Consultar citas del usuario en el rango de fechas usando INNER JOIN
     $stmt = $conn->prepare("
-        SELECT 
-            c.id_cita as id,
+        SELECT
+            c.id_cita AS id,
             c.nombre,
             c.apellido,
             c.correo,
@@ -27,29 +49,24 @@ try {
             c.fecha,
             c.telefono,
             c.motivo,
-            u.usuario as nombre_usuario,
-            u.correo as correo_usuario
+            u.usuario AS nombre_usuario,
+            u.correo AS correo_usuario
         FROM citas c
-        INNER JOIN usuarios u ON c.id_usuario = u.id_usuario
+        LEFT JOIN usuarios u ON c.id_usuario = u.id_usuario
         WHERE c.id_usuario = ? AND c.fecha BETWEEN ? AND ?
-        ORDER BY c.fecha ASC
+        ORDER BY c.fecha ASC, c.id_cita ASC
     ");
-    $stmt->execute([$_SESSION['id_usuario'], $desde, $hasta]);
+    $stmt->execute([(int) $_SESSION['id_usuario'], $desde, $hasta]);
     $citas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
     foreach ($citas as &$cita) {
         $cita['archivo_ruc'] = legacy_file_url($cita['archivo_ruc'] ?? null);
         $cita['archivo_cedula'] = legacy_file_url($cita['archivo_cedula'] ?? null);
     }
     unset($cita);
-    
-    // Retornar JSON
-    header('Content-Type: application/json');
-    echo json_encode($citas);
-    
-} catch (PDOException $e) {
-    http_response_code(500);
-    echo json_encode(['error' => 'Error en la base de datos: ' . $e->getMessage()]);
+
+    horariosUserJson($citas);
+} catch (Throwable $exception) {
+    error_log('Error al consultar citas del usuario: '.$exception->getMessage());
+    horariosUserJson(['error' => 'No se pudieron cargar tus citas. Inténtalo de nuevo.'], 500);
 }
-?>
-
-

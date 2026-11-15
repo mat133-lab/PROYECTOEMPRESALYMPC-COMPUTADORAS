@@ -94,6 +94,7 @@ function chatNormalizeText($mensaje) {
     $texto = function_exists('mb_strtolower') ? mb_strtolower((string)$mensaje, 'UTF-8') : strtolower((string)$mensaje);
     return strtr($texto, [
         'á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ü' => 'u', 'ñ' => 'n',
+        'Á' => 'a', 'É' => 'e', 'Í' => 'i', 'Ó' => 'o', 'Ú' => 'u', 'Ü' => 'u', 'Ñ' => 'n',
     ]);
 }
 

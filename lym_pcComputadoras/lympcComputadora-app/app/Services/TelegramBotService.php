@@ -11,10 +11,20 @@ use App\Models\TelegramLinkCode;
 use App\Models\TelegramSession;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\Response;
+use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 
 class TelegramBotService
 {
+    public function __construct(
+        private AiIntentService $aiIntents,
+        private TelegramActionService $actions,
+        private TelegramAdvisorNotificationService $advisorNotifications,
+    ) {}
+
     private const PAGE_SIZE = 5;
 
     private const CATEGORIES = [
@@ -66,11 +76,11 @@ class TelegramBotService
         }
 
         $text = trim((string) data_get($message, 'text'));
-        if (preg_match('/^\/vincular(?:\s+([A-Z0-9]+))?$/i', $text, $m)) {
+        if (preg_match('/^\/vincular(?:@[A-Z0-9_]+)?(?:\s+([A-Z0-9]+))?$/i', $text, $m)) {
             $this->start($m[1] ?? '', $chatId, $fromId, (string) data_get($message, 'from.username'));
             return;
         }
-        if (preg_match('/^\/(start|menu|inicio)$/i', $text)) {
+        if (preg_match('/^\/(start|menu|inicio)(?:@[A-Z0-9_]+)?$/i', $text)) {
             $this->resetSession($chatId);
             $account = TelegramAccount::where('telegram_user_id', $fromId)->first();
             if (! $account) {
@@ -79,6 +89,11 @@ class TelegramBotService
             }
             $user = User::find($account->id_usuario);
             if (! $user) {
+                $this->clearOrphanedAccount($account, $chatId);
+                return;
+            }
+            if (! $account->telefono_verificado_en) {
+                $this->requestContact($chatId);
                 return;
             }
             $this->sendWelcome($chatId, $user);
@@ -94,12 +109,137 @@ class TelegramBotService
         $account->update(['ultima_actividad_en' => now(), 'telegram_chat_id' => $chatId]);
         $user = User::find($account->id_usuario);
         if (! $user) {
+            $this->clearOrphanedAccount($account, $chatId);
             return;
         }
 
-        // Cualquier texto fuera de comando se trata como "volver al menú"
-        // porque el flujo normal se controla 100% con botones inline.
-        $this->sendWelcome($chatId, $user, "No entendí ese mensaje. Usa los botones para continuar. 👇");
+        if (preg_match('/^\/mis_(citas|pedidos)(?:@[A-Z0-9_]+)?$/i', $text, $m)) {
+            $session = [];
+            $this->screenCuenta($user, $chatId, strtolower($m[1]), $session, null);
+            return;
+        }
+        if (preg_match('/^\/agenda_hoy(?:@[A-Z0-9_]+)?$/i', $text)) {
+            $this->sendAgendaHoy($user, $chatId);
+            return;
+        }
+        if (preg_match('/^\/resumen(?:@[A-Z0-9_]+)?$/i', $text)) {
+            $this->sendDailySummary($user, $chatId);
+            return;
+        }
+        if (preg_match('/^\/confirmar(?:@[A-Z0-9_]+)?\s+([A-Z0-9]+)$/i', $text, $m)) {
+            $this->send($chatId, e($this->actions->confirm($user, $chatId, $m[1])));
+            return;
+        }
+        if (preg_match('/^\/(?:ayuda|comandos)(?:@[A-Z0-9_]+)?$/i', $text)) {
+            $this->sendCommandHelp($user, $chatId);
+            return;
+        }
+        if (str_starts_with($text, '/')) {
+            $this->send($chatId, '❓ Comando no reconocido. Escribe /ayuda o usa /menu.');
+            return;
+        }
+
+        $this->interpretText($user, $chatId, $text);
+    }
+
+    private function interpretText(User $user, string $chatId, string $text): void
+    {
+        try {
+            $intent = $this->aiIntents->interpret($user, mb_substr($text, 0, 2000));
+        } catch (ConnectionException|RequestException|\RuntimeException $e) {
+            Log::warning('No se pudo interpretar un mensaje de Telegram con IA.', [
+                'provider' => config('services.assistant_ai.provider'),
+                'exception' => $e::class,
+            ]);
+            $this->send($chatId, '⚠️ No pude consultar el asistente de IA ahora. Revisa la configuración del proveedor y vuelve a intentar, o usa /menu.');
+            return;
+        }
+
+        $action = (string) ($intent['accion'] ?? '');
+        $data = is_array($intent['datos'] ?? null) ? $intent['datos'] : [];
+        if ($action === 'respuesta') {
+            $reply = trim((string) ($data['texto'] ?? ''));
+            $this->send($chatId, $reply !== '' ? e($reply) : 'No pude entender la solicitud. Prueba /ayuda o usa los botones del menú.');
+            return;
+        }
+
+        try {
+            $pending = $this->actions->createPending($user, $chatId, $intent);
+        } catch (\InvalidArgumentException $e) {
+            $this->send($chatId, '⚠️ ' . e($e->getMessage()));
+            return;
+        }
+
+        $token = (string) $pending->getAttribute('plain_confirmation_token');
+        $this->send(
+            $chatId,
+            "⚠️ <b>Confirma la acción</b>\n\n"
+                . e($pending->resumen)
+                . "\n\nNo se realizará ningún cambio hasta que elijas una opción."
+                . "\n\nTambién puedes usar <code>/confirmar {$token}</code>."
+                . "\nEl código vence en 10 minutos.",
+            $this->inlineKeyboard([
+                [['text' => '✅ Confirmar acción', 'callback_data' => "accion_confirmar|{$token}"]],
+                [['text' => '❌ Cancelar', 'callback_data' => "accion_cancelar|{$token}"]],
+            ])
+        );
+    }
+
+    private function sendCommandHelp(User $user, string $chatId): void
+    {
+        $commands = [
+            '/start o /menu — abrir el menú',
+            '/mis_citas — consultar tus citas',
+            '/mis_pedidos — consultar tus pedidos',
+            'Escribe tu consulta en texto normal para pedir ayuda o iniciar una acción.',
+            'Confirma o cancela las acciones propuestas con los botones; /confirmar CODIGO es opcional.',
+        ];
+        $role = strtolower((string) $user->rol);
+        if (in_array($role, ['admin', 'tecnico', 'encargado', 'pasante'], true)) {
+            $commands[] = '/agenda_hoy — agenda del día';
+        }
+        if ($role === 'admin') {
+            $commands[] = '/resumen — resumen operativo de hoy';
+        }
+        $this->send($chatId, '<b>Comandos disponibles</b>' . "\n\n" . implode("\n", array_map('e', $commands)));
+    }
+
+    private function sendAgendaHoy(User $user, string $chatId): void
+    {
+        if (! in_array(strtolower((string) $user->rol), ['admin', 'tecnico', 'encargado', 'pasante'], true)) {
+            $this->send($chatId, '🔒 Este comando está disponible solo para personal autorizado.');
+            return;
+        }
+
+        $citas = Cita::whereDate('fecha', Carbon::today())->orderBy('id_cita')->limit(20)->get();
+        $lines = ["📅 <b>Agenda de hoy</b> — {$citas->count()} cita(s)"];
+        foreach ($citas as $cita) {
+            $lines[] = '• ' . e((string) $cita->nombre) . ' — ' . e((string) $cita->motivo);
+        }
+        if ($citas->isEmpty()) {
+            $lines[] = 'No hay citas registradas para hoy.';
+        }
+        $this->send($chatId, implode("\n", $lines));
+    }
+
+    private function sendDailySummary(User $user, string $chatId): void
+    {
+        if (strtolower((string) $user->rol) !== 'admin') {
+            $this->send($chatId, '🔒 Este comando está disponible solo para administradores.');
+            return;
+        }
+
+        $today = Carbon::today();
+        $appointments = Cita::whereDate('fecha', $today)->count();
+        $contacts = Contacto::whereDate('fecha', $today)->count();
+        $orders = Pedido::whereDate('fecha_pedido', $today);
+        $this->send($chatId,
+            "📊 <b>Resumen de hoy</b>\n\n"
+                . "📅 Citas: {$appointments}\n"
+                . "💬 Solicitudes de contacto: {$contacts}\n"
+                . "📦 Pedidos registrados: {$orders->count()}\n"
+                . "💲 Total registrado: \$" . number_format((float) $orders->sum('total'), 2)
+        );
     }
 
     public function handleCallback(array $callback): void
@@ -121,6 +261,7 @@ class TelegramBotService
         }
         $user = User::find($account->id_usuario);
         if (! $user) {
+            $this->clearOrphanedAccount($account, $chatId);
             return;
         }
         $account->update(['ultima_actividad_en' => now(), 'telegram_chat_id' => $chatId]);
@@ -145,7 +286,7 @@ class TelegramBotService
             'cart_add' => $this->actionCartAdd($user, $chatId, $payload, $session, $messageId),
             'cart_view' => $this->screenCart($user, $chatId, $session, $messageId),
             'cart_clear' => $this->actionCartClear($user, $chatId, $session, $messageId),
-            'cart_checkout' => $this->actionCartCheckout($user, $chatId, $session, $messageId),
+            'cart_checkout' => $this->actionCartCheckout($user, $chatId, $payload, $session, $messageId),
             'svc' => $this->screenService($user, $chatId, $payload, $session, $messageId),
             'cita_mes' => $this->screenCitaDias($chatId, $payload, $session, $messageId),
             'cita_dia' => $this->screenCitaMotivos($chatId, $payload, $session, $messageId),
@@ -155,6 +296,8 @@ class TelegramBotService
             'cuenta_ped' => $this->screenCuentaPedidoDetalle($user, $chatId, $payload, $messageId),
             'asesor' => $this->screenAsesor($user, $chatId, $payload, $session, $messageId),
             'asesor_asunto' => $this->actionAsesorCrear($user, $chatId, $payload, $session, $messageId),
+            'accion_confirmar' => $this->actionConfirmar($user, $chatId, $payload, $messageId),
+            'accion_cancelar' => $this->actionCancelarPendiente($user, $chatId, $payload, $messageId),
             'cancel' => $this->actionCancelar($user, $chatId, $session, $messageId),
             'noop' => null,
             default => $this->screenWelcome($user, $chatId, 'Opción no reconocida. Vuelve al menú principal 👇'),
@@ -363,13 +506,63 @@ class TelegramBotService
         $this->editOrSend($chatId, $messageId, "🗑 Carrito vaciado.", $this->backToMenu());
     }
 
-    private function actionCartCheckout(User $user, string $chatId, array &$session, ?int $messageId): void
+    private function actionCartCheckout(User $user, string $chatId, string $payload, array &$session, ?int $messageId): void
     {
         $cart = $this->cartGet($session);
         if (empty($cart)) {
             $this->editOrSend($chatId, $messageId, "🛒 Tu carrito está vacío.", $this->backToMenu());
             return;
         }
+        if ($payload === 'confirm') {
+            $products = Producto::whereIn('id_producto', array_keys($cart))->get()->keyBy('id_producto');
+            $lines = [];
+            $total = 0.0;
+            foreach ($cart as $id => $quantity) {
+                $product = $products->get((int) $id);
+                $quantity = (int) $quantity;
+                if (! $product || $quantity < 1 || (int) $product->unidades < $quantity) {
+                    $this->editOrSend(
+                        $chatId,
+                        $messageId,
+                        '⚠️ El stock cambió y no envié la solicitud. Revisa el carrito y vuelve a confirmar.',
+                        $this->inlineKeyboard([
+                            [['text' => '🛒 Revisar carrito', 'callback_data' => 'cart_view|']],
+                            [['text' => '🏠 Menú principal', 'callback_data' => 'menu|']],
+                        ])
+                    );
+                    return;
+                }
+                $unitPrice = (float) $product->precio;
+                $subtotal = $unitPrice * $quantity;
+                $total += $subtotal;
+                $lines[] = "• {$product->nombre} — {$quantity} × \${$unitPrice} = \$" . number_format($subtotal, 2);
+            }
+
+            $contact = Contacto::create([
+                'id_usuario' => $user->id_usuario,
+                'nombre' => $user->usuario,
+                'correo' => $user->correo,
+                'compania' => 'Solicitud de pedido por Telegram',
+                'mensaje' => implode("\n", $lines) . "\nTotal estimado: \$" . number_format($total, 2)
+                    . "\nVerificar disponibilidad y precio antes de confirmar la venta.",
+            ]);
+            $advisorNotified = $this->advisorNotifications->send($contact);
+            $this->cartSet($session, []);
+            $this->editOrSend(
+                $chatId,
+                $messageId,
+                "✅ <b>Solicitud enviada al asesor</b>\n\n"
+                    . "Total estimado: <b>\$" . number_format($total, 2) . "</b>\n"
+                    . $this->advisorDeliveryMessage($advisorNotified)
+                    . "Esto todavía no es una venta pagada y no descuenta inventario.",
+                $this->inlineKeyboard([
+                    [['text' => '🛒 Seguir comprando', 'callback_data' => 'cat|laptops']],
+                    [['text' => '🏠 Menú principal', 'callback_data' => 'menu|']],
+                ])
+            );
+            return;
+        }
+
         $rows = [
             [
                 ['text' => '✅ Sí, enviar pedido', 'callback_data' => 'cart_checkout|confirm'],
@@ -614,15 +807,16 @@ class TelegramBotService
             }
         }
         try {
-            Contacto::create([
+            $contact = Contacto::create([
                 'id_usuario' => $user->id_usuario,
                 'nombre' => $user->usuario,
                 'correo' => $user->correo,
                 'compania' => 'Telegram',
                 'mensaje' => $mensaje,
             ]);
+            $advisorNotified = $this->advisorNotifications->send($contact);
             $this->editOrSend($chatId, $messageId,
-                "✅ <b>Mensaje enviado</b>\n\n📨 {$asunto}\n\nUn asesor revisará tu solicitud y te contactará al correo registrado.",
+                "✅ <b>Solicitud guardada</b>\n\n📨 {$asunto}\n\n" . $this->advisorDeliveryMessage($advisorNotified),
                 $this->inlineKeyboard([
                     [['text' => '💬 Enviar otra consulta', 'callback_data' => 'asesor|tipos']],
                     [['text' => '🏠 Menú principal', 'callback_data' => 'menu|']],
@@ -638,6 +832,36 @@ class TelegramBotService
     {
         $this->editOrSend($chatId, $messageId, "❌ Operación cancelada.", $this->backToMenu());
         $this->resetSession($chatId);
+    }
+
+    private function actionConfirmar(User $user, string $chatId, string $token, ?int $messageId): void
+    {
+        $result = $this->actions->confirm($user, $chatId, $token);
+        $this->editOrSend($chatId, $messageId, e($result), $this->backToMenu());
+    }
+
+    private function advisorDeliveryMessage(bool $notified): string
+    {
+        return $notified
+            ? "Se envió un aviso a los asesores. Pueden responderte al correo de tu cuenta."
+            : "La solicitud quedó en la bandeja del portal, pero no se pudo enviar el aviso por correo. El asesor debe revisar la bandeja.";
+    }
+
+    private function actionCancelarPendiente(User $user, string $chatId, string $token, ?int $messageId): void
+    {
+        $result = $this->actions->cancel($user, $chatId, $token);
+        $this->editOrSend($chatId, $messageId, e($result), $this->backToMenu());
+    }
+
+    private function clearOrphanedAccount(TelegramAccount $account, string $chatId): void
+    {
+        $account->delete();
+        $this->send(
+            $chatId,
+            "⚠️ La vinculación anterior apunta a un usuario del portal que ya no existe. "
+                . "Eliminé ese vínculo obsoleto. Inicia sesión en el portal, genera un código nuevo "
+                . "y envíalo aquí con <code>/vincular CODIGO</code>."
+        );
     }
 
     // ────────────────────────── Vinculación ──────────────────────────
@@ -665,9 +889,7 @@ class TelegramBotService
             'ultima_actividad_en' => now(),
         ]);
         $link->update(['usado_en' => now()]);
-        $this->send($chatId,
-            "✅ <b>Cuenta vinculada con éxito</b>.\n\nAhora comparte tu número para verificar tu identidad. Toca el botón:",
-            $this->buildReplyKeyboard([['text' => '📱 Compartir mi contacto', 'request_contact' => true]]));
+        $this->requestContact($chatId);
     }
 
     private function saveContact(?TelegramAccount $account, array $contact, string $fromId, string $chatId): void
@@ -683,10 +905,24 @@ class TelegramBotService
         }
         $account->update(['telefono' => $phone, 'telefono_verificado_en' => now()]);
         $user = User::find($account->id_usuario);
-        $this->send($chatId, "✅ Número verificado.\n\nToca <b>/menu</b> o escribe <code>menu</code> para ver las opciones.", null);
+        if (! $user) {
+            $this->clearOrphanedAccount($account, $chatId);
+            return;
+        }
+        $this->send($chatId, '✅ Número verificado.', ['remove_keyboard' => true]);
+        $this->sendWelcome($chatId, $user);
     }
 
     // ────────────────────────── Helpers de teclado ──────────────────────────
+
+    private function requestContact(string $chatId): void
+    {
+        $this->send(
+            $chatId,
+            "✅ <b>Cuenta vinculada</b>.\n\nPara terminar, toca el botón para compartir tu número:",
+            $this->buildReplyKeyboard([[['text' => '📱 Compartir mi contacto', 'request_contact' => true]]])
+        );
+    }
 
     private function inlineKeyboard(array $rows): array
     {
@@ -762,7 +998,8 @@ class TelegramBotService
         if ($markup) {
             $body['reply_markup'] = json_encode($markup);
         }
-        Http::timeout(8)->post("https://api.telegram.org/bot{$token}/sendMessage", $body);
+        $response = Http::timeout(8)->post("https://api.telegram.org/bot{$token}/sendMessage", $body);
+        $this->assertTelegramResponse($response, 'sendMessage');
     }
 
     private function editOrSend(string $chatId, ?int $messageId, string $text, array $markup): void
@@ -787,7 +1024,8 @@ class TelegramBotService
             }
         }
         $body['reply_markup'] = $markup;
-        Http::timeout(8)->post("https://api.telegram.org/bot{$token}/sendMessage", $body);
+        $response = Http::timeout(8)->post("https://api.telegram.org/bot{$token}/sendMessage", $body);
+        $this->assertTelegramResponse($response, 'sendMessage');
     }
 
     private function answerCallback(array $callback, string $text = ''): void
@@ -797,11 +1035,21 @@ class TelegramBotService
         if (! $token || ! $id) {
             return;
         }
-        Http::timeout(8)->post("https://api.telegram.org/bot{$token}/answerCallbackQuery", [
+        $response = Http::timeout(8)->post("https://api.telegram.org/bot{$token}/answerCallbackQuery", [
             'callback_query_id' => $id,
             'text' => $text,
             'show_alert' => false,
         ]);
+        $this->assertTelegramResponse($response, 'answerCallbackQuery');
+    }
+
+    private function assertTelegramResponse(Response $response, string $method): void
+    {
+        if ($response->successful() && $response->json('ok') !== false) {
+            return;
+        }
+        $description = (string) $response->json('description', 'Respuesta inválida de Telegram.');
+        throw new \RuntimeException("Telegram {$method} falló (HTTP {$response->status()}): {$description}");
     }
 
     private function answerCallbackText(string $chatId, ?int $messageId, string $note, array $markup): void

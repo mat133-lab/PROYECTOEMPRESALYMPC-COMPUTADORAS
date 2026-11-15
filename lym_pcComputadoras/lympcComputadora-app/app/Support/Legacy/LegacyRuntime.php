@@ -14,6 +14,14 @@ class LegacyRuntime
         $script = rawurldecode($script);
         $this->assertValidScript($script);
 
+        $request = request();
+        $_SERVER['REQUEST_METHOD'] ??= $request->getMethod();
+        $_SERVER['HTTP_HOST'] ??= $request->getHost();
+        $_SERVER['REQUEST_URI'] ??= $request->getRequestUri();
+        $_SERVER['SCRIPT_NAME'] ??= '/php/'.$script;
+        $_GET = array_replace($_GET, $request->query->all());
+        $_POST = array_replace($_POST, $request->request->all());
+
         $path = resource_path('legacy/php/'.$script);
         if (! is_file($path)) {
             abort(404);
@@ -50,6 +58,22 @@ class LegacyRuntime
             session_write_close();
             setcookie($previousSessionName, '', time() - 3600, '/');
             unset($_COOKIE[$previousSessionName], $_COOKIE[session_name()]);
+        }
+
+        // Legacy scripts start native PHP sessions themselves. If PHP points
+        // at a missing or unwritable temp directory, use Laravel's writable
+        // storage area so those pages still render in local/dev environments.
+        $sessionPath = session_save_path();
+        $sessionPathParts = explode(';', (string) $sessionPath);
+        $sessionDirectory = (string) end($sessionPathParts);
+        if ($sessionDirectory === '' || ! is_dir($sessionDirectory) || ! is_writable($sessionDirectory)) {
+            $fallbackSessionDirectory = storage_path('framework/sessions');
+            if (! is_dir($fallbackSessionDirectory)) {
+                @mkdir($fallbackSessionDirectory, 0755, true);
+            }
+            if (is_dir($fallbackSessionDirectory) && is_writable($fallbackSessionDirectory)) {
+                session_save_path($fallbackSessionDirectory);
+            }
         }
 
         session_name($legacySessionName);
@@ -102,6 +126,24 @@ _COOKIE:\n" . print_r($_COOKIE, true) . "\n", FILE_APPEND);
             chdir($scriptDirectory);
             require $path;
             $content = ob_get_clean();
+
+            // Legacy forms do not use Blade's @csrf directive. Add Laravel's
+            // token to every POST form so the web middleware accepts valid
+            // submissions instead of returning a 419 before PHP can handle it.
+            if (is_string($content) && str_contains(strtolower($content), '<form')) {
+                $csrfToken = csrf_token();
+                $content = preg_replace_callback(
+                    '/<form\b(?=[^>]*\bmethod\s*=\s*(?:"post"|\'post\'|post))[^>]*>/i',
+                    static function (array $matches) use ($csrfToken): string {
+                        if (preg_match('/\bname\s*=\s*(?:"_token"|\'_token\')/i', $matches[0])) {
+                            return $matches[0];
+                        }
+
+                        return $matches[0].'<input type="hidden" name="_token" value="'.htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8').'">';
+                    },
+                    $content
+                ) ?? $content;
+            }
 
             // Logging: volcar headers y cookies después de ejecutar el script legacy
             try {

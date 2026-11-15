@@ -29,10 +29,10 @@ $alertMessage = '';
 if (isset($_GET['upload'])) {
     if ($_GET['upload'] === 'success') {
         $alertType = 'success';
-        $alertMessage = 'El archivo se carg� correctamente.';
+        $alertMessage = 'El archivo se cargo correctamente.';
     } elseif ($_GET['upload'] === 'error') {
         $alertType = 'danger';
-        $alertMessage = isset($_GET['message']) ? htmlspecialchars($_GET['message']) : 'Ocurri� un error al cargar el archivo.';
+        $alertMessage = isset($_GET['message']) ? htmlspecialchars($_GET['message']) : 'Ocurrio un error al cargar el archivo.';
     }
 }
 ?>
@@ -46,8 +46,8 @@ if (isset($_GET['upload'])) {
     <title>Dashboard Pasante - L&M PC Computadoras</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/style.css') : '../../../public/css/style.css' ?>">
-    <link rel="stylesheet" href="<?= function_exists('url') ? url('css/dashboard_pasante.css') : '../../../public/css/dashboard_pasante.css' ?>">
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/style.css') ?>">
+    <link rel="stylesheet" href="<?= legacy_asset_url('css/dashboard_pasante.css') ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
@@ -375,7 +375,7 @@ if (isset($_GET['upload'])) {
                         <span class="precio">Ver Ubicacion</span>
                     </div>
                 </a>
-                <a href="../php/horario.php" class="box text-decoration-none text-dark">
+                <a href="../php/horario_pasante.php" class="box text-decoration-none text-dark">
                     <img src="../img/calendar.webp" alt="Calendario" onerror="this.style.display='none'">
                     <div class="product-txt">
                         <h3>Calendario</h3>
@@ -425,7 +425,7 @@ if (isset($_GET['upload'])) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-    <script src="<?= function_exists('url') ? url('js/dashboard_pasante.js') : '../../../public/js/dashboard_pasante.js' ?>"></script>
+    <script src="<?= legacy_asset_url('js/dashboard_pasante.js') ?>"></script>
 </body>
 
 </html>

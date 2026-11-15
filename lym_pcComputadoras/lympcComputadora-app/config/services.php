@@ -52,7 +52,7 @@ return [
     ],
 
     'assistant_ai' => [
-        // Valores admitidos: gemini, qwen o groq. La clave jamás debe ir al cliente.
+        // Valores admitidos: gemini, qwen, groq o nvidia. La clave jamás debe ir al cliente.
         'provider' => env('AI_PROVIDER', 'gemini'),
         'gemini_key' => env('GEMINI_API_KEY'),
         'gemini_model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
@@ -62,6 +62,9 @@ return [
         'groq_key' => env('GROQ_API_KEY', env('QWEN_API_KEY')),
         'groq_model' => env('GROQ_MODEL', env('QWEN_MODEL', 'qwen/qwen3.6-27b')),
         'groq_base_url' => env('GROQ_BASE_URL', 'https://api.groq.com/openai/v1'),
+        'nvidia_key' => env('NVIDIA_API_KEY'),
+        'nvidia_model' => env('NVIDIA_MODEL', 'openai/gpt-oss-20b'),
+        'nvidia_base_url' => env('NVIDIA_BASE_URL', 'https://integrate.api.nvidia.com/v1'),
     ],
 
 ];
