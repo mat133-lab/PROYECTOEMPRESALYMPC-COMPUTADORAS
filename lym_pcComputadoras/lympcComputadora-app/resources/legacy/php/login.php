@@ -5,7 +5,8 @@ require_once '../includes/email_verification.php';
 
 // Si el usuario ya tiene sesión iniciada, redirigir al dashboard
 if(isset($_SESSION['usuario'])){
-    header("Location: ../php/dashboard.php");
+    // Evita que el boton de regreso rebote del login al dashboard autenticado.
+    header("Location: ../php/vistabeta.php");
     exit;
 }
 

@@ -1,9 +1,16 @@
-.floating-chat {
+.floating-contact-actions {
     position: fixed;
     right: 24px;
     bottom: 24px;
     z-index: 2000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     font-family: 'Poppins', sans-serif;
+}
+
+.floating-chat {
+    position: relative;
 }
 
 .floating-chat__button {
@@ -18,6 +25,31 @@
     box-shadow: 0 14px 30px rgba(0, 0, 0, 0.22);
     font-size: 26px;
     cursor: pointer;
+}
+
+.floating-whatsapp {
+    width: 64px;
+    height: 64px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #25d366;
+    color: #fff;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.22);
+    font-size: 34px;
+    text-decoration: none;
+}
+
+.floating-whatsapp:hover {
+    background: #1ebe5d;
+    color: #fff;
+}
+
+.floating-chat__button img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
 .floating-chat__panel {
@@ -146,6 +178,7 @@
 
 .floating-chat__footer {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
@@ -214,9 +247,16 @@
 }
 
 @media (max-width: 480px) {
-    .floating-chat {
+    .floating-contact-actions {
         right: 16px;
         bottom: 16px;
+        gap: 10px;
+    }
+
+    .floating-whatsapp,
+    .floating-chat__button {
+        width: 56px;
+        height: 56px;
     }
 
     .floating-chat__panel {

@@ -5,8 +5,8 @@ session_start();
 session_unset();
 session_destroy();
 
-/*redirige al login*/
-header("Location: ../php/login.php");
+/* Regresar a la pagina publica despues de cerrar sesion. */
+header("Location: ../php/vistabeta.php");
 exit();
 
 ?>

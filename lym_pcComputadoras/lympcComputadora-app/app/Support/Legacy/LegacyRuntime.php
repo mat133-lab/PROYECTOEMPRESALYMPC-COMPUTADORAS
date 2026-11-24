@@ -160,6 +160,21 @@ _COOKIE:\n" . print_r($_COOKIE, true) . "\n", FILE_APPEND);
             chdir($cwd ?: base_path());
         }
 
+        if (is_string($content) && stripos($content, '</body>') !== false) {
+            $navigationConfirmation = '<link rel="stylesheet" href="'.e(asset('css/navigation-confirmation.css')).'">'
+                . '<dialog class="navigation-confirmation" id="navigationConfirmation" aria-labelledby="navigationConfirmationTitle" aria-describedby="navigationConfirmationMessage">'
+                . '<div class="navigation-confirmation__icon" aria-hidden="true"><span>?</span></div>'
+                . '<h2 id="navigationConfirmationTitle">¿Deseas continuar?</h2>'
+                . '<p id="navigationConfirmationMessage">Confirma si deseas abrir esta página.</p>'
+                . '<div class="navigation-confirmation__actions">'
+                . '<button type="button" class="navigation-confirmation__cancel" data-navigation-cancel>Cancelar</button>'
+                . '<button type="button" class="navigation-confirmation__allow" data-navigation-allow>Permitir</button>'
+                . '</div></dialog>'
+                . '<script src="'.e(asset('js/navigation-confirmation.js')).'" defer></script>';
+
+            $content = preg_replace('/<\/body>/i', $navigationConfirmation.'</body>', $content, 1) ?? $content;
+        }
+
         $status = http_response_code() ?: 200;
         $headers = $this->newHeaders($headersBefore);
         $hasLocation = $this->containsHeader($headers, 'Location');
